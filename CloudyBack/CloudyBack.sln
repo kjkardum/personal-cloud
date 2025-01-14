@@ -1,0 +1,78 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kjkardum.CloudyBack.Api", "Kjkardum.CloudyBack.Api\Kjkardum.CloudyBack.Api.csproj", "{5ACD8B49-9984-4F1C-8A7D-51AD939B7D47}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{9379E0EB-22EF-46F8-A7A9-8695814638F7}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		Directory.Build.props = Directory.Build.props
+		docker-compose.dev.yaml = docker-compose.dev.yaml
+		..\..\.gitignore = ..\..\.gitignore
+		Dockerfile = Dockerfile
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{ADC6F3C6-BA57-4A03-AF2E-4B501100F82D}"
+	ProjectSection(SolutionItems) = preProject
+		Tests\Directory.Build.props = Tests\Directory.Build.props
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kjkardum.CloudyBack.Application", "Kjkardum.CloudyBack.Application\Kjkardum.CloudyBack.Application.csproj", "{AD822B31-CAA6-4A13-AF7A-3AF5430E7DDD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kjkardum.CloudyBack.Domain", "Kjkardum.CloudyBack.Domain\Kjkardum.CloudyBack.Domain.csproj", "{A825836D-39BB-4541-8976-168DF043B452}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kjkardum.CloudyBack.Infrastructure", "Kjkardum.CloudyBack.Infrastructure\Kjkardum.CloudyBack.Infrastructure.csproj", "{21FF1CB4-F65E-4859-AA87-53C311490F5E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kjkardum.CloudyBack.Api.Tests", "Tests\Kjkardum.CloudyBack.Api.Tests\Kjkardum.CloudyBack.Api.Tests.csproj", "{D9BB11B8-5F15-43C4-AAEB-CFC2E8B5F091}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kjkardum.CloudyBack.Application.Tests", "Tests\Kjkardum.CloudyBack.Application.Tests\Kjkardum.CloudyBack.Application.Tests.csproj", "{3F9DA92D-7021-47F8-A3E7-50987C971C5A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kjkardum.CloudyBack.Infrastructure.Tests", "Tests\Kjkardum.CloudyBack.Infrastructure.Tests\Kjkardum.CloudyBack.Infrastructure.Tests.csproj", "{BCB64D38-40B4-422D-A904-309FA25CD3B9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kjkardum.CloudyBack.Integration.Tests", "Tests\Kjkardum.CloudyBack.Integration.Tests\Kjkardum.CloudyBack.Integration.Tests.csproj", "{0CCB0AC8-1CFA-4EC9-ADB8-5BC9D4F26619}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5ACD8B49-9984-4F1C-8A7D-51AD939B7D47}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5ACD8B49-9984-4F1C-8A7D-51AD939B7D47}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5ACD8B49-9984-4F1C-8A7D-51AD939B7D47}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5ACD8B49-9984-4F1C-8A7D-51AD939B7D47}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AD822B31-CAA6-4A13-AF7A-3AF5430E7DDD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AD822B31-CAA6-4A13-AF7A-3AF5430E7DDD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AD822B31-CAA6-4A13-AF7A-3AF5430E7DDD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AD822B31-CAA6-4A13-AF7A-3AF5430E7DDD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A825836D-39BB-4541-8976-168DF043B452}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A825836D-39BB-4541-8976-168DF043B452}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A825836D-39BB-4541-8976-168DF043B452}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A825836D-39BB-4541-8976-168DF043B452}.Release|Any CPU.Build.0 = Release|Any CPU
+		{21FF1CB4-F65E-4859-AA87-53C311490F5E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21FF1CB4-F65E-4859-AA87-53C311490F5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21FF1CB4-F65E-4859-AA87-53C311490F5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21FF1CB4-F65E-4859-AA87-53C311490F5E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D9BB11B8-5F15-43C4-AAEB-CFC2E8B5F091}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D9BB11B8-5F15-43C4-AAEB-CFC2E8B5F091}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D9BB11B8-5F15-43C4-AAEB-CFC2E8B5F091}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D9BB11B8-5F15-43C4-AAEB-CFC2E8B5F091}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3F9DA92D-7021-47F8-A3E7-50987C971C5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3F9DA92D-7021-47F8-A3E7-50987C971C5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3F9DA92D-7021-47F8-A3E7-50987C971C5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3F9DA92D-7021-47F8-A3E7-50987C971C5A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BCB64D38-40B4-422D-A904-309FA25CD3B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BCB64D38-40B4-422D-A904-309FA25CD3B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BCB64D38-40B4-422D-A904-309FA25CD3B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BCB64D38-40B4-422D-A904-309FA25CD3B9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0CCB0AC8-1CFA-4EC9-ADB8-5BC9D4F26619}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0CCB0AC8-1CFA-4EC9-ADB8-5BC9D4F26619}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0CCB0AC8-1CFA-4EC9-ADB8-5BC9D4F26619}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0CCB0AC8-1CFA-4EC9-ADB8-5BC9D4F26619}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{D9BB11B8-5F15-43C4-AAEB-CFC2E8B5F091} = {ADC6F3C6-BA57-4A03-AF2E-4B501100F82D}
+		{3F9DA92D-7021-47F8-A3E7-50987C971C5A} = {ADC6F3C6-BA57-4A03-AF2E-4B501100F82D}
+		{BCB64D38-40B4-422D-A904-309FA25CD3B9} = {ADC6F3C6-BA57-4A03-AF2E-4B501100F82D}
+		{0CCB0AC8-1CFA-4EC9-ADB8-5BC9D4F26619} = {ADC6F3C6-BA57-4A03-AF2E-4B501100F82D}
+	EndGlobalSection
+EndGlobal
