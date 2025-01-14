@@ -1,0 +1,23 @@
+﻿<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path="Directory.Build.props" />
+    <File Path="docker-compose.dev.yaml" />
+    <File Path="..\..\.gitignore" />
+    <File Path="Dockerfile" />
+  </Folder>
+  <Folder Name="/Solution Items/.config/">
+    <File Path=".config\dotnet-tools.json" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="Tests\Kjkardum.CloudyBack.Api.Tests\Kjkardum.CloudyBack.Api.Tests.csproj" Type="Classic C#" />
+    <Project Path="Tests\Kjkardum.CloudyBack.Application.Tests\Kjkardum.CloudyBack.Application.Tests.csproj" Type="Classic C#" />
+    <Project Path="Tests\Kjkardum.CloudyBack.Infrastructure.Tests\Kjkardum.CloudyBack.Infrastructure.Tests.csproj" Type="Classic C#" />
+    <Project Path="Tests\Kjkardum.CloudyBack.Integration.Tests\Kjkardum.CloudyBack.Integration.Tests.csproj" Type="Classic C#" />
+    <File Path="Tests\Directory.Build.props" />
+  </Folder>
+  <Project Path="Kjkardum.CloudyBack.Api\Kjkardum.CloudyBack.Api.csproj" Type="Classic C#" />
+  <Project Path="Kjkardum.CloudyBack.Application\Kjkardum.CloudyBack.Application.csproj" Type="Classic C#" />
+  <Project Path="Kjkardum.CloudyBack.Domain\Kjkardum.CloudyBack.Domain.csproj" Type="Classic C#" />
+  <Project Path="Kjkardum.CloudyBack.Infrastructure\Kjkardum.CloudyBack.Infrastructure.csproj" Type="Classic C#" />
+</Solution>
