@@ -1,8 +1,11 @@
+using Docker.DotNet;
+using Kjkardum.CloudyBack.Application.Clients;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Kjkardum.CloudyBack.Application.Repositories;
 using Kjkardum.CloudyBack.Application.Services;
+using Kjkardum.CloudyBack.Infrastructure.Containerization.Postgres;
 using Kjkardum.CloudyBack.Infrastructure.Identity;
 using Kjkardum.CloudyBack.Infrastructure.Persistence;
 using Kjkardum.CloudyBack.Infrastructure.Repositories;
@@ -29,8 +32,16 @@ public static class ServiceExtensions
             }
         });
 
+        services.AddSingleton<DockerClient>(_ => new DockerClientConfiguration().CreateClient());
+        services.AddTransient<IPostgresServerClient, PostgresServerClient>();
+
         services.AddTransient<ISignInService, SignInService>();
+
         services.AddTransient<IUserRepository, UserRepository>();
+        services.AddTransient<IBaseResourceRepository, BaseResourceRepository>();
+        services.AddTransient<IResourceGroupRepository, ResourceGroupRepository>();
+        services.AddTransient<IPostgresServerResourceRepository, PostgresServerResourceRepository>();
+        services.AddTransient<IPostgresDatabaseResourceRepository, PostgresDatabaseResourceRepository>();
         return services;
     }
 }

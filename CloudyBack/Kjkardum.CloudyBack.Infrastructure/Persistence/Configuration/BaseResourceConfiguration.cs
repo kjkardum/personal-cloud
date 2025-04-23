@@ -9,6 +9,8 @@ public class BaseResourceConfiguration: IEntityTypeConfiguration<BaseResource>
     public void Configure(EntityTypeBuilder<BaseResource> builder)
     {
         builder.HasIndex(e => e.Name).IsUnique();
+        builder.HasIndex(t => t.CreatedAt);
+        builder.HasIndex(t => t.UpdatedAt);
 
         builder.UseTpcMappingStrategy();
     }

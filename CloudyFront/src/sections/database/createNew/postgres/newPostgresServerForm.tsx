@@ -1,0 +1,57 @@
+import { z } from 'zod';
+import { Button, Divider, TextInput } from '@mantine/core';
+import { useForm, zodResolver } from '@mantine/form';
+import { ResourceGroupAutocomplete } from '@/components/ResourceGroup/ResourceGroupAutocomplete';
+import {
+  CreatePostgresServerCommand,
+  usePostApiResourcePostgresServerResourceMutation,
+
+} from '@/services/rtk/cloudyApi';
+import {useNavigate} from "react-router-dom";
+
+export const NewPostgresServerForm = () => {
+  const [createPostgresServerResource] = usePostApiResourcePostgresServerResourceMutation();
+    const navigate = useNavigate();
+  const form = useForm<CreatePostgresServerCommand>({
+    mode: 'uncontrolled',
+    initialValues: { resourceGroupId: '', serverName: '', serverPort: undefined },
+    validate: zodResolver(
+      z.object({
+        resourceGroupId: z
+          .string()
+          .nonempty('Resource group is required, select or type any name to create a new one'),
+        serverName: z.string().nonempty('Server name is required'),
+        serverPort: z.number().optional(),
+      })
+    ),
+  });
+
+  const submitForm = async (values: CreatePostgresServerCommand) => {
+    const server = await createPostgresServerResource({ createPostgresServerCommand: values }).unwrap();
+    navigate(`/postgres/new/database?serverId=${server.id}`);
+  };
+  return (
+    <form onSubmit={form.onSubmit(submitForm)}>
+      <ResourceGroupAutocomplete
+        onResourceGroupSelect={(resourceGroupId) =>
+          form.setFieldValue('resourceGroupId', resourceGroupId)
+        }
+      />
+      <TextInput
+        label="Server name"
+        placeholder="Server name"
+        key={form.key('serverName')}
+        {...form.getInputProps('serverName')}
+      />
+      <TextInput
+        type="number"
+        label="Server port"
+        placeholder="Server port (leave empty for default)"
+        key={form.key('serverPort')}
+        {...form.getInputProps('serverPort')}
+      />
+      <Divider my="sm" />
+      <Button type="submit">Create database server</Button>
+    </form>
+  );
+};

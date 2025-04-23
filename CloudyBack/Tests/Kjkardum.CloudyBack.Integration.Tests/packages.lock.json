@@ -188,6 +188,16 @@
           "System.Diagnostics.EventLog": "6.0.0"
         }
       },
+      "Docker.DotNet": {
+        "type": "Transitive",
+        "resolved": "3.125.15",
+        "contentHash": "XN8FKxVv8Mjmwu104/Hl9lM61pLY675s70gzwSj8KR5pwblo8HfWLcCuinh9kYsqujBkMH4HVRCEcRuU6al4BQ==",
+        "dependencies": {
+          "Newtonsoft.Json": "13.0.1",
+          "System.Buffers": "4.5.1",
+          "System.Threading.Tasks.Extensions": "4.5.4"
+        }
+      },
       "FluentValidation": {
         "type": "Transitive",
         "resolved": "11.9.1",
@@ -824,6 +834,11 @@
         "resolved": "6.6.2",
         "contentHash": "mBBb+/8Hm2Q3Wygag+hu2jj69tZW5psuv0vMRXY07Wy+Rrj40vRP8ZTbKBhs91r45/HXT4aY4z0iSBYx1h6JvA=="
       },
+      "System.Buffers": {
+        "type": "Transitive",
+        "resolved": "4.5.1",
+        "contentHash": "Rw7ijyl1qqRS0YQD/WycNst8hUUMgrMH4FCn1nNm27M4VxchZ1js3fVjQaANHO5f3sN4isvP4a+Met9Y4YomAg=="
+      },
       "System.ClientModel": {
         "type": "Transitive",
         "resolved": "1.0.0",
@@ -1041,28 +1056,28 @@
           "xunit.extensibility.core": "[2.8.0]"
         }
       },
-      "Kjkardum.CloudyBack.api": {
+      "kjkardum.cloudyback.api": {
         "type": "Project",
         "dependencies": {
           "ApiExceptions": "[1.2.3, )",
-          "Kjkardum.CloudyBack.Application": "[1.0.0, )",
-          "Kjkardum.CloudyBack.Infrastructure": "[1.0.0, )",
           "FluentValidation": "[11.9.1, )",
           "Hellang.Middleware.ProblemDetails": "[6.5.1, )",
+          "Kjkardum.CloudyBack.Application": "[1.0.0, )",
+          "Kjkardum.CloudyBack.Infrastructure": "[1.0.0, )",
           "Microsoft.AspNetCore.Authentication.JwtBearer": "[8.0.5, )",
           "Microsoft.EntityFrameworkCore.Sqlite": "[8.0.5, )",
           "Swashbuckle.AspNetCore": "[6.6.2, )",
           "Swashbuckle.AspNetCore.Annotations": "[6.6.2, )"
         }
       },
-      "Kjkardum.CloudyBack.application": {
+      "kjkardum.cloudyback.application": {
         "type": "Project",
         "dependencies": {
           "ApiExceptions": "[1.2.3, )",
           "AutoMapper": "[13.0.1, )",
-          "Kjkardum.CloudyBack.Domain": "[1.0.0, )",
           "FluentValidation": "[11.9.1, )",
           "FluentValidation.DependencyInjectionExtensions": "[11.9.1, )",
+          "Kjkardum.CloudyBack.Domain": "[1.0.0, )",
           "MediatR": "[12.2.0, )",
           "Microsoft.Extensions.Configuration": "[8.0.0, )",
           "Microsoft.Extensions.Configuration.Abstractions": "[8.0.0, )",
@@ -1071,14 +1086,15 @@
           "Microsoft.Extensions.Options.ConfigurationExtensions": "[8.0.0, )"
         }
       },
-      "Kjkardum.CloudyBack.domain": {
+      "kjkardum.cloudyback.domain": {
         "type": "Project"
       },
-      "Kjkardum.CloudyBack.infrastructure": {
+      "kjkardum.cloudyback.infrastructure": {
         "type": "Project",
         "dependencies": {
           "Azure.Storage.Blobs": "[12.20.0, )",
           "BCrypt.Net-Next": "[4.0.3, )",
+          "Docker.DotNet": "[3.125.15, )",
           "Kjkardum.CloudyBack.Application": "[1.0.0, )",
           "Kjkardum.CloudyBack.Domain": "[1.0.0, )",
           "Microsoft.EntityFrameworkCore": "[8.0.5, )",

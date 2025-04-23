@@ -1,5 +1,5 @@
 import React from 'react';
-import {IconBrowser, IconDatabase, IconFolder, IconHome, IconPackage, IconProps} from '@tabler/icons-react';
+import {IconBrowser, IconDatabase, IconFolder, IconHome, IconPackage, IconProps, IconServer} from '@tabler/icons-react';
 import {rem, useMantineColorScheme, useMantineTheme} from '@mantine/core';
 
 const defaultIconProps = {
@@ -15,6 +15,11 @@ export const CloudyIconWebApplication = (props: IconProps) => {
 export const CloudyIconDatabase = (props: IconProps) => {
   const theme = useMantineTheme();
   return <IconDatabase {...defaultIconProps} color={theme.colors.pink[6]} {...props} />;
+};
+
+export const CloudyIconDatabaseServer = (props: IconProps) => {
+  const theme = useMantineTheme();
+  return < ><IconDatabase {...defaultIconProps} color={theme.colors.pink[6]} {...props} /> <IconServer {...defaultIconProps} color={theme.colors.pink[6]} {...props} /></>;
 };
 
 export const CloudyIconResourceGroup = (props: IconProps) => {

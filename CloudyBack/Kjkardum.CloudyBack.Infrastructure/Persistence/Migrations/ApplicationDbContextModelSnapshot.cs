@@ -40,8 +40,12 @@ namespace Kjkardum.CloudyBack.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CreatedAt");
+
                     b.HasIndex("Name")
                         .IsUnique();
+
+                    b.HasIndex("UpdatedAt");
 
                     b.ToTable((string)null);
 
@@ -125,6 +129,9 @@ namespace Kjkardum.CloudyBack.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Kjkardum.CloudyBack.Domain.Entities.PostgresServerResource", b =>
                 {
                     b.HasBaseType("Kjkardum.CloudyBack.Domain.Entities.ResourceGroupedBaseResource");
+
+                    b.Property<int>("Port")
+                        .HasColumnType("int");
 
                     b.Property<string>("SaPassword")
                         .IsRequired()

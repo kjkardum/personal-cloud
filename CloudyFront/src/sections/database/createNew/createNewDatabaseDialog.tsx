@@ -22,7 +22,7 @@ export const CreateNewDatabaseDialog = (props: CreateNewDatabaseDialogProps) => 
                     <DashboardButton
                         icon={<CloudyIconDatabasePostgreSql{...BigIconProps} />}
                         w='280px'
-                        onClick={() => navigate('/database/createNew/postgres')}>
+                        onClick={() => navigate('/postgres/new/database')}>
                         PostgreSQL
                     </DashboardButton>
                     <Text c='dimmed' size='xs' w='100%' ta='center'>(free & open source database)</Text>
@@ -31,7 +31,7 @@ export const CreateNewDatabaseDialog = (props: CreateNewDatabaseDialogProps) => 
                     <DashboardButton
                         icon={<CloudyIconDatabaseMicrosoftSqlServer {...BigIconProps} />}
                         w='280px'
-                        onClick={() => navigate('/database/createNew/sqlserver')}>
+                        onClick={() => navigate('/sqlserver/new/database')}>
                         Microsoft SQL Server
                     </DashboardButton>
                     <Text c='dimmed' size='xs' w='100%' ta='center'>(version based on your licence)</Text>

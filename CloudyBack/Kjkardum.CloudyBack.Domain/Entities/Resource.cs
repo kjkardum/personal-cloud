@@ -4,8 +4,8 @@ public abstract class BaseResource: IAuditableEntity
 {
     public Guid Id { get; set; }
     public required string Name { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public DateTime UpdatedAt { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 }
 
 public class ResourceGroup: BaseResource
@@ -25,6 +25,7 @@ public class PostgresServerResource: ResourceGroupedBaseResource
     public required string SaPassword { get; set; }
 
     public List<PostgresDatabaseResource>? PostgresDatabaseResources { get; set; }
+    public int Port { get; set; }
 }
 
 public class PostgresDatabaseResource: ResourceGroupedBaseResource

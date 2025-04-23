@@ -36,7 +36,7 @@ app.MapControllers();
 app.UseCors(corsBuilder => corsBuilder
     .WithOrigins(
         "http://cloudy.local:3000",
-        "http://localhost:3000")
+        "http://localhost:5173")
     .AllowAnyHeader()
     .AllowAnyMethod()
     .AllowCredentials());

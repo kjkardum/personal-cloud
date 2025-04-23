@@ -1,0 +1,591 @@
+openapi: 3.0.1
+info:
+  title: Kjkardum.CloudyBack.Api
+  version: '1.0'
+paths:
+  /api/Authentication/Login:
+    post:
+      tags:
+        - Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLoginCommand'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoggedInUserDto'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProblemDetails'
+  /api/resource/BaseResource:
+    get:
+      tags:
+        - BaseResource
+      parameters:
+        - name: Page
+          in: query
+          schema:
+            type: integer
+            format: int32
+        - name: PageSize
+          in: query
+          schema:
+            type: integer
+            format: int32
+        - name: FilterBy
+          in: query
+          schema:
+            type: string
+        - name: OrderBy
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/BaseResourceDtoPaginatedResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResourceDtoPaginatedResponse'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/BaseResourceDtoPaginatedResponse'
+  /api/resource/PostgresServerResource:
+    get:
+      tags:
+        - PostgresServerResource
+      parameters:
+        - name: Page
+          in: query
+          schema:
+            type: integer
+            format: int32
+        - name: PageSize
+          in: query
+          schema:
+            type: integer
+            format: int32
+        - name: FilterBy
+          in: query
+          schema:
+            type: string
+        - name: OrderBy
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/PostgresServerResourceDtoPaginatedResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostgresServerResourceDtoPaginatedResponse'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/PostgresServerResourceDtoPaginatedResponse'
+    post:
+      tags:
+        - PostgresServerResource
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePostgresServerCommand'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/CreatePostgresServerCommand'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/CreatePostgresServerCommand'
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/PostgresServerResourceDto'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostgresServerResourceDto'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/PostgresServerResourceDto'
+  '/api/resource/PostgresServerResource/{serverId}':
+    get:
+      tags:
+        - PostgresServerResource
+      parameters:
+        - name: serverId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/PostgresServerResourceDto'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostgresServerResourceDto'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/PostgresServerResourceDto'
+  '/api/resource/PostgresServerResource/{serverId}/database':
+    post:
+      tags:
+        - PostgresServerResource
+      parameters:
+        - name: serverId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePostgresDatabaseCommand'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/CreatePostgresDatabaseCommand'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/CreatePostgresDatabaseCommand'
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/PostgresDatabaseResourceDto'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostgresDatabaseResourceDto'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/PostgresDatabaseResourceDto'
+  /api/resource/ResourceGroup:
+    post:
+      tags:
+        - ResourceGroup
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateResourceGroupCommand'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/CreateResourceGroupCommand'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/CreateResourceGroupCommand'
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ResourceGroupDto'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceGroupDto'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ResourceGroupDto'
+    get:
+      tags:
+        - ResourceGroup
+      parameters:
+        - name: Page
+          in: query
+          schema:
+            type: integer
+            format: int32
+        - name: PageSize
+          in: query
+          schema:
+            type: integer
+            format: int32
+        - name: FilterBy
+          in: query
+          schema:
+            type: string
+        - name: OrderBy
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ResourceGroupDtoPaginatedResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceGroupDtoPaginatedResponse'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ResourceGroupDtoPaginatedResponse'
+  /health:
+    get:
+      tags:
+        - Status
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: string
+            text/json:
+              schema:
+                type: string
+  /authenticated:
+    get:
+      tags:
+        - Status
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: string
+            application/json:
+              schema:
+                type: string
+            text/json:
+              schema:
+                type: string
+  /api/TenantManagement/createUser:
+    post:
+      tags:
+        - TenantManagement
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegistrationCommand'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/UserRegistrationCommand'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/UserRegistrationCommand'
+      responses:
+        '200':
+          description: OK
+  '/api/TenantManagement/updateUser/{id}':
+    put:
+      tags:
+        - TenantManagement
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdateCommand'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdateCommand'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/UserUpdateCommand'
+      responses:
+        '200':
+          description: OK
+  '/api/TenantManagement/deleteUser/{id}':
+    delete:
+      tags:
+        - TenantManagement
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+components:
+  schemas:
+    BaseResourceDto:
+      required:
+        - id
+        - name
+        - resourceType
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        resourceType:
+          type: string
+      additionalProperties: false
+    BaseResourceDtoPaginatedResponse:
+      required:
+        - data
+      type: object
+      properties:
+        page:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        totalCount:
+          type: integer
+          format: int32
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/BaseResourceDto'
+      additionalProperties: false
+    CreatePostgresDatabaseCommand:
+      required:
+        - adminPassword
+        - adminUsername
+        - databaseName
+      type: object
+      properties:
+        databaseName:
+          type: string
+        adminUsername:
+          type: string
+        adminPassword:
+          type: string
+      additionalProperties: false
+    CreatePostgresServerCommand:
+      required:
+        - resourceGroupId
+        - serverName
+      type: object
+      properties:
+        resourceGroupId:
+          type: string
+          format: uuid
+        serverName:
+          type: string
+        serverPort:
+          type: integer
+          format: int32
+          nullable: true
+      additionalProperties: false
+    CreateResourceGroupCommand:
+      required:
+        - name
+      type: object
+      properties:
+        name:
+          type: string
+      additionalProperties: false
+    LoggedInUserDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+        token:
+          type: string
+      additionalProperties: false
+    PostgresDatabaseResourceDto:
+      required:
+        - id
+        - name
+        - resourceType
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        resourceType:
+          type: string
+      additionalProperties: false
+    PostgresServerResourceDto:
+      required:
+        - id
+        - name
+        - resourceType
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        resourceType:
+          type: string
+      additionalProperties: false
+    PostgresServerResourceDtoPaginatedResponse:
+      required:
+        - data
+      type: object
+      properties:
+        page:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        totalCount:
+          type: integer
+          format: int32
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/PostgresServerResourceDto'
+      additionalProperties: false
+    ProblemDetails:
+      type: object
+      properties:
+        type:
+          type: string
+          nullable: true
+        title:
+          type: string
+          nullable: true
+        status:
+          type: integer
+          format: int32
+          nullable: true
+        detail:
+          type: string
+          nullable: true
+        instance:
+          type: string
+          nullable: true
+      additionalProperties: { }
+    ResourceGroupDto:
+      required:
+        - id
+        - name
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      additionalProperties: false
+    ResourceGroupDtoPaginatedResponse:
+      required:
+        - data
+      type: object
+      properties:
+        page:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        totalCount:
+          type: integer
+          format: int32
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResourceGroupDto'
+      additionalProperties: false
+    UserLoginCommand:
+      type: object
+      properties:
+        email:
+          type: string
+        normalizedEmail:
+          type: string
+          readOnly: true
+        password:
+          type: string
+      additionalProperties: false
+    UserRegistrationCommand:
+      type: object
+      properties:
+        email:
+          type: string
+        normalizedEmail:
+          type: string
+          readOnly: true
+        password:
+          type: string
+      additionalProperties: false
+    UserUpdateCommand:
+      type: object
+      properties:
+        newPassword:
+          type: string
+          nullable: true
+      additionalProperties: false
+  securitySchemes:
+    Bearer:
+      type: apiKey
+      description: "JWT Authorization token using the Bearer scheme. <br>\nEnter 'Bearer' [space] and then your token in the text input below. <br>\nExample: 'Bearer 12345abcdef'"
+      name: Authorization
+      in: header
+security:
+  - Bearer: [ ]

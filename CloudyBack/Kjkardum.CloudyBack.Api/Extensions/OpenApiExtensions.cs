@@ -44,6 +44,15 @@ public static class OpenApiExtensions
                         new List<string>()
                     }
                 });
+            setup.SupportNonNullableReferenceTypes();
+            var currentAssembly = Assembly.GetExecutingAssembly();
+            var xmlDocs = currentAssembly.GetReferencedAssemblies()
+                .Union([currentAssembly.GetName()])
+                .Select(a => Path.Combine(Path.GetDirectoryName(currentAssembly.Location)!, $"{a.Name}.xml"))
+                .Where(File.Exists)
+                .ToArray();
+
+            Array.ForEach(xmlDocs, (d) => setup.IncludeXmlComments(d));
         });
 
         return services;

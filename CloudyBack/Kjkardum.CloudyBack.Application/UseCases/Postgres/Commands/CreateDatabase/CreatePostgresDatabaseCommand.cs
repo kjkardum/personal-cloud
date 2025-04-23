@@ -1,0 +1,13 @@
+using Kjkardum.CloudyBack.Application.UseCases.Postgres.Dtos;
+using MediatR;
+using System.Text.Json.Serialization;
+
+namespace Kjkardum.CloudyBack.Application.UseCases.Postgres.Commands.CreateDatabase;
+
+public class CreatePostgresDatabaseCommand: IRequest<PostgresDatabaseResourceDto>
+{
+    [JsonIgnore] public Guid ServerId { get; set; }
+    public required string DatabaseName { get; set; }
+    public required string AdminUsername { get; set; }
+    public required string AdminPassword { get; set; }
+}

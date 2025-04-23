@@ -16,6 +16,7 @@
     "vitest": "vitest run",
     "vitest:watch": "vitest",
     "test": "npm run typecheck && npm run prettier && npm run lint && npm run vitest && npm run build",
+    "generate-types": "curl -k -o ./apispecs/swagger.yaml https://localhost:7098/swagger/v1/swagger.yaml && npx @rtk-query/codegen-openapi ./tools/openapi-config.cts",
     "storybook": "storybook dev -p 6006",
     "storybook:build": "storybook build"
   },
@@ -23,14 +24,20 @@
     "@mantine/core": "7.13.2",
     "@mantine/form": "^7.15.2",
     "@mantine/hooks": "7.13.2",
+    "@reduxjs/toolkit": "^2.5.0",
     "@tabler/icons-react": "^3.19.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^6.27.0"
+    "react-redux": "^9.2.0",
+    "react-router-dom": "^6.27.0",
+    "redux-persist": "^6.0.0",
+    "ts-node": "^10.9.2",
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.12.0",
     "@ianvs/prettier-plugin-sort-imports": "^4.3.1",
+    "@rtk-query/codegen-openapi": "^2.0.0",
     "@storybook/react": "^8.3.5",
     "@storybook/react-vite": "^8.3.5",
     "@testing-library/dom": "^10.4.0",
