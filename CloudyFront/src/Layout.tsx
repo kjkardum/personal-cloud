@@ -32,15 +32,16 @@ export default function Layout() {
     }
   }, [colorScheme, setColorScheme]);
 
+  const headerHeight =  60;
   return (
     <AppShell
-      header={{ height: 60 }}
+      header={{ height: headerHeight }}
       navbar={{
         width: iconsOnly ? 60 : 220,
         breakpoint: 'sm',
         collapsed: { mobile: !opened },
       }}
-      padding="md"
+      padding="0"
     >
       <AppShell.Header>
         <Flex justify="space-between" align="center" h="100%" px="sm">
@@ -93,7 +94,7 @@ export default function Layout() {
           </ActionIcon>
         </Flex>
       </AppShell.Navbar>
-      <AppShell.Main><Outlet /></AppShell.Main>
+      <AppShell.Main style={{height: `calc(100vh - ${headerHeight}px)`}}><Outlet /></AppShell.Main>
     </AppShell>
   );
 }

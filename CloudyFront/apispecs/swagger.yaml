@@ -67,6 +67,107 @@ paths:
             text/json:
               schema:
                 $ref: '#/components/schemas/BaseResourceDtoPaginatedResponse'
+  '/api/resource/BaseResource/{resourceId}/container':
+    get:
+      tags:
+        - BaseResource
+      parameters:
+        - name: resourceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ContainerDto'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContainerDto'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ContainerDto'
+  '/api/resource/BaseResource/{resourceId}/audit-log':
+    get:
+      tags:
+        - BaseResource
+      parameters:
+        - name: resourceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: Page
+          in: query
+          schema:
+            type: integer
+            format: int32
+        - name: PageSize
+          in: query
+          schema:
+            type: integer
+            format: int32
+        - name: FilterBy
+          in: query
+          schema:
+            type: string
+        - name: OrderBy
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/AuditLogEntryPaginatedResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuditLogEntryPaginatedResponse'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/AuditLogEntryPaginatedResponse'
+  '/api/resource/BaseResource/{resourceId}/prometheus':
+    post:
+      tags:
+        - BaseResource
+      parameters:
+        - name: resourceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryPrometheusQuery'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/QueryPrometheusQuery'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/QueryPrometheusQuery'
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/PrometheusResultDto'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrometheusResultDto'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/PrometheusResultDto'
   /api/resource/PostgresServerResource:
     get:
       tags:
@@ -154,6 +255,19 @@ paths:
             text/json:
               schema:
                 $ref: '#/components/schemas/PostgresServerResourceDto'
+    delete:
+      tags:
+        - PostgresServerResource
+      parameters:
+        - name: serverId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
   '/api/resource/PostgresServerResource/{serverId}/database':
     post:
       tags:
@@ -189,6 +303,24 @@ paths:
             text/json:
               schema:
                 $ref: '#/components/schemas/PostgresDatabaseResourceDto'
+  '/api/resource/PostgresServerResource/{serverId}/containerAction':
+    post:
+      tags:
+        - PostgresServerResource
+      parameters:
+        - name: serverId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: actionId
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
   /api/resource/ResourceGroup:
     post:
       tags:
@@ -252,6 +384,30 @@ paths:
             text/json:
               schema:
                 $ref: '#/components/schemas/ResourceGroupDtoPaginatedResponse'
+  '/api/resource/ResourceGroupedResource/{resourceId}':
+    get:
+      tags:
+        - ResourceGroupedResource
+      parameters:
+        - name: resourceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ResourceGroupedBaseResourceDto'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceGroupedBaseResourceDto'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ResourceGroupedBaseResourceDto'
   /health:
     get:
       tags:
@@ -345,6 +501,71 @@ paths:
           description: OK
 components:
   schemas:
+    AuditLogEntry:
+      required:
+        - actionDisplayText
+        - actionName
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        actionName:
+          type: string
+        actionDisplayText:
+          type: string
+        actionMetadata:
+          type: string
+          nullable: true
+        timestamp:
+          type: string
+          format: date-time
+        resourceId:
+          type: string
+          format: uuid
+        resource:
+          $ref: '#/components/schemas/BaseResource'
+      additionalProperties: false
+    AuditLogEntryPaginatedResponse:
+      required:
+        - data
+      type: object
+      properties:
+        page:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        totalCount:
+          type: integer
+          format: int32
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuditLogEntry'
+      additionalProperties: false
+    BaseResource:
+      required:
+        - name
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        auditLogEntries:
+          type: array
+          items:
+            $ref: '#/components/schemas/AuditLogEntry'
+      additionalProperties: false
     BaseResourceDto:
       required:
         - id
@@ -384,6 +605,24 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/BaseResourceDto'
+      additionalProperties: false
+    ContainerDto:
+      type: object
+      properties:
+        stateRunning:
+          type: boolean
+        statePaused:
+          type: boolean
+        stateRestarting:
+          type: boolean
+        stateError:
+          type: string
+        stateStartedAt:
+          type: string
+          format: date-time
+        stateFinishedAt:
+          type: string
+          format: date-time
       additionalProperties: false
     CreatePostgresDatabaseCommand:
       required:
@@ -454,6 +693,10 @@ components:
           format: date-time
         resourceType:
           type: string
+        databaseName:
+          type: string
+        adminUsername:
+          type: string
       additionalProperties: false
     PostgresServerResourceDto:
       required:
@@ -475,6 +718,15 @@ components:
           format: date-time
         resourceType:
           type: string
+        resourceGroupId:
+          type: string
+          format: uuid
+        resourceGroupName:
+          type: string
+        postgresDatabaseResources:
+          type: array
+          items:
+            $ref: '#/components/schemas/PostgresDatabaseResourceDto'
       additionalProperties: false
     PostgresServerResourceDtoPaginatedResponse:
       required:
@@ -495,6 +747,10 @@ components:
           items:
             $ref: '#/components/schemas/PostgresServerResourceDto'
       additionalProperties: false
+    PredefinedPrometheusQuery:
+      enum:
+        - PostgresProcessesCount
+      type: string
     ProblemDetails:
       type: object
       properties:
@@ -515,6 +771,59 @@ components:
           type: string
           nullable: true
       additionalProperties: { }
+    PrometheusDataDto:
+      type: object
+      properties:
+        resultType:
+          type: string
+        result:
+          type: array
+          items:
+            $ref: '#/components/schemas/PrometheusResultItemDto'
+      additionalProperties: false
+    PrometheusResultDto:
+      type: object
+      properties:
+        status:
+          type: string
+        data:
+          $ref: '#/components/schemas/PrometheusDataDto'
+      additionalProperties: false
+    PrometheusResultItemDto:
+      type: object
+      properties:
+        metric:
+          type: object
+          additionalProperties:
+            type: string
+        values:
+          type: array
+          items:
+            type: array
+            items: { }
+      additionalProperties: false
+    QueryPrometheusQuery:
+      type: object
+      properties:
+        query:
+          $ref: '#/components/schemas/PredefinedPrometheusQuery'
+        start:
+          type: string
+          format: date-time
+        end:
+          type: string
+          format: date-time
+        step:
+          type: string
+          nullable: true
+        timeout:
+          type: string
+          nullable: true
+        limit:
+          type: integer
+          format: int32
+          nullable: true
+      additionalProperties: false
     ResourceGroupDto:
       required:
         - id
@@ -551,6 +860,32 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ResourceGroupDto'
+      additionalProperties: false
+    ResourceGroupedBaseResourceDto:
+      required:
+        - id
+        - name
+        - resourceType
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        resourceType:
+          type: string
+        resourceGroupId:
+          type: string
+          format: uuid
+        resourceGroupName:
+          type: string
       additionalProperties: false
     UserLoginCommand:
       type: object

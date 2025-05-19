@@ -90,7 +90,7 @@ export const NewPostgresDatabaseForm = () => {
                 {...form.getInputProps('adminPassword')}
             />
             <Divider my="sm" />
-            <Button type="submit">Create database database</Button>
+            <Button type="submit">Create database</Button>
         </form>
     );
 }

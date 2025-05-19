@@ -1,4 +1,5 @@
 using Kjkardum.CloudyBack.Application.UseCases.Postgres.Dtos;
+using Kjkardum.CloudyBack.Domain.Entities;
 using MediatR;
 using System.Text.Json.Serialization;
 

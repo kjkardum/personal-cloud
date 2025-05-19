@@ -2,6 +2,7 @@ using AutoMapper;
 using Kjkardum.CloudyBack.Application.Clients;
 using Kjkardum.CloudyBack.Application.Repositories;
 using Kjkardum.CloudyBack.Application.UseCases.Postgres.Dtos;
+using Kjkardum.CloudyBack.Domain.Entities;
 using MediatR;
 using System.Security.Cryptography;
 
@@ -9,7 +10,9 @@ namespace Kjkardum.CloudyBack.Application.UseCases.Postgres.Commands.CreateServe
 
 public class CreatePostgresServerCommandHandler(
     IPostgresServerResourceRepository repository,
+    IBaseResourceRepository baseResourceRepository,
     IPostgresServerClient postgresServerClient,
+    IPrometheusClient prometheusClient,
     IMapper mapper) : IRequestHandler<CreatePostgresServerCommand, PostgresServerResourceDto>
 {
     public async Task<PostgresServerResourceDto> Handle(CreatePostgresServerCommand request, CancellationToken cancellationToken)
@@ -23,7 +26,7 @@ public class CreatePostgresServerCommandHandler(
 
         var password = Convert.ToBase64String(passwordBytes);
         var random = new Random();
-        var postgresServerResource = new Domain.Entities.PostgresServerResource
+        var postgresServerResource = new PostgresServerResource
         {
             Name = request.ServerName,
             ResourceGroupId = request.ResourceGroupId,
@@ -34,10 +37,28 @@ public class CreatePostgresServerCommandHandler(
 
         var createdPostgresServerResource = await repository.Create(postgresServerResource);
 
-        await postgresServerClient.CreateServerAsync(postgresServerResource.Id,
+        await prometheusClient.AttachCollector(createdPostgresServerResource.Id, request.ServerName);
+        await postgresServerClient.CreateServerAsync(
+            postgresServerResource.Id,
             postgresServerResource.Port,
             postgresServerResource.SaUsername,
-            postgresServerResource.SaPassword);
+            postgresServerResource.SaPassword,
+            postgresServerResource.Name);
+
+        await baseResourceRepository.LogResourceAction(new AuditLogEntry
+            {
+                ActionName = nameof(CreatePostgresServerCommand),
+                ActionDisplayText = $"Create new postgres server {request.ServerName}",
+                ResourceId = createdPostgresServerResource.Id
+            });
+
+        await baseResourceRepository.LogResourceAction(new AuditLogEntry
+            {
+                ActionName = nameof(CreatePostgresServerCommand),
+                ActionDisplayText = $"Create new resource {request.ServerName}",
+                ResourceId = request.ResourceGroupId
+            });
+
 
         var mappedPostgresServerResource = mapper.Map<PostgresServerResourceDto>(createdPostgresServerResource);
 

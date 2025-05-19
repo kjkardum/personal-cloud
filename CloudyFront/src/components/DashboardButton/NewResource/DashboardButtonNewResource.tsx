@@ -9,7 +9,7 @@ import {
   CloudyIconResourceGroup,
   CloudyIconWebApplication,
 } from '@/icons/Resources';
-import { CreateNewDatabaseDialog } from '@/sections/database/createNew/createNewDatabaseDialog';
+import { CreateNewDatabaseDialog } from '@/sections/database/general/createNewDatabaseDialog';
 
 export function DashboardButtonNewResource() {
   const [databaseDialogOpened, { open: openDatabaseDialog, close: closeDatabaseDialog }] = useDisclosure(false);

@@ -3,6 +3,8 @@ using Kjkardum.CloudyBack.Application.Response;
 using Kjkardum.CloudyBack.Application.UseCases.BaseResource.Queries.GetPaginated;
 using Kjkardum.CloudyBack.Application.UseCases.Postgres.Commands.CreateDatabase;
 using Kjkardum.CloudyBack.Application.UseCases.Postgres.Commands.CreateServer;
+using Kjkardum.CloudyBack.Application.UseCases.Postgres.Commands.DeleteServer;
+using Kjkardum.CloudyBack.Application.UseCases.Postgres.Commands.ServerContainerAction;
 using Kjkardum.CloudyBack.Application.UseCases.Postgres.Dtos;
 using Kjkardum.CloudyBack.Application.UseCases.Postgres.Queries.GetById;
 using MediatR;
@@ -42,7 +44,7 @@ public class PostgresServerResourceController(IMediator mediator): ControllerBas
         return Ok(result);
     }
 
-    [HttpPost("{serverId}/database")]
+    [HttpPost("{serverId:guid}/database")]
     public async Task<ActionResult<PostgresDatabaseResourceDto>> CreateDatabase(
         Guid serverId,
         [FromBody] CreatePostgresDatabaseCommand request,
@@ -51,5 +53,19 @@ public class PostgresServerResourceController(IMediator mediator): ControllerBas
         request.ServerId = serverId;
         var result = await mediator.Send(request, cancellationToken);
         return Ok(result);
+    }
+
+    [HttpPost("{serverId:guid}/containerAction")]
+    public async Task<IActionResult> ExecuteContainerAction(Guid serverId, [FromQuery] string actionId)
+    {
+        await mediator.Send(new PostgresServerContainerActionCommand { Id = serverId, ActionId = actionId });
+        return Ok();
+    }
+
+    [HttpDelete("{serverId:guid}")]
+    public async Task<IActionResult> Delete(Guid serverId, CancellationToken cancellationToken = default)
+    {
+        await mediator.Send(new DeletePostgresServerResourceCommand { Id = serverId }, cancellationToken);
+        return NoContent();
     }
 }

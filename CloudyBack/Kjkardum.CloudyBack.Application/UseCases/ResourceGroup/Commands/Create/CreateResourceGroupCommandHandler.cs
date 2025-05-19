@@ -1,12 +1,14 @@
 using AutoMapper;
 using Kjkardum.CloudyBack.Application.Repositories;
 using Kjkardum.CloudyBack.Application.UseCases.ResourceGroup.Dto;
+using Kjkardum.CloudyBack.Domain.Entities;
 using MediatR;
 
 namespace Kjkardum.CloudyBack.Application.UseCases.ResourceGroup.Commands.Create;
 
 public class CreateResourceGroupCommandHandler(
     IResourceGroupRepository repository,
+    IBaseResourceRepository baseResourceRepository,
     IMapper mapper) : IRequestHandler<CreateResourceGroupCommand, ResourceGroupDto>
 {
     public async Task<ResourceGroupDto> Handle(
@@ -19,6 +21,13 @@ public class CreateResourceGroupCommandHandler(
         };
 
         var createdResourceGroup = await repository.Create(resourceGroup);
+
+        await baseResourceRepository.LogResourceAction(new AuditLogEntry
+            {
+                ActionName = nameof(CreateResourceGroupCommand),
+                ActionDisplayText = $"Create new resource group {request.Name}",
+                ResourceId = createdResourceGroup.Id
+            });
 
         var mappedResourceGroup = mapper.Map<ResourceGroupDto>(createdResourceGroup);
 

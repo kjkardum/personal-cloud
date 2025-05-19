@@ -2,8 +2,10 @@ import React from 'react';
 import {IconBrowser, IconDatabase, IconFolder, IconHome, IconPackage, IconProps, IconServer} from '@tabler/icons-react';
 import {rem, useMantineColorScheme, useMantineTheme} from '@mantine/core';
 
+export const defaultIconStyle = { width: rem(16), height: rem(16) };
+
 const defaultIconProps = {
-  style: { width: rem(16), height: rem(16) },
+  style: defaultIconStyle,
   stroke: 1.5,
 };
 

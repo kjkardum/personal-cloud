@@ -10,6 +10,7 @@ namespace Kjkardum.CloudyBack.Application.UseCases.Postgres.Commands.CreateDatab
 public class CreatePostgresDatabaseCommandHandler(
     IPostgresServerResourceRepository serverRepository,
     IPostgresDatabaseResourceRepository databaseRepository,
+    IBaseResourceRepository baseResourceRepository,
     IMapper mapper,
     IPostgresServerClient client) : IRequestHandler<CreatePostgresDatabaseCommand, PostgresDatabaseResourceDto>
 {
@@ -43,6 +44,18 @@ public class CreatePostgresDatabaseCommandHandler(
             request.AdminUsername,
             request.AdminPassword);
 
+        await baseResourceRepository.LogResourceAction(new AuditLogEntry
+            {
+                ActionName = nameof(CreatePostgresDatabaseCommand),
+                ActionDisplayText = $"Create new database {request.DatabaseName} on server {serverResource.Name}",
+                ResourceId = serverResource.Id
+            });
+        await baseResourceRepository.LogResourceAction(new AuditLogEntry
+            {
+                ActionName = nameof(CreatePostgresDatabaseCommand),
+                ActionDisplayText = $"Create new database {request.DatabaseName} on server {serverResource.Name}",
+                ResourceId = databaseResource.Id
+            });
 
         return mapper.Map<PostgresDatabaseResourceDto>(databaseResource);
     }

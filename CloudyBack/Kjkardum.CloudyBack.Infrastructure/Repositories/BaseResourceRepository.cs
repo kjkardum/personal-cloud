@@ -9,9 +9,12 @@ namespace Kjkardum.CloudyBack.Infrastructure.Repositories;
 
 public class BaseResourceRepository(ApplicationDbContext dbContext): IBaseResourceRepository
 {
+    public async Task<BaseResource?> GetById(Guid id) =>
+        await dbContext.Resources
+            .FirstOrDefaultAsync(x => x.Id == id);
+
     public async Task<(IEnumerable<BaseResource>, int)> GetPaginated(PaginatedRequest pagination)
     {
-        //page (from 1), pageSize, filterBy (looks at name), orderBy, where orderBys are allowed to be: Name, CreatedAt, UpdatedAt in a format Name,Asc or Name,Desc
         var query = dbContext.Resources.AsQueryable();
         if (!string.IsNullOrEmpty(pagination.FilterBy))
         {
@@ -42,5 +45,31 @@ public class BaseResourceRepository(ApplicationDbContext dbContext): IBaseResour
         var baseResource = await query.ToListAsync();
         var total = await query.CountAsync();
         return (baseResource, total);
+    }
+
+    public async Task<(IEnumerable<AuditLogEntry>, int)> GetAuditLogEntries(
+        Guid resourceId,
+        PaginatedRequest pagination)
+    {
+        var query = dbContext.AuditLogEntries.AsQueryable();
+        if (resourceId != Guid.Empty)
+        {
+            query = query.Where(x => x.ResourceId == resourceId);
+        }
+
+        query = query
+            .Skip((pagination.Page - 1) * pagination.PageSize)
+            .Take(pagination.PageSize);
+
+        query = query.OrderByDescending(t => t.Timestamp);
+        var auditLogEntries = await query.ToListAsync();
+        var total = await query.CountAsync();
+        return (auditLogEntries, total);
+    }
+
+    public async Task LogResourceAction(AuditLogEntry auditLogEntry)
+    {
+        await dbContext.AuditLogEntries.AddAsync(auditLogEntry);
+        await dbContext.SaveChangesAsync();
     }
 }

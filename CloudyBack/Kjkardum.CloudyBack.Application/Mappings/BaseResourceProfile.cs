@@ -10,5 +10,8 @@ public class BaseResourceProfile: Profile
     {
         CreateMap<BaseResource, BaseResourceDto>()
             .ForMember(dest => dest.ResourceType, opt => opt.MapFrom(src => src.GetType().Name));
+        CreateMap<ResourceGroupedBaseResource, ResourceGroupedBaseResourceDto>()
+            .ForMember(dest => dest.ResourceType, opt => opt.MapFrom(src => src.GetType().Name))
+            .ForMember(dest => dest.ResourceGroupName, opt => opt.MapFrom(src => src.ResourceGroup.Name));
     }
 }

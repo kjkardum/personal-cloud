@@ -22,6 +22,40 @@ namespace Kjkardum.CloudyBack.Infrastructure.Persistence.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Kjkardum.CloudyBack.Domain.Entities.AuditLogEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ActionDisplayText")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ActionMetadata")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ActionName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("ResourceId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Timestamp");
+
+                    b.HasIndex("ResourceId", "Timestamp")
+                        .IsUnique()
+                        .IsDescending(false, true);
+
+                    b.ToTable("AuditLogEntries");
+                });
+
             modelBuilder.Entity("Kjkardum.CloudyBack.Domain.Entities.BaseResource", b =>
                 {
                     b.Property<Guid>("Id")
@@ -144,6 +178,17 @@ namespace Kjkardum.CloudyBack.Infrastructure.Persistence.Migrations
                     b.ToTable("PostgresServerResources");
                 });
 
+            modelBuilder.Entity("Kjkardum.CloudyBack.Domain.Entities.AuditLogEntry", b =>
+                {
+                    b.HasOne("Kjkardum.CloudyBack.Domain.Entities.BaseResource", "Resource")
+                        .WithMany("AuditLogEntries")
+                        .HasForeignKey("ResourceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Resource");
+                });
+
             modelBuilder.Entity("Kjkardum.CloudyBack.Domain.Entities.ResourceGroupedBaseResource", b =>
                 {
                     b.HasOne("Kjkardum.CloudyBack.Domain.Entities.ResourceGroup", "ResourceGroup")
@@ -164,6 +209,11 @@ namespace Kjkardum.CloudyBack.Infrastructure.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("PostgresDatabaseServerResource");
+                });
+
+            modelBuilder.Entity("Kjkardum.CloudyBack.Domain.Entities.BaseResource", b =>
+                {
+                    b.Navigation("AuditLogEntries");
                 });
 
             modelBuilder.Entity("Kjkardum.CloudyBack.Domain.Entities.ResourceGroup", b =>

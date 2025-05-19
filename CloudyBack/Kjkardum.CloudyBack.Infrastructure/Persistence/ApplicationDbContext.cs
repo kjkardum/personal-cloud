@@ -8,6 +8,7 @@ namespace Kjkardum.CloudyBack.Infrastructure.Persistence
     public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
     {
         public DbSet<BaseResource> Resources => Set<BaseResource>();
+        public DbSet<AuditLogEntry> AuditLogEntries => Set<AuditLogEntry>();
         public DbSet<ResourceGroupedBaseResource> ResourceGroupedBaseResources => Set<ResourceGroupedBaseResource>();
 
         public DbSet<ResourceGroup> ResourceGroups => Set<ResourceGroup>();

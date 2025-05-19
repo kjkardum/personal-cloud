@@ -6,6 +6,18 @@ public abstract class BaseResource: IAuditableEntity
     public required string Name { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+    public ICollection<AuditLogEntry> AuditLogEntries { get; set; } = new List<AuditLogEntry>();
+}
+
+public class AuditLogEntry
+{
+    public Guid Id { get; set; }
+    public required string ActionName { get; set; }
+    public required string ActionDisplayText { get; set; }
+    public string? ActionMetadata { get; set; }
+    public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+    public Guid ResourceId { get; set; }
+    public BaseResource? Resource { get; set; }
 }
 
 public class ResourceGroup: BaseResource

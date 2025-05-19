@@ -1,4 +1,6 @@
 import '@mantine/core/styles.css';
+import 'mantine-datatable/styles.layer.css';
+import './layout.css';
 
 import { Provider as ReduxProvider } from 'react-redux';
 import { RouterProvider } from 'react-router-dom';

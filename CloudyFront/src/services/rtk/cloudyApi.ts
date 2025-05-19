@@ -5,6 +5,7 @@ export const addTagTypes = [
   'BaseResource',
   'PostgresServerResource',
   'ResourceGroup',
+  'ResourceGroupedResource',
   'Status',
   'TenantManagement',
 ] as const;
@@ -40,6 +41,41 @@ const injectedRtkApi = api
         }),
         providesTags: ['BaseResource'],
       }),
+      getApiResourceBaseResourceByResourceIdContainer: build.query<
+        GetApiResourceBaseResourceByResourceIdContainerApiResponse,
+        GetApiResourceBaseResourceByResourceIdContainerApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/resource/BaseResource/${queryArg.resourceId}/container`,
+        }),
+        providesTags: ['BaseResource'],
+      }),
+      getApiResourceBaseResourceByResourceIdAuditLog: build.query<
+        GetApiResourceBaseResourceByResourceIdAuditLogApiResponse,
+        GetApiResourceBaseResourceByResourceIdAuditLogApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/resource/BaseResource/${queryArg.resourceId}/audit-log`,
+          params: {
+            Page: queryArg.page,
+            PageSize: queryArg.pageSize,
+            FilterBy: queryArg.filterBy,
+            OrderBy: queryArg.orderBy,
+          },
+        }),
+        providesTags: ['BaseResource'],
+      }),
+      postApiResourceBaseResourceByResourceIdPrometheus: build.mutation<
+        PostApiResourceBaseResourceByResourceIdPrometheusApiResponse,
+        PostApiResourceBaseResourceByResourceIdPrometheusApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/resource/BaseResource/${queryArg.resourceId}/prometheus`,
+          method: 'POST',
+          body: queryArg.queryPrometheusQuery,
+        }),
+        invalidatesTags: ['BaseResource'],
+      }),
       getApiResourcePostgresServerResource: build.query<
         GetApiResourcePostgresServerResourceApiResponse,
         GetApiResourcePostgresServerResourceApiArg
@@ -73,6 +109,16 @@ const injectedRtkApi = api
         query: (queryArg) => ({ url: `/api/resource/PostgresServerResource/${queryArg.serverId}` }),
         providesTags: ['PostgresServerResource'],
       }),
+      deleteApiResourcePostgresServerResourceByServerId: build.mutation<
+        DeleteApiResourcePostgresServerResourceByServerIdApiResponse,
+        DeleteApiResourcePostgresServerResourceByServerIdApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/resource/PostgresServerResource/${queryArg.serverId}`,
+          method: 'DELETE',
+        }),
+        invalidatesTags: ['PostgresServerResource'],
+      }),
       postApiResourcePostgresServerResourceByServerIdDatabase: build.mutation<
         PostApiResourcePostgresServerResourceByServerIdDatabaseApiResponse,
         PostApiResourcePostgresServerResourceByServerIdDatabaseApiArg
@@ -81,6 +127,19 @@ const injectedRtkApi = api
           url: `/api/resource/PostgresServerResource/${queryArg.serverId}/database`,
           method: 'POST',
           body: queryArg.createPostgresDatabaseCommand,
+        }),
+        invalidatesTags: ['PostgresServerResource'],
+      }),
+      postApiResourcePostgresServerResourceByServerIdContainerAction: build.mutation<
+        PostApiResourcePostgresServerResourceByServerIdContainerActionApiResponse,
+        PostApiResourcePostgresServerResourceByServerIdContainerActionApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/resource/PostgresServerResource/${queryArg.serverId}/containerAction`,
+          method: 'POST',
+          params: {
+            actionId: queryArg.actionId,
+          },
         }),
         invalidatesTags: ['PostgresServerResource'],
       }),
@@ -109,6 +168,15 @@ const injectedRtkApi = api
           },
         }),
         providesTags: ['ResourceGroup'],
+      }),
+      getApiResourceResourceGroupedResourceByResourceId: build.query<
+        GetApiResourceResourceGroupedResourceByResourceIdApiResponse,
+        GetApiResourceResourceGroupedResourceByResourceIdApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/resource/ResourceGroupedResource/${queryArg.resourceId}`,
+        }),
+        providesTags: ['ResourceGroupedResource'],
       }),
       getHealth: build.query<GetHealthApiResponse, GetHealthApiArg>({
         query: () => ({ url: `/health` }),
@@ -166,6 +234,26 @@ export type GetApiResourceBaseResourceApiArg = {
   filterBy?: string;
   orderBy?: string;
 };
+export type GetApiResourceBaseResourceByResourceIdContainerApiResponse =
+  /** status 200 OK */ ContainerDto;
+export type GetApiResourceBaseResourceByResourceIdContainerApiArg = {
+  resourceId: string;
+};
+export type GetApiResourceBaseResourceByResourceIdAuditLogApiResponse =
+  /** status 200 OK */ AuditLogEntryPaginatedResponse;
+export type GetApiResourceBaseResourceByResourceIdAuditLogApiArg = {
+  resourceId: string;
+  page?: number;
+  pageSize?: number;
+  filterBy?: string;
+  orderBy?: string;
+};
+export type PostApiResourceBaseResourceByResourceIdPrometheusApiResponse =
+  /** status 200 OK */ PrometheusResultDto;
+export type PostApiResourceBaseResourceByResourceIdPrometheusApiArg = {
+  resourceId: string;
+  queryPrometheusQuery: QueryPrometheusQuery;
+};
 export type GetApiResourcePostgresServerResourceApiResponse =
   /** status 200 OK */ PostgresServerResourceDtoPaginatedResponse;
 export type GetApiResourcePostgresServerResourceApiArg = {
@@ -184,11 +272,20 @@ export type GetApiResourcePostgresServerResourceByServerIdApiResponse =
 export type GetApiResourcePostgresServerResourceByServerIdApiArg = {
   serverId: string;
 };
+export type DeleteApiResourcePostgresServerResourceByServerIdApiResponse = unknown;
+export type DeleteApiResourcePostgresServerResourceByServerIdApiArg = {
+  serverId: string;
+};
 export type PostApiResourcePostgresServerResourceByServerIdDatabaseApiResponse =
   /** status 200 OK */ PostgresDatabaseResourceDto;
 export type PostApiResourcePostgresServerResourceByServerIdDatabaseApiArg = {
   serverId: string;
   createPostgresDatabaseCommand: CreatePostgresDatabaseCommand;
+};
+export type PostApiResourcePostgresServerResourceByServerIdContainerActionApiResponse = unknown;
+export type PostApiResourcePostgresServerResourceByServerIdContainerActionApiArg = {
+  serverId: string;
+  actionId?: string;
 };
 export type PostApiResourceResourceGroupApiResponse = /** status 200 OK */ ResourceGroupDto;
 export type PostApiResourceResourceGroupApiArg = {
@@ -201,6 +298,11 @@ export type GetApiResourceResourceGroupApiArg = {
   pageSize?: number;
   filterBy?: string;
   orderBy?: string;
+};
+export type GetApiResourceResourceGroupedResourceByResourceIdApiResponse =
+  /** status 200 OK */ ResourceGroupedBaseResourceDto;
+export type GetApiResourceResourceGroupedResourceByResourceIdApiArg = {
+  resourceId: string;
 };
 export type GetHealthApiResponse = /** status 200 OK */ string;
 export type GetHealthApiArg = void;
@@ -254,12 +356,76 @@ export type BaseResourceDtoPaginatedResponse = {
   totalCount?: number;
   data: BaseResourceDto[];
 };
+export type ContainerDto = {
+  stateRunning?: boolean;
+  statePaused?: boolean;
+  stateRestarting?: boolean;
+  stateError?: string;
+  stateStartedAt?: string;
+  stateFinishedAt?: string;
+};
+export type BaseResource = {
+  id?: string;
+  name: string;
+  createdAt?: string;
+  updatedAt?: string;
+  auditLogEntries?: AuditLogEntry[];
+};
+export type AuditLogEntry = {
+  id?: string;
+  actionName: string;
+  actionDisplayText: string;
+  actionMetadata?: string | null;
+  timestamp?: string;
+  resourceId?: string;
+  resource?: BaseResource;
+};
+export type AuditLogEntryPaginatedResponse = {
+  page?: number;
+  pageSize?: number;
+  totalCount?: number;
+  data: AuditLogEntry[];
+};
+export type PrometheusResultItemDto = {
+  metric?: {
+    [key: string]: string;
+  };
+  values?: any[][];
+};
+export type PrometheusDataDto = {
+  resultType?: string;
+  result?: PrometheusResultItemDto[];
+};
+export type PrometheusResultDto = {
+  status?: string;
+  data?: PrometheusDataDto;
+};
+export type QueryPrometheusQuery = {
+  query?: PredefinedPrometheusQuery;
+  start?: string;
+  end?: string;
+  step?: string | null;
+  timeout?: string | null;
+  limit?: number | null;
+};
+export type PostgresDatabaseResourceDto = {
+  id: string;
+  name: string;
+  createdAt?: string;
+  updatedAt?: string;
+  resourceType: string;
+  databaseName?: string;
+  adminUsername?: string;
+};
 export type PostgresServerResourceDto = {
   id: string;
   name: string;
   createdAt?: string;
   updatedAt?: string;
   resourceType: string;
+  resourceGroupId?: string;
+  resourceGroupName?: string;
+  postgresDatabaseResources?: PostgresDatabaseResourceDto[];
 };
 export type PostgresServerResourceDtoPaginatedResponse = {
   page?: number;
@@ -271,13 +437,6 @@ export type CreatePostgresServerCommand = {
   resourceGroupId: string;
   serverName: string;
   serverPort?: number | null;
-};
-export type PostgresDatabaseResourceDto = {
-  id: string;
-  name: string;
-  createdAt?: string;
-  updatedAt?: string;
-  resourceType: string;
 };
 export type CreatePostgresDatabaseCommand = {
   databaseName: string;
@@ -299,6 +458,15 @@ export type ResourceGroupDtoPaginatedResponse = {
   totalCount?: number;
   data: ResourceGroupDto[];
 };
+export type ResourceGroupedBaseResourceDto = {
+  id: string;
+  name: string;
+  createdAt?: string;
+  updatedAt?: string;
+  resourceType: string;
+  resourceGroupId?: string;
+  resourceGroupName?: string;
+};
 export type UserRegistrationCommand = {
   email?: string;
   password?: string;
@@ -311,19 +479,31 @@ export type UserRegistrationCommandRead = {
 export type UserUpdateCommand = {
   newPassword?: string | null;
 };
+export enum PredefinedPrometheusQuery {
+  PostgresProcessesCount = 'PostgresProcessesCount',
+}
 export const {
   usePostApiAuthenticationLoginMutation,
   useGetApiResourceBaseResourceQuery,
   useLazyGetApiResourceBaseResourceQuery,
+  useGetApiResourceBaseResourceByResourceIdContainerQuery,
+  useLazyGetApiResourceBaseResourceByResourceIdContainerQuery,
+  useGetApiResourceBaseResourceByResourceIdAuditLogQuery,
+  useLazyGetApiResourceBaseResourceByResourceIdAuditLogQuery,
+  usePostApiResourceBaseResourceByResourceIdPrometheusMutation,
   useGetApiResourcePostgresServerResourceQuery,
   useLazyGetApiResourcePostgresServerResourceQuery,
   usePostApiResourcePostgresServerResourceMutation,
   useGetApiResourcePostgresServerResourceByServerIdQuery,
   useLazyGetApiResourcePostgresServerResourceByServerIdQuery,
+  useDeleteApiResourcePostgresServerResourceByServerIdMutation,
   usePostApiResourcePostgresServerResourceByServerIdDatabaseMutation,
+  usePostApiResourcePostgresServerResourceByServerIdContainerActionMutation,
   usePostApiResourceResourceGroupMutation,
   useGetApiResourceResourceGroupQuery,
   useLazyGetApiResourceResourceGroupQuery,
+  useGetApiResourceResourceGroupedResourceByResourceIdQuery,
+  useLazyGetApiResourceResourceGroupedResourceByResourceIdQuery,
   useGetHealthQuery,
   useLazyGetHealthQuery,
   useGetAuthenticatedQuery,

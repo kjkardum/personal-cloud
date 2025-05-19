@@ -18,7 +18,10 @@ public class PostgresServerResourceRepository(ApplicationDbContext dbContext): I
 
     public async Task<PostgresServerResource?> GetById(Guid id)
     {
-        var postgresServerResource = await dbContext.PostgresServerResources.FirstOrDefaultAsync(x => x.Id == id);
+        var postgresServerResource = await dbContext.PostgresServerResources
+            .Include(t => t.ResourceGroup)
+            .Include(t => t.PostgresDatabaseResources)
+            .FirstOrDefaultAsync(x => x.Id == id);
         return postgresServerResource;
     }
 
@@ -55,5 +58,11 @@ public class PostgresServerResourceRepository(ApplicationDbContext dbContext): I
         var postgresServerResources = await query.ToListAsync();
         var total = await query.CountAsync();
         return (postgresServerResources, total);
+    }
+
+    public async Task Delete(PostgresServerResource postgresServerResource)
+    {
+        dbContext.PostgresServerResources.Remove(postgresServerResource);
+        await dbContext.SaveChangesAsync();
     }
 }

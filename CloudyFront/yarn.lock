@@ -1002,6 +1002,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@kurkle/color@npm:^0.3.0":
+  version: 0.3.4
+  resolution: "@kurkle/color@npm:0.3.4"
+  checksum: 10c0/0e9fd55c614b005c5f0c4c755bca19ec0293bc7513b4ea3ec1725234f9c2fa81afbc78156baf555c8b9cb0d305619253c3f5bca016067daeebb3d00ebb4ea683
+  languageName: node
+  linkType: hard
+
 "@mantine/core@npm:7.13.2":
   version: 7.13.2
   resolution: "@mantine/core@npm:7.13.2"
@@ -2190,6 +2197,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"axios@npm:^1.8.4":
+  version: 1.9.0
+  resolution: "axios@npm:1.9.0"
+  dependencies:
+    follow-redirects: "npm:^1.15.6"
+    form-data: "npm:^4.0.0"
+    proxy-from-env: "npm:^1.1.0"
+  checksum: 10c0/9371a56886c2e43e4ff5647b5c2c3c046ed0a3d13482ef1d0135b994a628c41fbad459796f101c655e62f0c161d03883454474d2e435b2e021b1924d9f24994c
+  languageName: node
+  linkType: hard
+
 "axobject-query@npm:^4.1.0":
   version: 4.1.0
   resolution: "axobject-query@npm:4.1.0"
@@ -2416,6 +2434,37 @@ __metadata:
   languageName: node
   linkType: hard
 
+"chart.js@npm:^4.4.9":
+  version: 4.4.9
+  resolution: "chart.js@npm:4.4.9"
+  dependencies:
+    "@kurkle/color": "npm:^0.3.0"
+  checksum: 10c0/970e06bf1f8f498671b19b3105bb5fc5c25558286baa6141e7895815efca303c4b1a8f9c82430e61d8c772795fd8e40ddf9bc33fdf7559e3a016d7580c2d987c
+  languageName: node
+  linkType: hard
+
+"chartjs-adapter-date-fns@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "chartjs-adapter-date-fns@npm:3.0.0"
+  peerDependencies:
+    chart.js: ">=2.8.0"
+    date-fns: ">=2.0.0"
+  checksum: 10c0/bc785632da9e6253a969c84f5d382e39944246de8410285f060d6715b3ed681cee80142bb2c410329b4c21094efc6d54f9c289200463dce865f736a01a76de4b
+  languageName: node
+  linkType: hard
+
+"chartjs-plugin-datasource-prometheus@npm:^2.3.2":
+  version: 2.3.2
+  resolution: "chartjs-plugin-datasource-prometheus@npm:2.3.2"
+  dependencies:
+    chartjs-adapter-date-fns: "npm:^3.0.0"
+    prometheus-query: "npm:^3.5.0"
+  peerDependencies:
+    chart.js: ">= 4 < 5"
+  checksum: 10c0/dab2e5b6db899a22a398023c05057be300f85a92b1f8f14096f1bd480aef16d827b66b2e7c56ff39afa0fe6d2026f13eeab8407a241869e024cb0406ad04641e
+  languageName: node
+  linkType: hard
+
 "check-error@npm:^2.1.1":
   version: 2.1.1
   resolution: "check-error@npm:2.1.1"
@@ -2633,6 +2682,13 @@ __metadata:
     es-errors: "npm:^1.3.0"
     is-data-view: "npm:^1.0.1"
   checksum: 10c0/fa7aa40078025b7810dcffc16df02c480573b7b53ef1205aa6a61533011005c1890e5ba17018c692ce7c900212b547262d33279fde801ad9843edc0863bf78c4
+  languageName: node
+  linkType: hard
+
+"date-fns@npm:^4.1.0":
+  version: 4.1.0
+  resolution: "date-fns@npm:4.1.0"
+  checksum: 10c0/b79ff32830e6b7faa009590af6ae0fb8c3fd9ffad46d930548fbb5acf473773b4712ae887e156ba91a7b3dc30591ce0f517d69fd83bd9c38650fdc03b4e0bac8
   languageName: node
   linkType: hard
 
@@ -3536,6 +3592,16 @@ __metadata:
   version: 3.3.2
   resolution: "flatted@npm:3.3.2"
   checksum: 10c0/24cc735e74d593b6c767fe04f2ef369abe15b62f6906158079b9874bdb3ee5ae7110bb75042e70cd3f99d409d766f357caf78d5ecee9780206f5fdc5edbad334
+  languageName: node
+  linkType: hard
+
+"follow-redirects@npm:^1.15.6":
+  version: 1.15.9
+  resolution: "follow-redirects@npm:1.15.9"
+  peerDependenciesMeta:
+    debug:
+      optional: true
+  checksum: 10c0/5829165bd112c3c0e82be6c15b1a58fa9dcfaede3b3c54697a82fe4a62dd5ae5e8222956b448d2f98e331525f05d00404aba7d696de9e761ef6e42fdc780244f
   languageName: node
   linkType: hard
 
@@ -4693,6 +4759,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"mantine-datatable@npm:^7.17.1":
+  version: 7.17.1
+  resolution: "mantine-datatable@npm:7.17.1"
+  peerDependencies:
+    "@mantine/core": ">=7.14"
+    "@mantine/hooks": ">=7.14"
+    clsx: ">=2"
+    react: ">=18.2"
+  checksum: 10c0/aafc41ba88e1a33a4094a47ceb23940952f811fc9240dad622030c7348169f0e51a78b024ce186762e1a114c94621e54508f23b5e57507055b3640d120a298ce
+  languageName: node
+  linkType: hard
+
 "mantine-vite-template@workspace:.":
   version: 0.0.0-use.local
   resolution: "mantine-vite-template@workspace:."
@@ -4714,18 +4792,25 @@ __metadata:
     "@types/react": "npm:^18.3.11"
     "@types/react-dom": "npm:^18.3.1"
     "@vitejs/plugin-react": "npm:^4.3.2"
+    chart.js: "npm:^4.4.9"
+    chartjs-adapter-date-fns: "npm:^3.0.0"
+    chartjs-plugin-datasource-prometheus: "npm:^2.3.2"
+    date-fns: "npm:^4.1.0"
     eslint: "npm:^9.12.0"
     eslint-config-mantine: "npm:^4.0.3"
     eslint-plugin-jsx-a11y: "npm:^6.10.0"
     eslint-plugin-react: "npm:^7.37.1"
     identity-obj-proxy: "npm:^3.0.0"
     jsdom: "npm:^25.0.1"
+    mantine-datatable: "npm:^7.17.1"
+    momentjs: "npm:^2.0.0"
     postcss: "npm:^8.4.47"
     postcss-preset-mantine: "npm:1.17.0"
     postcss-simple-vars: "npm:^7.0.1"
     prettier: "npm:^3.3.3"
     prop-types: "npm:^15.8.1"
     react: "npm:^18.3.1"
+    react-chartjs-2: "npm:^5.3.0"
     react-dom: "npm:^18.3.1"
     react-redux: "npm:^9.2.0"
     react-router-dom: "npm:^6.27.0"
@@ -4943,6 +5028,13 @@ __metadata:
   bin:
     mkdirp: dist/cjs/src/bin.js
   checksum: 10c0/9f2b975e9246351f5e3a40dcfac99fcd0baa31fbfab615fe059fb11e51f10e4803c63de1f384c54d656e4db31d000e4767e9ef076a22e12a641357602e31d57d
+  languageName: node
+  linkType: hard
+
+"momentjs@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "momentjs@npm:2.0.0"
+  checksum: 10c0/59c9e2ac6266275e38abbc97d013550a9848eacd891d01cdff0a7dbcfe9910fcc0591ae851834ddc36b6d5129881ed96998dd25c5d355ba3c79cbe336cef1919
   languageName: node
   linkType: hard
 
@@ -5552,6 +5644,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"prometheus-query@npm:^3.5.0":
+  version: 3.5.0
+  resolution: "prometheus-query@npm:3.5.0"
+  dependencies:
+    axios: "npm:^1.8.4"
+  checksum: 10c0/1ebdb44869068f23eb22a34c90823c4996e25addc2773bf1da8c1d396a52ce7a1dee60e89baefdc1859c296e2735dbfe83f8676bc6bba69d6180fa9e2bcad516
+  languageName: node
+  linkType: hard
+
 "promise-retry@npm:^2.0.1":
   version: 2.0.1
   resolution: "promise-retry@npm:2.0.1"
@@ -5573,6 +5674,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"proxy-from-env@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "proxy-from-env@npm:1.1.0"
+  checksum: 10c0/fe7dd8b1bdbbbea18d1459107729c3e4a2243ca870d26d34c2c1bcd3e4425b7bcc5112362df2d93cc7fb9746f6142b5e272fd1cc5c86ddf8580175186f6ad42b
+  languageName: node
+  linkType: hard
+
 "punycode@npm:^2.1.0, punycode@npm:^2.3.1":
   version: 2.3.1
   resolution: "punycode@npm:2.3.1"
@@ -5584,6 +5692,16 @@ __metadata:
   version: 1.2.3
   resolution: "queue-microtask@npm:1.2.3"
   checksum: 10c0/900a93d3cdae3acd7d16f642c29a642aea32c2026446151f0778c62ac089d4b8e6c986811076e1ae180a694cedf077d453a11b58ff0a865629a4f82ab558e102
+  languageName: node
+  linkType: hard
+
+"react-chartjs-2@npm:^5.3.0":
+  version: 5.3.0
+  resolution: "react-chartjs-2@npm:5.3.0"
+  peerDependencies:
+    chart.js: ^4.1.1
+    react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+  checksum: 10c0/4415d40217c084a49f9a936fbd30f67e0e705148e6f8359bec65601033d1076f31085c45793839fc29ec833e6c427b0bf9861a0c54c432c08d35bc9590ffa41a
   languageName: node
   linkType: hard
 
