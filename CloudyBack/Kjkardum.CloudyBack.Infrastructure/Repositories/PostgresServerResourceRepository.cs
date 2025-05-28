@@ -50,13 +50,13 @@ public class PostgresServerResourceRepository(ApplicationDbContext dbContext): I
                 _ => query.OrderBy(orderByFunc)
             };
         }
+        var total = await query.CountAsync();
 
         query = query
             .Skip((pagination.Page - 1) * pagination.PageSize)
             .Take(pagination.PageSize);
 
         var postgresServerResources = await query.ToListAsync();
-        var total = await query.CountAsync();
         return (postgresServerResources, total);
     }
 

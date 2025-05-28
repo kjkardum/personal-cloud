@@ -4,7 +4,7 @@ import { DashboardButton } from '@/components/DashboardButton/DashboardButton';
 import { DashboardButtonNewResource } from '@/components/DashboardButton/NewResource/DashboardButtonNewResource';
 import {CloudyIconDatabase} from '@/icons/Resources';
 import {useGetApiResourceBaseResourceQuery} from "@/services/rtk/cloudyApi";
-import {TypeToIcon} from "@/util/typeToIcon";
+import {TypeToIcon} from "@/util/typeToDisplay";
 import { useNavigate } from 'react-router-dom';
 import { viewResourceOfType } from '@/util/navigation';
 

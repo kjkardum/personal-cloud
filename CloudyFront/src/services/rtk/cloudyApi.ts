@@ -3,6 +3,7 @@ import { api } from './api';
 export const addTagTypes = [
   'Authentication',
   'BaseResource',
+  'KafkaClusterResource',
   'PostgresServerResource',
   'ResourceGroup',
   'ResourceGroupedResource',
@@ -76,6 +77,35 @@ const injectedRtkApi = api
         }),
         invalidatesTags: ['BaseResource'],
       }),
+      postApiResourceBaseResourceByResourceIdLoki: build.mutation<
+        PostApiResourceBaseResourceByResourceIdLokiApiResponse,
+        PostApiResourceBaseResourceByResourceIdLokiApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/resource/BaseResource/${queryArg.resourceId}/loki`,
+          method: 'POST',
+          body: queryArg.queryLokiQuery,
+        }),
+        invalidatesTags: ['BaseResource'],
+      }),
+      getApiResourceKafkaClusterResourceByServerId: build.query<
+        GetApiResourceKafkaClusterResourceByServerIdApiResponse,
+        GetApiResourceKafkaClusterResourceByServerIdApiArg
+      >({
+        query: (queryArg) => ({ url: `/api/resource/KafkaClusterResource/${queryArg.serverId}` }),
+        providesTags: ['KafkaClusterResource'],
+      }),
+      postApiResourceKafkaClusterResource: build.mutation<
+        PostApiResourceKafkaClusterResourceApiResponse,
+        PostApiResourceKafkaClusterResourceApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/resource/KafkaClusterResource`,
+          method: 'POST',
+          body: queryArg.createKafkaClusterCommand,
+        }),
+        invalidatesTags: ['KafkaClusterResource'],
+      }),
       getApiResourcePostgresServerResource: build.query<
         GetApiResourcePostgresServerResourceApiResponse,
         GetApiResourcePostgresServerResourceApiArg
@@ -116,6 +146,26 @@ const injectedRtkApi = api
         query: (queryArg) => ({
           url: `/api/resource/PostgresServerResource/${queryArg.serverId}`,
           method: 'DELETE',
+        }),
+        invalidatesTags: ['PostgresServerResource'],
+      }),
+      getApiResourcePostgresServerResourceDatabaseByDatabaseId: build.query<
+        GetApiResourcePostgresServerResourceDatabaseByDatabaseIdApiResponse,
+        GetApiResourcePostgresServerResourceDatabaseByDatabaseIdApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/resource/PostgresServerResource/database/${queryArg.databaseId}`,
+        }),
+        providesTags: ['PostgresServerResource'],
+      }),
+      postDatabaseByDatabaseIdRunQuery: build.mutation<
+        PostDatabaseByDatabaseIdRunQueryApiResponse,
+        PostDatabaseByDatabaseIdRunQueryApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/database/${queryArg.databaseId}/runQuery`,
+          method: 'POST',
+          body: queryArg.runPostgresDatabaseQueryCommand,
         }),
         invalidatesTags: ['PostgresServerResource'],
       }),
@@ -167,6 +217,13 @@ const injectedRtkApi = api
             OrderBy: queryArg.orderBy,
           },
         }),
+        providesTags: ['ResourceGroup'],
+      }),
+      getApiResourceResourceGroupById: build.query<
+        GetApiResourceResourceGroupByIdApiResponse,
+        GetApiResourceResourceGroupByIdApiArg
+      >({
+        query: (queryArg) => ({ url: `/api/resource/ResourceGroup/${queryArg.id}` }),
         providesTags: ['ResourceGroup'],
       }),
       getApiResourceResourceGroupedResourceByResourceId: build.query<
@@ -254,6 +311,22 @@ export type PostApiResourceBaseResourceByResourceIdPrometheusApiArg = {
   resourceId: string;
   queryPrometheusQuery: QueryPrometheusQuery;
 };
+export type PostApiResourceBaseResourceByResourceIdLokiApiResponse =
+  /** status 200 OK */ PrometheusResultDto;
+export type PostApiResourceBaseResourceByResourceIdLokiApiArg = {
+  resourceId: string;
+  queryLokiQuery: QueryLokiQuery;
+};
+export type GetApiResourceKafkaClusterResourceByServerIdApiResponse =
+  /** status 200 OK */ KafkaClusterResourceDto;
+export type GetApiResourceKafkaClusterResourceByServerIdApiArg = {
+  serverId: string;
+};
+export type PostApiResourceKafkaClusterResourceApiResponse =
+  /** status 200 OK */ KafkaClusterResourceDto;
+export type PostApiResourceKafkaClusterResourceApiArg = {
+  createKafkaClusterCommand: CreateKafkaClusterCommand;
+};
 export type GetApiResourcePostgresServerResourceApiResponse =
   /** status 200 OK */ PostgresServerResourceDtoPaginatedResponse;
 export type GetApiResourcePostgresServerResourceApiArg = {
@@ -276,8 +349,19 @@ export type DeleteApiResourcePostgresServerResourceByServerIdApiResponse = unkno
 export type DeleteApiResourcePostgresServerResourceByServerIdApiArg = {
   serverId: string;
 };
-export type PostApiResourcePostgresServerResourceByServerIdDatabaseApiResponse =
+export type GetApiResourcePostgresServerResourceDatabaseByDatabaseIdApiResponse =
   /** status 200 OK */ PostgresDatabaseResourceDto;
+export type GetApiResourcePostgresServerResourceDatabaseByDatabaseIdApiArg = {
+  databaseId: string;
+};
+export type PostDatabaseByDatabaseIdRunQueryApiResponse =
+  /** status 200 OK */ PostgresQueryResultDto;
+export type PostDatabaseByDatabaseIdRunQueryApiArg = {
+  databaseId: string;
+  runPostgresDatabaseQueryCommand: RunPostgresDatabaseQueryCommand;
+};
+export type PostApiResourcePostgresServerResourceByServerIdDatabaseApiResponse =
+  /** status 200 OK */ PostgresDatabaseSimpleResourceDto;
 export type PostApiResourcePostgresServerResourceByServerIdDatabaseApiArg = {
   serverId: string;
   createPostgresDatabaseCommand: CreatePostgresDatabaseCommand;
@@ -287,17 +371,21 @@ export type PostApiResourcePostgresServerResourceByServerIdContainerActionApiArg
   serverId: string;
   actionId?: string;
 };
-export type PostApiResourceResourceGroupApiResponse = /** status 200 OK */ ResourceGroupDto;
+export type PostApiResourceResourceGroupApiResponse = /** status 200 OK */ ResourceGroupSimpleDto;
 export type PostApiResourceResourceGroupApiArg = {
   createResourceGroupCommand: CreateResourceGroupCommand;
 };
 export type GetApiResourceResourceGroupApiResponse =
-  /** status 200 OK */ ResourceGroupDtoPaginatedResponse;
+  /** status 200 OK */ ResourceGroupSimpleDtoPaginatedResponse;
 export type GetApiResourceResourceGroupApiArg = {
   page?: number;
   pageSize?: number;
   filterBy?: string;
   orderBy?: string;
+};
+export type GetApiResourceResourceGroupByIdApiResponse = /** status 200 OK */ ResourceGroupDto;
+export type GetApiResourceResourceGroupByIdApiArg = {
+  id: string;
 };
 export type GetApiResourceResourceGroupedResourceByResourceIdApiResponse =
   /** status 200 OK */ ResourceGroupedBaseResourceDto;
@@ -390,6 +478,9 @@ export type PrometheusResultItemDto = {
   metric?: {
     [key: string]: string;
   };
+  stream?: {
+    [key: string]: string;
+  };
   values?: any[][];
 };
 export type PrometheusDataDto = {
@@ -408,7 +499,29 @@ export type QueryPrometheusQuery = {
   timeout?: string | null;
   limit?: number | null;
 };
-export type PostgresDatabaseResourceDto = {
+export type QueryLokiQuery = {
+  query?: PredefinedLokiQuery;
+  start?: string;
+  end?: string;
+  step?: string | null;
+  timeout?: string | null;
+  limit?: number | null;
+};
+export type KafkaClusterResourceDto = {
+  id: string;
+  name: string;
+  createdAt?: string;
+  updatedAt?: string;
+  resourceType: string;
+  resourceGroupId?: string;
+  resourceGroupName?: string;
+};
+export type CreateKafkaClusterCommand = {
+  resourceGroupId: string;
+  serverName: string;
+  serverPort?: number | null;
+};
+export type PostgresDatabaseSimpleResourceDto = {
   id: string;
   name: string;
   createdAt?: string;
@@ -425,7 +538,7 @@ export type PostgresServerResourceDto = {
   resourceType: string;
   resourceGroupId?: string;
   resourceGroupName?: string;
-  postgresDatabaseResources?: PostgresDatabaseResourceDto[];
+  postgresDatabaseResources?: PostgresDatabaseSimpleResourceDto[];
 };
 export type PostgresServerResourceDtoPaginatedResponse = {
   page?: number;
@@ -438,12 +551,31 @@ export type CreatePostgresServerCommand = {
   serverName: string;
   serverPort?: number | null;
 };
+export type PostgresDatabaseResourceDto = {
+  id: string;
+  name: string;
+  createdAt?: string;
+  updatedAt?: string;
+  resourceType: string;
+  resourceGroupId?: string;
+  resourceGroupName?: string;
+  databaseName?: string;
+  adminUsername?: string;
+  serverName?: string;
+  serverId?: string;
+};
+export type PostgresQueryResultDto = {
+  csvResponse?: string[][];
+};
+export type RunPostgresDatabaseQueryCommand = {
+  query?: string;
+};
 export type CreatePostgresDatabaseCommand = {
   databaseName: string;
   adminUsername: string;
   adminPassword: string;
 };
-export type ResourceGroupDto = {
+export type ResourceGroupSimpleDto = {
   id: string;
   name: string;
   createdAt?: string;
@@ -452,11 +584,18 @@ export type ResourceGroupDto = {
 export type CreateResourceGroupCommand = {
   name: string;
 };
-export type ResourceGroupDtoPaginatedResponse = {
+export type ResourceGroupSimpleDtoPaginatedResponse = {
   page?: number;
   pageSize?: number;
   totalCount?: number;
-  data: ResourceGroupDto[];
+  data: ResourceGroupSimpleDto[];
+};
+export type ResourceGroupDto = {
+  id: string;
+  name: string;
+  createdAt?: string;
+  updatedAt?: string;
+  resources?: BaseResourceDto[];
 };
 export type ResourceGroupedBaseResourceDto = {
   id: string;
@@ -481,6 +620,13 @@ export type UserUpdateCommand = {
 };
 export enum PredefinedPrometheusQuery {
   PostgresProcessesCount = 'PostgresProcessesCount',
+  PostgresEntriesInserted = 'PostgresEntriesInserted',
+  PostgresEntriesReturned = 'PostgresEntriesReturned',
+  GeneralCpuLoad = 'GeneralCPULoad',
+  GeneralMemoryUsage = 'GeneralMemoryUsage',
+}
+export enum PredefinedLokiQuery {
+  Demo = 'Demo',
 }
 export const {
   usePostApiAuthenticationLoginMutation,
@@ -491,17 +637,26 @@ export const {
   useGetApiResourceBaseResourceByResourceIdAuditLogQuery,
   useLazyGetApiResourceBaseResourceByResourceIdAuditLogQuery,
   usePostApiResourceBaseResourceByResourceIdPrometheusMutation,
+  usePostApiResourceBaseResourceByResourceIdLokiMutation,
+  useGetApiResourceKafkaClusterResourceByServerIdQuery,
+  useLazyGetApiResourceKafkaClusterResourceByServerIdQuery,
+  usePostApiResourceKafkaClusterResourceMutation,
   useGetApiResourcePostgresServerResourceQuery,
   useLazyGetApiResourcePostgresServerResourceQuery,
   usePostApiResourcePostgresServerResourceMutation,
   useGetApiResourcePostgresServerResourceByServerIdQuery,
   useLazyGetApiResourcePostgresServerResourceByServerIdQuery,
   useDeleteApiResourcePostgresServerResourceByServerIdMutation,
+  useGetApiResourcePostgresServerResourceDatabaseByDatabaseIdQuery,
+  useLazyGetApiResourcePostgresServerResourceDatabaseByDatabaseIdQuery,
+  usePostDatabaseByDatabaseIdRunQueryMutation,
   usePostApiResourcePostgresServerResourceByServerIdDatabaseMutation,
   usePostApiResourcePostgresServerResourceByServerIdContainerActionMutation,
   usePostApiResourceResourceGroupMutation,
   useGetApiResourceResourceGroupQuery,
   useLazyGetApiResourceResourceGroupQuery,
+  useGetApiResourceResourceGroupByIdQuery,
+  useLazyGetApiResourceResourceGroupByIdQuery,
   useGetApiResourceResourceGroupedResourceByResourceIdQuery,
   useLazyGetApiResourceResourceGroupedResourceByResourceIdQuery,
   useGetHealthQuery,

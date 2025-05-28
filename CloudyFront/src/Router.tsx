@@ -1,9 +1,12 @@
 import { createBrowserRouter } from 'react-router-dom';
-import { HomePage } from './pages/Home.page';
 import Layout from "@/Layout";
-import {NewPostgresServerPage} from "@/pages/postgres/createNew/NewPostgresServer.page";
-import {NewPostgresDatabasePage} from "@/pages/postgres/createNew/NewPostgresDatabase.page";
+import { NewPostgresDatabasePage } from "@/pages/postgres/createNew/NewPostgresDatabase.page";
+import { NewPostgresServerPage } from "@/pages/postgres/createNew/NewPostgresServer.page";
 import { ViewPostgresServerPage } from '@/pages/postgres/view/viewPostgresServer.page';
+import { HomePage } from './pages/Home.page';
+import { ViewPostgresDatabasePage } from './pages/postgres/view/viewPostgresDatabase.page';
+import { ViewResourceGroupPage } from '@/pages/resourceGroup/view/viewResourceGroup.page';
+
 
 export const routes = createBrowserRouter([
   {
@@ -36,8 +39,21 @@ export const routes = createBrowserRouter([
               {
                 path: 'server/:id',
                 element: <ViewPostgresServerPage/>,
+              },
+              {
+                path: 'database/:id',
+                element: <ViewPostgresDatabasePage/>,
               }
             ]
+          }
+        ]
+      },
+      {
+        path: 'resourceGroup',
+        children: [
+          {
+            path: 'view/:id',
+            element: <ViewResourceGroupPage />,
           }
         ]
       }

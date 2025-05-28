@@ -18,7 +18,9 @@ public class ResourceGroupRepository(ApplicationDbContext dbContext): IResourceG
 
     public async Task<ResourceGroup?> GetById(Guid id)
     {
-        var resourceGroup = await dbContext.ResourceGroups.FirstOrDefaultAsync(x => x.Id == id);
+        var resourceGroup = await dbContext.ResourceGroups
+            .Include(t => t.Resources)
+            .FirstOrDefaultAsync(x => x.Id == id);
         return resourceGroup;
     }
 
@@ -47,13 +49,13 @@ public class ResourceGroupRepository(ApplicationDbContext dbContext): IResourceG
                 _ => query.OrderBy(orderByFunc)
             };
         }
+        var total = await query.CountAsync();
 
         query = query
             .Skip((pagination.Page - 1) * pagination.PageSize)
             .Take(pagination.PageSize);
 
         var resourceGroups = await query.ToListAsync();
-        var total = await query.CountAsync();
         return (resourceGroups, total);
     }
 }

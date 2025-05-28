@@ -9,9 +9,9 @@ namespace Kjkardum.CloudyBack.Application.UseCases.ResourceGroup.Commands.Create
 public class CreateResourceGroupCommandHandler(
     IResourceGroupRepository repository,
     IBaseResourceRepository baseResourceRepository,
-    IMapper mapper) : IRequestHandler<CreateResourceGroupCommand, ResourceGroupDto>
+    IMapper mapper) : IRequestHandler<CreateResourceGroupCommand, ResourceGroupSimpleDto>
 {
-    public async Task<ResourceGroupDto> Handle(
+    public async Task<ResourceGroupSimpleDto> Handle(
         CreateResourceGroupCommand request,
         CancellationToken cancellationToken)
     {
@@ -29,7 +29,7 @@ public class CreateResourceGroupCommandHandler(
                 ResourceId = createdResourceGroup.Id
             });
 
-        var mappedResourceGroup = mapper.Map<ResourceGroupDto>(createdResourceGroup);
+        var mappedResourceGroup = mapper.Map<ResourceGroupSimpleDto>(createdResourceGroup);
 
         return mappedResourceGroup;
     }

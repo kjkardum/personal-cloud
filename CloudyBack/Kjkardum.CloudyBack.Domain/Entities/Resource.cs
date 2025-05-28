@@ -49,3 +49,10 @@ public class PostgresDatabaseResource: ResourceGroupedBaseResource
     public Guid PostgresDatabaseServerResourceId { get; set; }
     public PostgresServerResource? PostgresDatabaseServerResource { get; set; }
 }
+
+public class KafkaClusterResource: ResourceGroupedBaseResource
+{
+    public required string SaUsername { get; set; }
+    public required string SaPassword { get; set; }
+    public int Port { get; set; }
+}

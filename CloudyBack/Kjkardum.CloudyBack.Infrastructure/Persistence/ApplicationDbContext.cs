@@ -14,6 +14,7 @@ namespace Kjkardum.CloudyBack.Infrastructure.Persistence
         public DbSet<ResourceGroup> ResourceGroups => Set<ResourceGroup>();
         public DbSet<PostgresServerResource> PostgresServerResources => Set<PostgresServerResource>();
         public DbSet<PostgresDatabaseResource> PostgresDatabaseResources => Set<PostgresDatabaseResource>();
+        public DbSet<KafkaClusterResource> KafkaClusterResources => Set<KafkaClusterResource>();
 
         public DbSet<User> Users => Set<User>();
 

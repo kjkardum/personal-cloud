@@ -12,7 +12,7 @@ public class CreatePostgresServerCommandHandler(
     IPostgresServerResourceRepository repository,
     IBaseResourceRepository baseResourceRepository,
     IPostgresServerClient postgresServerClient,
-    IPrometheusClient prometheusClient,
+    IObservabilityClient observabilityClient,
     IMapper mapper) : IRequestHandler<CreatePostgresServerCommand, PostgresServerResourceDto>
 {
     public async Task<PostgresServerResourceDto> Handle(CreatePostgresServerCommand request, CancellationToken cancellationToken)
@@ -35,9 +35,9 @@ public class CreatePostgresServerCommandHandler(
             SaPassword = password
         };
 
-        var createdPostgresServerResource = await repository.Create(postgresServerResource);
+        postgresServerResource = await repository.Create(postgresServerResource);
 
-        await prometheusClient.AttachCollector(createdPostgresServerResource.Id, request.ServerName);
+        await observabilityClient.AttachCollector(postgresServerResource.Id, request.ServerName);
         await postgresServerClient.CreateServerAsync(
             postgresServerResource.Id,
             postgresServerResource.Port,
@@ -49,7 +49,7 @@ public class CreatePostgresServerCommandHandler(
             {
                 ActionName = nameof(CreatePostgresServerCommand),
                 ActionDisplayText = $"Create new postgres server {request.ServerName}",
-                ResourceId = createdPostgresServerResource.Id
+                ResourceId = postgresServerResource.Id
             });
 
         await baseResourceRepository.LogResourceAction(new AuditLogEntry
@@ -60,7 +60,7 @@ public class CreatePostgresServerCommandHandler(
             });
 
 
-        var mappedPostgresServerResource = mapper.Map<PostgresServerResourceDto>(createdPostgresServerResource);
+        var mappedPostgresServerResource = mapper.Map<PostgresServerResourceDto>(postgresServerResource);
 
         return mappedPostgresServerResource;
     }

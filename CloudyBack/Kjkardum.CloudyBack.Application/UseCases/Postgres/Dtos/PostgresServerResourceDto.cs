@@ -4,5 +4,5 @@ namespace Kjkardum.CloudyBack.Application.UseCases.Postgres.Dtos;
 
 public class PostgresServerResourceDto : ResourceGroupedBaseResourceDto
 {
-    public List<PostgresDatabaseResourceDto> PostgresDatabaseResources { get; set; }
+    public List<PostgresDatabaseSimpleResourceDto> PostgresDatabaseResources { get; set; }
 }

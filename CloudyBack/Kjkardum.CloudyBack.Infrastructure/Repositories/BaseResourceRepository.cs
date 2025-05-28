@@ -38,12 +38,13 @@ public class BaseResourceRepository(ApplicationDbContext dbContext): IBaseResour
             };
         }
 
+        var total = await query.CountAsync();
+
         query = query
             .Skip((pagination.Page - 1) * pagination.PageSize)
             .Take(pagination.PageSize);
 
         var baseResource = await query.ToListAsync();
-        var total = await query.CountAsync();
         return (baseResource, total);
     }
 
@@ -57,13 +58,15 @@ public class BaseResourceRepository(ApplicationDbContext dbContext): IBaseResour
             query = query.Where(x => x.ResourceId == resourceId);
         }
 
+        var total = await query.CountAsync();
+
+        query = query.OrderByDescending(t => t.Timestamp);
+
         query = query
             .Skip((pagination.Page - 1) * pagination.PageSize)
             .Take(pagination.PageSize);
 
-        query = query.OrderByDescending(t => t.Timestamp);
         var auditLogEntries = await query.ToListAsync();
-        var total = await query.CountAsync();
         return (auditLogEntries, total);
     }
 

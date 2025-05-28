@@ -299,14 +299,14 @@
           "xunit.extensibility.core": "[2.8.0]"
         }
       },
-      "Kjkardum.CloudyBack.application": {
+      "kjkardum.cloudyback.application": {
         "type": "Project",
         "dependencies": {
           "ApiExceptions": "[1.2.3, )",
           "AutoMapper": "[13.0.1, )",
-          "Kjkardum.CloudyBack.Domain": "[1.0.0, )",
           "FluentValidation": "[11.9.1, )",
           "FluentValidation.DependencyInjectionExtensions": "[11.9.1, )",
+          "Kjkardum.CloudyBack.Domain": "[1.0.0, )",
           "MediatR": "[12.2.0, )",
           "Microsoft.Extensions.Configuration": "[8.0.0, )",
           "Microsoft.Extensions.Configuration.Abstractions": "[8.0.0, )",
@@ -315,7 +315,7 @@
           "Microsoft.Extensions.Options.ConfigurationExtensions": "[8.0.0, )"
         }
       },
-      "Kjkardum.CloudyBack.domain": {
+      "kjkardum.cloudyback.domain": {
         "type": "Project"
       }
     }

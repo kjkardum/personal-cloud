@@ -168,6 +168,93 @@ paths:
             text/json:
               schema:
                 $ref: '#/components/schemas/PrometheusResultDto'
+  '/api/resource/BaseResource/{resourceId}/loki':
+    post:
+      tags:
+        - BaseResource
+      parameters:
+        - name: resourceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryLokiQuery'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/QueryLokiQuery'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/QueryLokiQuery'
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/PrometheusResultDto'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrometheusResultDto'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/PrometheusResultDto'
+  '/api/resource/KafkaClusterResource/{serverId}':
+    get:
+      tags:
+        - KafkaClusterResource
+      parameters:
+        - name: serverId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/KafkaClusterResourceDto'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KafkaClusterResourceDto'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/KafkaClusterResourceDto'
+  /api/resource/KafkaClusterResource:
+    post:
+      tags:
+        - KafkaClusterResource
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateKafkaClusterCommand'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/CreateKafkaClusterCommand'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/CreateKafkaClusterCommand'
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/KafkaClusterResourceDto'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KafkaClusterResourceDto'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/KafkaClusterResourceDto'
   /api/resource/PostgresServerResource:
     get:
       tags:
@@ -268,6 +355,65 @@ paths:
       responses:
         '200':
           description: OK
+  '/api/resource/PostgresServerResource/database/{databaseId}':
+    get:
+      tags:
+        - PostgresServerResource
+      parameters:
+        - name: databaseId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/PostgresDatabaseResourceDto'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostgresDatabaseResourceDto'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/PostgresDatabaseResourceDto'
+  '/database/{databaseId}/runQuery':
+    post:
+      tags:
+        - PostgresServerResource
+      parameters:
+        - name: databaseId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RunPostgresDatabaseQueryCommand'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/RunPostgresDatabaseQueryCommand'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/RunPostgresDatabaseQueryCommand'
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/PostgresQueryResultDto'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostgresQueryResultDto'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/PostgresQueryResultDto'
   '/api/resource/PostgresServerResource/{serverId}/database':
     post:
       tags:
@@ -296,13 +442,13 @@ paths:
           content:
             text/plain:
               schema:
-                $ref: '#/components/schemas/PostgresDatabaseResourceDto'
+                $ref: '#/components/schemas/PostgresDatabaseSimpleResourceDto'
             application/json:
               schema:
-                $ref: '#/components/schemas/PostgresDatabaseResourceDto'
+                $ref: '#/components/schemas/PostgresDatabaseSimpleResourceDto'
             text/json:
               schema:
-                $ref: '#/components/schemas/PostgresDatabaseResourceDto'
+                $ref: '#/components/schemas/PostgresDatabaseSimpleResourceDto'
   '/api/resource/PostgresServerResource/{serverId}/containerAction':
     post:
       tags:
@@ -342,13 +488,13 @@ paths:
           content:
             text/plain:
               schema:
-                $ref: '#/components/schemas/ResourceGroupDto'
+                $ref: '#/components/schemas/ResourceGroupSimpleDto'
             application/json:
               schema:
-                $ref: '#/components/schemas/ResourceGroupDto'
+                $ref: '#/components/schemas/ResourceGroupSimpleDto'
             text/json:
               schema:
-                $ref: '#/components/schemas/ResourceGroupDto'
+                $ref: '#/components/schemas/ResourceGroupSimpleDto'
     get:
       tags:
         - ResourceGroup
@@ -377,13 +523,37 @@ paths:
           content:
             text/plain:
               schema:
-                $ref: '#/components/schemas/ResourceGroupDtoPaginatedResponse'
+                $ref: '#/components/schemas/ResourceGroupSimpleDtoPaginatedResponse'
             application/json:
               schema:
-                $ref: '#/components/schemas/ResourceGroupDtoPaginatedResponse'
+                $ref: '#/components/schemas/ResourceGroupSimpleDtoPaginatedResponse'
             text/json:
               schema:
-                $ref: '#/components/schemas/ResourceGroupDtoPaginatedResponse'
+                $ref: '#/components/schemas/ResourceGroupSimpleDtoPaginatedResponse'
+  '/api/resource/ResourceGroup/{id}':
+    get:
+      tags:
+        - ResourceGroup
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ResourceGroupDto'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceGroupDto'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ResourceGroupDto'
   '/api/resource/ResourceGroupedResource/{resourceId}':
     get:
       tags:
@@ -624,6 +794,22 @@ components:
           type: string
           format: date-time
       additionalProperties: false
+    CreateKafkaClusterCommand:
+      required:
+        - resourceGroupId
+        - serverName
+      type: object
+      properties:
+        resourceGroupId:
+          type: string
+          format: uuid
+        serverName:
+          type: string
+        serverPort:
+          type: integer
+          format: int32
+          nullable: true
+      additionalProperties: false
     CreatePostgresDatabaseCommand:
       required:
         - adminPassword
@@ -662,6 +848,32 @@ components:
         name:
           type: string
       additionalProperties: false
+    KafkaClusterResourceDto:
+      required:
+        - id
+        - name
+        - resourceType
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        resourceType:
+          type: string
+        resourceGroupId:
+          type: string
+          format: uuid
+        resourceGroupName:
+          type: string
+      additionalProperties: false
     LoggedInUserDto:
       type: object
       properties:
@@ -693,10 +905,54 @@ components:
           format: date-time
         resourceType:
           type: string
+        resourceGroupId:
+          type: string
+          format: uuid
+        resourceGroupName:
+          type: string
         databaseName:
           type: string
         adminUsername:
           type: string
+        serverName:
+          type: string
+        serverId:
+          type: string
+      additionalProperties: false
+    PostgresDatabaseSimpleResourceDto:
+      required:
+        - id
+        - name
+        - resourceType
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        resourceType:
+          type: string
+        databaseName:
+          type: string
+        adminUsername:
+          type: string
+      additionalProperties: false
+    PostgresQueryResultDto:
+      type: object
+      properties:
+        csvResponse:
+          type: array
+          items:
+            type: array
+            items:
+              type: string
       additionalProperties: false
     PostgresServerResourceDto:
       required:
@@ -726,7 +982,7 @@ components:
         postgresDatabaseResources:
           type: array
           items:
-            $ref: '#/components/schemas/PostgresDatabaseResourceDto'
+            $ref: '#/components/schemas/PostgresDatabaseSimpleResourceDto'
       additionalProperties: false
     PostgresServerResourceDtoPaginatedResponse:
       required:
@@ -747,9 +1003,17 @@ components:
           items:
             $ref: '#/components/schemas/PostgresServerResourceDto'
       additionalProperties: false
+    PredefinedLokiQuery:
+      enum:
+        - Demo
+      type: string
     PredefinedPrometheusQuery:
       enum:
         - PostgresProcessesCount
+        - PostgresEntriesInserted
+        - PostgresEntriesReturned
+        - GeneralCPULoad
+        - GeneralMemoryUsage
       type: string
     ProblemDetails:
       type: object
@@ -796,11 +1060,37 @@ components:
           type: object
           additionalProperties:
             type: string
+        stream:
+          type: object
+          additionalProperties:
+            type: string
         values:
           type: array
           items:
             type: array
             items: { }
+      additionalProperties: false
+    QueryLokiQuery:
+      type: object
+      properties:
+        query:
+          $ref: '#/components/schemas/PredefinedLokiQuery'
+        start:
+          type: string
+          format: date-time
+        end:
+          type: string
+          format: date-time
+        step:
+          type: string
+          nullable: true
+        timeout:
+          type: string
+          nullable: true
+        limit:
+          type: integer
+          format: int32
+          nullable: true
       additionalProperties: false
     QueryPrometheusQuery:
       type: object
@@ -841,8 +1131,30 @@ components:
         updatedAt:
           type: string
           format: date-time
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/BaseResourceDto'
       additionalProperties: false
-    ResourceGroupDtoPaginatedResponse:
+    ResourceGroupSimpleDto:
+      required:
+        - id
+        - name
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      additionalProperties: false
+    ResourceGroupSimpleDtoPaginatedResponse:
       required:
         - data
       type: object
@@ -859,7 +1171,7 @@ components:
         data:
           type: array
           items:
-            $ref: '#/components/schemas/ResourceGroupDto'
+            $ref: '#/components/schemas/ResourceGroupSimpleDto'
       additionalProperties: false
     ResourceGroupedBaseResourceDto:
       required:
@@ -885,6 +1197,12 @@ components:
           type: string
           format: uuid
         resourceGroupName:
+          type: string
+      additionalProperties: false
+    RunPostgresDatabaseQueryCommand:
+      type: object
+      properties:
+        query:
           type: string
       additionalProperties: false
     UserLoginCommand:

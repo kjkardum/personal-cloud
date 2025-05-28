@@ -46,6 +46,12 @@
       <None Update="Containerization\Clients\Orchestration\FileTemplates\web_template.yml">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+      <None Update="Containerization\Clients\Orchestration\FileTemplates\loki-config.yaml">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Containerization\Clients\Kafka\FileTemplates\collector.yml">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>

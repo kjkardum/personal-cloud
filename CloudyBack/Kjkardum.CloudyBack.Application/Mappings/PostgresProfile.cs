@@ -9,6 +9,9 @@ public class PostgresProfile: Profile
     public PostgresProfile()
     {
         CreateMap<PostgresServerResource, PostgresServerResourceDto>();
-        CreateMap<PostgresDatabaseResource, PostgresDatabaseResourceDto>();
+        CreateMap<PostgresDatabaseResource, PostgresDatabaseSimpleResourceDto>();
+        CreateMap<PostgresDatabaseResource, PostgresDatabaseResourceDto>()
+            .ForMember(dest => dest.ServerId, opt => opt.MapFrom(src => src.PostgresDatabaseServerResource!.Id))
+            .ForMember(dest => dest.ServerName, opt => opt.MapFrom(src => src.PostgresDatabaseServerResource!.Name));
     }
 }

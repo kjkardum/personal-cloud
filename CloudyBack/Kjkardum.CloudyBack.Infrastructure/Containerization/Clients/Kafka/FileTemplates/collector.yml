@@ -1,0 +1,42 @@
+receivers:
+  kafkametrics:
+    cluster_alias: "${KAFKA_CLUSTER_NAME}"
+    brokers: ["${KAFKA_BOOTSTRAP_SERVERS}"]
+    scrapers:
+      - brokers
+      - topics
+      - consumers
+    collection_interval: 30s
+    tls:
+      insecure: true
+    auth:
+      sasl:
+        mechanism: "PLAIN"
+        username: "${KAFKA_SASL_USERNAME}"
+        password: "${KAFKA_SASL_PASSWORD}"
+
+processors:
+  batch:
+  resource:
+    attributes:
+      - key: service.name
+        value: "${KAFKA_CLUSTER_NAME}"
+        action: upsert
+
+exporters:
+  debug:
+    verbosity: detailed
+  prometheus:
+    endpoint: "0.0.0.0:8889"
+  otlphttp:
+    endpoint: "${OTLP_ENDPOINT}"
+
+service:
+  telemetry:
+    logs:
+      level: "debug"
+  pipelines:
+    metrics:
+      receivers: [kafkametrics]
+      processors: [batch]
+      exporters: [prometheus]

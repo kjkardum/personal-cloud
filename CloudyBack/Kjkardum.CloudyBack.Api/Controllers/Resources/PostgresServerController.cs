@@ -4,9 +4,11 @@ using Kjkardum.CloudyBack.Application.UseCases.BaseResource.Queries.GetPaginated
 using Kjkardum.CloudyBack.Application.UseCases.Postgres.Commands.CreateDatabase;
 using Kjkardum.CloudyBack.Application.UseCases.Postgres.Commands.CreateServer;
 using Kjkardum.CloudyBack.Application.UseCases.Postgres.Commands.DeleteServer;
+using Kjkardum.CloudyBack.Application.UseCases.Postgres.Commands.RunDatabaseQuery;
 using Kjkardum.CloudyBack.Application.UseCases.Postgres.Commands.ServerContainerAction;
 using Kjkardum.CloudyBack.Application.UseCases.Postgres.Dtos;
 using Kjkardum.CloudyBack.Application.UseCases.Postgres.Queries.GetById;
+using Kjkardum.CloudyBack.Application.UseCases.Postgres.Queries.GetDatabaseById;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -35,6 +37,28 @@ public class PostgresServerResourceController(IMediator mediator): ControllerBas
         return Ok(result);
     }
 
+    [HttpGet("database/{databaseId:guid}")]
+    public async Task<ActionResult<PostgresDatabaseResourceDto>> GetDatabaseById(
+        Guid databaseId,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await mediator.Send(
+            new GetSinglePostgresDatabaseResourceQuery { Id = databaseId },
+            cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpPost("/database/{databaseId:guid}/runQuery")]
+    public async Task<ActionResult<PostgresQueryResultDto>> RunDatabaseQuery(
+        Guid databaseId,
+        RunPostgresDatabaseQueryCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        command.DatabaseId = databaseId;
+        var result = await mediator.Send(command, cancellationToken);
+        return Ok(result);
+    }
+
     [HttpPost]
     public async Task<ActionResult<PostgresServerResourceDto>> Create(
         CreatePostgresServerCommand request,
@@ -45,7 +69,7 @@ public class PostgresServerResourceController(IMediator mediator): ControllerBas
     }
 
     [HttpPost("{serverId:guid}/database")]
-    public async Task<ActionResult<PostgresDatabaseResourceDto>> CreateDatabase(
+    public async Task<ActionResult<PostgresDatabaseSimpleResourceDto>> CreateDatabase(
         Guid serverId,
         [FromBody] CreatePostgresDatabaseCommand request,
         CancellationToken cancellationToken = default)

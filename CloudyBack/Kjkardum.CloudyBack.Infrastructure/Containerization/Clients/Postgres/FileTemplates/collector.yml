@@ -3,22 +3,47 @@ receivers:
     endpoint: "${DATA_SOURCE_URI}"
     username: "${DATA_SOURCE_USER}"
     password: "${DATA_SOURCE_PASS}"
-    collection_interval: 5s
+    exclude_databases:
+      - "postgres"
+      - "CloudyAdmin"
+    collection_interval: 30s
     tls:
       insecure: true
     query_sample_collection:
       enabled: true
     top_query_collection:
       enabled: true
+      top_n_query: 10
+      max_rows_per_query: 10
+    metrics:
+      postgresql.tup_inserted:
+        enabled: true
+      postgresql.tup_returned:
+        enabled: true
+      postgresql.tup_updated:
+        enabled: true
+      postgresql.tup_deleted:
+        enabled: true
+    connection_pool:
+      max_idle_time: 45s
+      max_lifetime: 1m
+      max_idle: 5
+      max_open: 10
 
 processors:
   batch:
-
+  resource:
+    attributes:
+      - key: service.name
+        value: "${DATA_SOURCE_NAME}"
+        action: upsert
 exporters:
+  debug:
+    verbosity: detailed
   prometheus:
     endpoint: "0.0.0.0:8889"
-  debug:
-
+  otlphttp:
+    endpoint: "${OTLP_ENDPOINT}"
 
 service:
   telemetry:
@@ -27,8 +52,8 @@ service:
   pipelines:
     logs:
       receivers: [postgresql]
-      processors: [batch]
-      exporters: [debug]
+      processors: [batch, resource]
+      exporters: [otlphttp, debug]
     metrics:
       receivers: [postgresql]
       processors: [batch]

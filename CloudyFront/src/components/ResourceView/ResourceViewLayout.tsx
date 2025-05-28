@@ -31,7 +31,7 @@ export const ResourceViewLayout  = ({
             {subtitle && <Text c="darkgray">{subtitle}</Text>}
           </Box>
           <Divider />
-          <Flex direction="row" style={{height:'100%'}} w="100%">
+          <Flex direction="row" mih={0} flex={1} w="100%">
             <Box w={230}>
               {Children.map(children, (child, index) => (
                 <NavLink
@@ -47,7 +47,7 @@ export const ResourceViewLayout  = ({
               ))}
             </Box>
             <Divider orientation='vertical' />
-            <Box flex={1}>
+            <Box flex={1} miw={0} style={{overflowX: 'hidden'}}>
               {Array.isArray(children) && children.length > 1 ? children[activeChild] : children}
             </Box>
           </Flex>

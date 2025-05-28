@@ -8,6 +8,7 @@ public class ResourceGroupProfile: Profile
 {
     public ResourceGroupProfile()
     {
+        CreateMap<ResourceGroup, ResourceGroupSimpleDto>();
         CreateMap<ResourceGroup, ResourceGroupDto>();
     }
 }

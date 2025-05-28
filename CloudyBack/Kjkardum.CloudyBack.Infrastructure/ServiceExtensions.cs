@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Kjkardum.CloudyBack.Application.Repositories;
 using Kjkardum.CloudyBack.Application.Services;
 using Kjkardum.CloudyBack.Infrastructure.Containerization.Clients.General;
+using Kjkardum.CloudyBack.Infrastructure.Containerization.Clients.Kafka;
 using Kjkardum.CloudyBack.Infrastructure.Containerization.Clients.Orchestration;
 using Kjkardum.CloudyBack.Infrastructure.Containerization.Clients.Postgres;
 using Kjkardum.CloudyBack.Infrastructure.Identity;
@@ -36,9 +37,11 @@ public static class ServiceExtensions
 
         services.AddSingleton<DockerClient>(_ => new DockerClientConfiguration().CreateClient());
         services.AddTransient<IGeneralContainerStatusClient, GeneralContainerStatusClient>();
-        services.AddTransient<IPrometheusClient, PrometheusClient>();
+        services.AddTransient<IObservabilityClient, ObservabilityClient>();
         services.AddHttpClient("Prometheus", c => c.BaseAddress = new Uri("http://localhost:9090"));
+        services.AddHttpClient("Loki", c => c.BaseAddress = new Uri("http://localhost:3100/loki/"));
         services.AddTransient<IPostgresServerClient, PostgresServerClient>();
+        services.AddTransient<IKafkaClient, KafkaClient>();
 
         services.AddTransient<ISignInService, SignInService>();
 
@@ -48,6 +51,7 @@ public static class ServiceExtensions
         services.AddTransient<IResourceGroupRepository, ResourceGroupRepository>();
         services.AddTransient<IPostgresServerResourceRepository, PostgresServerResourceRepository>();
         services.AddTransient<IPostgresDatabaseResourceRepository, PostgresDatabaseResourceRepository>();
+        services.AddTransient<IKafkaRepository, KafkaRepository>();
         return services;
     }
 }

@@ -7,4 +7,5 @@ public interface IPostgresServerClient
     Task StartServerAsync(Guid requestId);
     Task StopServerAsync(Guid requestId);
     Task RestartServerAsync(Guid requestId);
+    Task<string> RunQueryAsync(Guid serverId, string saUsername, string saPassword, string database, string impersonateUser, string requestQuery);
 }

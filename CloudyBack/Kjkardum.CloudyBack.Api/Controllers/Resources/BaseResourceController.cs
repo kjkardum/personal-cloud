@@ -4,6 +4,7 @@ using Kjkardum.CloudyBack.Application.UseCases.BaseResource.Dtos;
 using Kjkardum.CloudyBack.Application.UseCases.BaseResource.Queries.GetAuditLog;
 using Kjkardum.CloudyBack.Application.UseCases.BaseResource.Queries.GetContainer;
 using Kjkardum.CloudyBack.Application.UseCases.BaseResource.Queries.GetPaginated;
+using Kjkardum.CloudyBack.Application.UseCases.BaseResource.Queries.QueryLoki;
 using Kjkardum.CloudyBack.Application.UseCases.BaseResource.Queries.QueryPrometheus;
 using Kjkardum.CloudyBack.Domain.Entities;
 using MediatR;
@@ -47,6 +48,17 @@ public class BaseResourceController(IMediator mediator): ControllerBase
     public async Task<ActionResult<PrometheusResultDto>> GetPrometheusMetrics(
         Guid resourceId,
         [FromBody] QueryPrometheusQuery query,
+        CancellationToken cancellationToken = default)
+    {
+        query.ResourceId = resourceId;
+        var result = await mediator.Send(query, cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpPost("{resourceId:guid}/loki")]
+    public async Task<ActionResult<PrometheusResultDto>> GetLokiMetrics(
+        Guid resourceId,
+        [FromBody] QueryLokiQuery query,
         CancellationToken cancellationToken = default)
     {
         query.ResourceId = resourceId;

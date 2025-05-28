@@ -12,9 +12,9 @@ public class CreatePostgresDatabaseCommandHandler(
     IPostgresDatabaseResourceRepository databaseRepository,
     IBaseResourceRepository baseResourceRepository,
     IMapper mapper,
-    IPostgresServerClient client) : IRequestHandler<CreatePostgresDatabaseCommand, PostgresDatabaseResourceDto>
+    IPostgresServerClient client) : IRequestHandler<CreatePostgresDatabaseCommand, PostgresDatabaseSimpleResourceDto>
 {
-    public async Task<PostgresDatabaseResourceDto> Handle(
+    public async Task<PostgresDatabaseSimpleResourceDto> Handle(
         CreatePostgresDatabaseCommand request,
         CancellationToken cancellationToken)
     {
@@ -57,6 +57,6 @@ public class CreatePostgresDatabaseCommandHandler(
                 ResourceId = databaseResource.Id
             });
 
-        return mapper.Map<PostgresDatabaseResourceDto>(databaseResource);
+        return mapper.Map<PostgresDatabaseSimpleResourceDto>(databaseResource);
     }
 }

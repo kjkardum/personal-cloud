@@ -136,6 +136,24 @@ namespace Kjkardum.CloudyBack.Infrastructure.Persistence.Migrations
                     b.ToTable((string)null);
                 });
 
+            modelBuilder.Entity("Kjkardum.CloudyBack.Domain.Entities.KafkaClusterResource", b =>
+                {
+                    b.HasBaseType("Kjkardum.CloudyBack.Domain.Entities.ResourceGroupedBaseResource");
+
+                    b.Property<int>("Port")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SaPassword")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SaUsername")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.ToTable("KafkaClusterResources");
+                });
+
             modelBuilder.Entity("Kjkardum.CloudyBack.Domain.Entities.PostgresDatabaseResource", b =>
                 {
                     b.HasBaseType("Kjkardum.CloudyBack.Domain.Entities.ResourceGroupedBaseResource");

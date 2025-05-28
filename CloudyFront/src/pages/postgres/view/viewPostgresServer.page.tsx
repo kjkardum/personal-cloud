@@ -1,24 +1,31 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { IconPlayerPlayFilled, IconPlayerStopFilled, IconRestore, IconTrash } from '@tabler/icons-react';
 import { DataTable } from 'mantine-datatable';
+import { Line } from 'react-chartjs-2';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { Box, Button, Divider, Modal, NavLink, Stack, Table, Text, Title, useMantineTheme } from '@mantine/core';
+import {
+  Anchor,
+  Box,
+  Button,
+  Divider,
+  Modal,
+  NavLink,
+  SimpleGrid,
+  Stack,
+  Table,
+  Text,
+  Title,
+  useMantineTheme,
+} from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
+import { MetricChart } from '@/components/Observability/MetricChart';
 import { ResourceViewLayout, ResourceViewPage } from '@/components/ResourceView/ResourceViewLayout';
 import { ResourceViewToolbar, ResourceViewToolbarItem } from '@/components/ResourceView/ResourceViewToolbar';
-import { CloudyIconDatabase, defaultIconStyle } from '@/icons/Resources';
-
-import {
-  PrometheusResultDto,
-  useDeleteApiResourcePostgresServerResourceByServerIdMutation,
-  useGetApiResourceBaseResourceByResourceIdAuditLogQuery,
-  useGetApiResourceBaseResourceByResourceIdContainerQuery,
-  useGetApiResourcePostgresServerResourceByServerIdQuery,
-  useGetApiResourceResourceGroupedResourceByResourceIdQuery,
-  usePostApiResourceBaseResourceByResourceIdPrometheusMutation,
-  usePostApiResourcePostgresServerResourceByServerIdContainerActionMutation,
-} from '@/services/rtk/cloudyApi';
-import { Line } from 'react-chartjs-2';
+import { CloudyIconDatabase, CloudyIconDatabaseServer, defaultIconStyle } from '@/icons/Resources';
+import { PredefinedLokiQuery, PredefinedPrometheusQuery, PrometheusResultDto, useDeleteApiResourcePostgresServerResourceByServerIdMutation, useGetApiResourceBaseResourceByResourceIdAuditLogQuery, useGetApiResourceBaseResourceByResourceIdContainerQuery, useGetApiResourcePostgresServerResourceByServerIdQuery, usePostApiResourceBaseResourceByResourceIdLokiMutation, usePostApiResourceBaseResourceByResourceIdPrometheusMutation, usePostApiResourcePostgresServerResourceByServerIdContainerActionMutation } from '@/services/rtk/cloudyApi';
+import { viewResourceOfType } from '@/util/navigation';
+import { ResourceViewSummary } from '@/components/ResourceView/ResourceViewSummary';
+import { ResourceViewAuditLog } from '@/components/ResourceView/ResourceViewAuditLog';
 
 export const ViewPostgresServerPage = () => {
   const navigate = useNavigate();
@@ -31,47 +38,21 @@ export const ViewPostgresServerPage = () => {
   const { data: resourceBaseData } = useGetApiResourcePostgresServerResourceByServerIdQuery({
     serverId: resourceId || '',
   });
-  const [getMetrics] = usePostApiResourceBaseResourceByResourceIdPrometheusMutation();
+  const [getLogs] = usePostApiResourceBaseResourceByResourceIdLokiMutation();
   const [metricsData, setMetricsData] = useState<PrometheusResultDto | undefined>(undefined);
   useEffect(() => {
     if (!resourceId) return;
     const now = new Date();
-    const hourAgo = new Date(now.getTime() - 60 * 60 * 1000);
-    getMetrics({resourceId, queryPrometheusQuery: {
-      query: "PostgresProcessesCount",
+    const hourAgo = new Date(now.getTime() - 8 * 60 * 60 * 1000);
+    getLogs({resourceId, queryLokiQuery: {
+      query: PredefinedLokiQuery.Demo,
       start: hourAgo.toISOString(),
       end: now.toISOString(),
-      step: "15s",
+      step: undefined,
       }}).unwrap().then((metrics) => {
       setMetricsData(metrics);
     });
   }, [resourceId]);
-  const customPrometheusReq = useCallback((start, end, step) => {
-    return getMetrics({
-      resourceId: resourceId || '',
-      queryPrometheusQuery: {
-        query: "PostgresProcessesCount",
-        start, end, step: String(step)
-      }
-    }).unwrap().then((metrics) => metrics.data)
-  }, [resourceId, getMetrics]);
-  const memoedOptionsPrometheusChart = useMemo(()=>({
-    plugins: {
-      'datasource-prometheus': {
-        query: customPrometheusReq,
-        timeRange: {
-          type: 'relative',
-          start: -1 * 60 * 60 * 1000, // 1h ago
-          end: 0,   // now
-        },
-      },
-    }}), [customPrometheusReq]);
-  const memoedDummyDataPrometheusChart = useMemo(()=>({labels: [], datasets: []}), []);
-  const [auditPage, setAuditPage] = useState(1);
-  const { data: resourceAuditLogPaginated } = useGetApiResourceBaseResourceByResourceIdAuditLogQuery({
-    resourceId: resourceId || '',
-    page: auditPage,
-  });
 
   const [action] = usePostApiResourcePostgresServerResourceByServerIdContainerActionMutation();
   const [deleteResource] = useDeleteApiResourcePostgresServerResourceByServerIdMutation();
@@ -91,11 +72,11 @@ export const ViewPostgresServerPage = () => {
     <ResourceViewLayout
       title={
         <>
-          <CloudyIconDatabase style={{ ...defaultIconStyle, marginRight: '4px' }} />
+          <CloudyIconDatabaseServer style={{ ...defaultIconStyle, marginRight: '4px' }} />
           {resourceBaseData?.name || 'Loading'}
         </>
       }
-      subtitle={`in ${resourceBaseData?.resourceGroupName}`}
+      subtitle={<>in <Anchor component={Link} to={viewResourceOfType('ResourceGroup', resourceBaseData?.resourceGroupId || '')}>{resourceBaseData?.resourceGroupName}</Anchor></>}
     >
       <ResourceViewPage title="Overview">
         <Modal opened={openedDelete} onClose={closeDelete} title="Delete resource">
@@ -142,45 +123,40 @@ export const ViewPostgresServerPage = () => {
           />
         </ResourceViewToolbar>
         <Stack p='sm'>
-          <Box>
-            <Title order={3}>General information</Title>
-            <Table withRowBorders={false}>
-              <tbody>
-                <tr>
-                  <td>Resource group</td>
-                  <td>{resourceBaseData?.resourceGroupName}</td>
-                </tr>
-                <tr>
-                  <td>Status</td>
-                  <td>{containerStatus?.stateRunning ? 'Active' : 'Stopped'}</td>
-                </tr>
-                <tr>
-                  <td>Server ID</td>
-                  <td>{resourceBaseData?.id}</td>
-                </tr>
-                <tr>
-                  <td>Server name</td>
-                  <td>{resourceBaseData?.name}</td>
-                </tr>
-                <tr>
-                  <td>Networking</td>
-                  <td><NavLink component={Link} replace={true} to={`/postgres/view/server/${resourceBaseData?.id}?rpi=4`} label='Go to configuration' p={0} c={theme.colors[theme.primaryColor][4]}/></td>
-                </tr>
-                <tr>
-                  <td>Databases</td>
-                  <td><NavLink component={Link} replace={true} to={`/postgres/view/server/${resourceBaseData?.id}?rpi=1`} label={`${resourceBaseData?.postgresDatabaseResources.length ?? 0} databases created`} p={0} c={theme.colors[theme.primaryColor][4]}/></td>
-                </tr>
-                <tr>
-                  <td>Created at</td>
-                  <td>{new Date(resourceBaseData?.createdAt).toLocaleString()}</td>
-                </tr>
-              </tbody>
-            </Table>
-          </Box>
+          <ResourceViewSummary items={[
+            { name: 'Resource group', value: { text: resourceBaseData?.resourceGroupName } },
+            { name: 'Status', value: { text: containerStatus?.stateRunning ? 'Active' : 'Stopped' } },
+            { name: 'Server ID', value: { text: resourceBaseData?.id } },
+            { name: 'Server name', value: { text: resourceBaseData?.name } },
+            { name: 'Networking', value: { text: 'Go to configuration', link: `${viewResourceOfType('PostgresServerResource', resourceBaseData?.id)}?rpi=4` } },
+            { name: 'Databases', value: { text: `${resourceBaseData?.postgresDatabaseResources?.length ?? 0} databases created`, link: `${viewResourceOfType('PostgresServerResource', resourceBaseData?.id)}?rpi=1` } },
+            { name: 'Created at', value: { text: new Date(resourceBaseData?.createdAt).toLocaleString() } },
+          ]} />
           <Divider />
           <Box>
             <Title order={3}>System health</Title>
-            <Line data={memoedDummyDataPrometheusChart} options={memoedOptionsPrometheusChart} />
+            <SimpleGrid
+              cols={{ base: 1, xl: 2 }}
+              spacing={{ base: 10, xl: 'xl' }}
+              verticalSpacing={{ base: 'md', xl: 'xl' }}
+            >
+              <div>
+                SQL Insertions count (per minute):
+                <MetricChart resourceId={resourceId || ''} query={PredefinedPrometheusQuery.PostgresEntriesInserted} range={{}} />
+              </div>
+              <div>
+                SQL Selection count (per minute):
+                <MetricChart resourceId={resourceId || ''} query={PredefinedPrometheusQuery.PostgresEntriesReturned} range={{}} />
+              </div>
+              <div>
+                CPU load (per minute):
+                <MetricChart resourceId={resourceId || ''} query={PredefinedPrometheusQuery.GeneralCpuLoad} range={{}} />
+              </div>
+              <div>
+                Memory usage (MB):
+                <MetricChart resourceId={resourceId || ''} query={PredefinedPrometheusQuery.GeneralMemoryUsage} range={{}} />
+              </div>
+            </SimpleGrid>
             <pre>{JSON.stringify(metricsData, null, 2)}</pre>
           </Box>
         </Stack>
@@ -205,26 +181,11 @@ export const ViewPostgresServerPage = () => {
             { accessor: 'createdAt', title: 'Created at', render: ({createdAt: date}) => new Date(date.endsWith('Z') ? date : date + 'Z').toLocaleString() },
             { accessor: 'updatedAt', title: 'Updated at', render: ({updatedAt: date}) => new Date(date.endsWith('Z') ? date : date + 'Z').toLocaleString() },
           ]}
-          onRowClick={({ record }) => alert(JSON.stringify(record))}
+          onRowClick={({ record }) => navigate(viewResourceOfType('PostgresDatabaseResource', record.id))}
         />
       </ResourceViewPage>
       <ResourceViewPage title="Audit log">
-        <DataTable
-          borderRadius="sm"
-          withColumnBorders
-          striped
-          highlightOnHover
-          records={resourceAuditLogPaginated?.data || []}
-          totalRecords={resourceAuditLogPaginated?.totalCount || 0}
-          recordsPerPage={resourceAuditLogPaginated?.pageSize || 0}
-          page={auditPage}
-          onPageChange={(page) => setAuditPage(page)}
-          columns={[
-            { accessor: 'actionDisplayText', title: 'Action' },
-            { accessor: 'timestamp', title: 'Timestamp', render: ({timestamp: date}) => new Date(date.endsWith('Z') ? date : date + 'Z').toLocaleString() },
-          ]}
-          onRowClick={({ record }) => alert(JSON.stringify(record))}
-        />
+        <ResourceViewAuditLog resourceBaseData={resourceBaseData} />
       </ResourceViewPage>
       <ResourceViewPage title="Backup">Soon</ResourceViewPage>
       <ResourceViewPage title="Networking">Soon</ResourceViewPage>

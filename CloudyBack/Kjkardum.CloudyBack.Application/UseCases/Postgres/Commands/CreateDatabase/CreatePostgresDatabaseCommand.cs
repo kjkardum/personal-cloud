@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace Kjkardum.CloudyBack.Application.UseCases.Postgres.Commands.CreateDatabase;
 
-public class CreatePostgresDatabaseCommand: IRequest<PostgresDatabaseResourceDto>
+public class CreatePostgresDatabaseCommand: IRequest<PostgresDatabaseSimpleResourceDto>
 {
     [JsonIgnore] public Guid ServerId { get; set; }
     public required string DatabaseName { get; set; }

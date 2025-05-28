@@ -1,3 +1,4 @@
+using CloudyPoC;
 using Docker.DotNet;
 using Docker.DotNet.Models;
 
@@ -98,6 +99,13 @@ app.MapGet("/postgres/read-logs", async () =>
     });
     using var reader = new StreamReader(logs);
     return await reader.ReadToEndAsync();
+});
+
+app.MapGet("/network/next-subnet", async () =>
+{
+    var allocator = new DockerSubnetAllocator(dockerClient);
+    var nextSubnet = await allocator.GetNextAvailableSubnet();
+    return nextSubnet?.ToString() ?? "No available subnet found";
 });
 
 app.Run();

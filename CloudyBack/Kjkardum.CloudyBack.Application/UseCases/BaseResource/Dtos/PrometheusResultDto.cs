@@ -14,5 +14,6 @@ public class PrometheusDataDto
 public class PrometheusResultItemDto
 {
     public Dictionary<string, string> metric { get; set; } = new();
+    public Dictionary<string, string> stream { get; set; } = new();
     public List<List<object>> values { get; set; } = new();
 }

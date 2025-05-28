@@ -12,7 +12,12 @@ public class PostgresServerClient(DockerClient client, ILogger<PostgresServerCli
     private const string ImageName = "postgres";
     private const string PostgresExporterImageName = "otel/opentelemetry-collector-contrib";
 
-    public async Task CreateServerAsync(Guid id, int serverPort, string saUsername, string saPassword, string serverName)
+    public async Task CreateServerAsync(
+        Guid id,
+        int serverPort,
+        string saUsername,
+        string saPassword,
+        string serverName)
     {
         await CreateCommonVolume(id);
         await CreateCommonNetwork(id);
@@ -35,18 +40,21 @@ public class PostgresServerClient(DockerClient client, ILogger<PostgresServerCli
             logger.LogInformation("Network already exists");
             return;
         }
+
         await client.Networks.CreateNetworkAsync(new NetworksCreateParameters
             {
-                Name = networkName,
-                Driver = "bridge"
+                Name = networkName, Driver = "bridge"
             });
         logger.LogInformation("Network created");
     }
 
     private async Task CreateSidecarTelemetryCollector(Guid id, string saUsername, string saPassword, string serverName)
     {
-        var currentDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-        var collectorYamlTemplate = Path.Combine(currentDirectory, "Containerization/Clients/Postgres/FileTemplates/collector.yml");
+        var currentDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ??
+                               throw new InvalidOperationException("Could not determine the current directory.");
+        var collectorYamlTemplate = Path.Combine(
+            currentDirectory,
+            "Containerization/Clients/Postgres/FileTemplates/collector.yml");
         await client.Images.CreateImageAsync(
             new ImagesCreateParameters { FromImage = PostgresExporterImageName, Tag = "latest" },
             null,
@@ -56,24 +64,24 @@ public class PostgresServerClient(DockerClient client, ILogger<PostgresServerCli
             {
                 Name = DockerNamingHelper.GetSidecarTelemetryName(id),
                 Image = PostgresExporterImageName,
-                NetworkingConfig = new NetworkingConfig()
-                {
-                    EndpointsConfig = new Dictionary<string, EndpointSettings>()
+                NetworkingConfig =
+                    new NetworkingConfig()
                     {
-                        {DockerNamingHelper.GetNetworkName(id), new EndpointSettings()},
-                        {DockerNamingHelper.ObservabilityNetworkName, new EndpointSettings()}
-                    }
-                },
-                HostConfig = new HostConfig
-                {
-                    Binds = new List<string> { $"{collectorYamlTemplate}:/conf/collector.yml", },
-                },
+                        EndpointsConfig = new Dictionary<string, EndpointSettings>()
+                        {
+                            { DockerNamingHelper.GetNetworkName(id), new EndpointSettings() },
+                            { DockerNamingHelper.ObservabilityNetworkName, new EndpointSettings() }
+                        }
+                    },
+                HostConfig =
+                    new HostConfig { Binds = new List<string> { $"{collectorYamlTemplate}:/conf/collector.yml", }, },
                 Env = new List<string>
                 {
                     $"DATA_SOURCE_URI={DockerNamingHelper.GetContainerName(id)}:5432",
                     $"DATA_SOURCE_USER={saUsername}",
                     $"DATA_SOURCE_PASS={saPassword}",
-                    $"DATA_SOURCE_NAME={serverName}"
+                    $"DATA_SOURCE_NAME={serverName}",
+                    $"OTLP_ENDPOINT=http://{DockerNamingHelper.LokiContainerName}:3100/otlp"
                 },
                 Cmd = new List<string> { "--config=/conf/collector.yml" }
             });
@@ -94,23 +102,37 @@ public class PostgresServerClient(DockerClient client, ILogger<PostgresServerCli
             {
                 Name = DockerNamingHelper.GetContainerName(id),
                 Image = ImageName,
-                NetworkingConfig = new NetworkingConfig()
-                {
-                    EndpointsConfig = new Dictionary<string, EndpointSettings>()
+                NetworkingConfig =
+                    new NetworkingConfig()
                     {
-                        {DockerNamingHelper.GetNetworkName(id), new EndpointSettings()}
-                    }
-                },
-                HostConfig = new HostConfig
-                {
-                    Binds = new List<string> { $"{DockerNamingHelper.GetVolumeName(id)}:/var/lib/postgresql/data", },
-                    PortBindings = new Dictionary<string, IList<PortBinding>>
-                    {
-                        { "5432/tcp", new List<PortBinding> { new() { HostPort = $"{serverPort}" } } }
+                        EndpointsConfig = new Dictionary<string, EndpointSettings>()
+                        {
+                            { DockerNamingHelper.GetNetworkName(id), new EndpointSettings() }
+                        }
                     },
-                },
+                HostConfig =
+                    new HostConfig
+                    {
+                        Binds =
+                            new List<string> { $"{DockerNamingHelper.GetVolumeName(id)}:/var/lib/postgresql/data", },
+                        PortBindings =
+                            new Dictionary<string, IList<PortBinding>>
+                            {
+                                { "5432/tcp", new List<PortBinding> { new() { HostPort = $"{serverPort}" } } }
+                            },
+                    },
                 ExposedPorts = new Dictionary<string, EmptyStruct> { { "5432/tcp", default } },
                 Env = new List<string> { $"POSTGRES_PASSWORD={saPassword}", $"POSTGRES_USER={saUsername}" },
+                Cmd = new List<string>
+                {
+                    "postgres",
+                    "-c",
+                    "shared_preload_libraries=pg_stat_statements",
+                    "-c",
+                    "pg_stat_statements.track=all",
+                    "-c",
+                    "max_connections=200",
+                },
             });
         logger.LogInformation("Container created");
         await client.Containers
@@ -128,42 +150,53 @@ public class PostgresServerClient(DockerClient client, ILogger<PostgresServerCli
     {
         var container = await client.Containers.InspectContainerAsync(DockerNamingHelper.GetContainerName(id));
         logger.LogInformation("Container found");
+        var ConnectToPostgresDatabase = $"\\connect postgres;";
+        var PreCheckActions = $"CREATE EXTENSION IF NOT EXISTS pg_stat_statements SCHEMA public;";
         var DatabaseCreate = $"CREATE DATABASE {databaseName};";
         var UserCreateAndGrant = $"CREATE USER {dbUsername} WITH ENCRYPTED PASSWORD '{dbPassword}';" +
-            $"GRANT ALL PRIVILEGES ON DATABASE {databaseName} TO {dbUsername};" +
-            $"ALTER USER {dbUsername} SET search_path TO {databaseName};" +
-            $"REVOKE ALL ON DATABASE postgres FROM PUBLIC;" +
-            $"CREATE EXTENSION IF NOT EXISTS pg_stat_statements";
+                                 $"GRANT ALL PRIVILEGES ON DATABASE {databaseName} TO {dbUsername};" +
+                                 $"ALTER USER {dbUsername} SET search_path TO {databaseName};" +
+                                 $"REVOKE ALL ON DATABASE postgres FROM PUBLIC;";
         var ConnectToNewDatabase = $"\\connect {databaseName};";
         var CreateSchema = $"CREATE SCHEMA IF NOT EXISTS {databaseName};" +
-            $"REVOKE ALL ON DATABASE {databaseName} FROM PUBLIC;" +
-            $"GRANT CONNECT ON DATABASE {databaseName} TO {dbUsername};" +
-            $"GRANT ALL PRIVILEGES ON SCHEMA {databaseName} TO {dbUsername};" +
-            $"ALTER DATABASE {databaseName} SET search_path TO {databaseName};" +
-            $"CREATE EXTENSION IF NOT EXISTS pg_stat_statements;";
+                           $"REVOKE ALL ON DATABASE {databaseName} FROM PUBLIC;" +
+                           $"GRANT CONNECT ON DATABASE {databaseName} TO {dbUsername};" +
+                           $"GRANT ALL PRIVILEGES ON SCHEMA {databaseName} TO {dbUsername};" +
+                           $"ALTER DATABASE {databaseName} SET search_path TO {databaseName};" +
+                           $"CREATE EXTENSION IF NOT EXISTS pg_stat_statements SCHEMA public;";
         var exec = await client.Exec.ExecCreateContainerAsync(
             container.ID,
             new ContainerExecCreateParameters
+            {
+                AttachStdin = true,
+                AttachStdout = true,
+                AttachStderr = true,
+                Env = new List<string> { $"PGPASSWORD={saPassword}" },
+                Cmd = new List<string>
                 {
-                    AttachStdin = true,
-                    AttachStdout = true,
-                    AttachStderr = true,
-                    Env = new List<string>
-                    {
-                        $"PGPASSWORD={saPassword}"
-                    },
-                    Cmd = new List<string>
-                    {
-                        "psql", "-U", saUsername,
-                        "-P", "pager=off", "-P", "format=csv",
-                        "-c", DatabaseCreate,
-                        "-c", UserCreateAndGrant,
-                        "-c", ConnectToNewDatabase,
-                        "-c", CreateSchema
-                    },
-                    Tty = true,
-                    Detach = false
-                });
+                    "psql",
+                    "-U",
+                    saUsername,
+                    "-P",
+                    "pager=off",
+                    "-P",
+                    "format=csv",
+                    "-c",
+                    ConnectToPostgresDatabase,
+                    "-c",
+                    PreCheckActions,
+                    "-c",
+                    DatabaseCreate,
+                    "-c",
+                    UserCreateAndGrant,
+                    "-c",
+                    ConnectToNewDatabase,
+                    "-c",
+                    CreateSchema
+                },
+                Tty = true,
+                Detach = false
+            });
         logger.LogInformation("Exec created");
         var execStart = await client.Exec.StartAndAttachContainerExecAsync(exec.ID, true);
         var (stdOut, stdErr) = await execStart.ReadOutputToEndAsync(default);
@@ -179,6 +212,7 @@ public class PostgresServerClient(DockerClient client, ILogger<PostgresServerCli
             logger.LogInformation("Container is already running");
             return;
         }
+
         await client.Containers
             .StartContainerAsync(DockerNamingHelper.GetContainerName(requestId), new ContainerStartParameters());
         logger.LogInformation("Container started");
@@ -193,6 +227,7 @@ public class PostgresServerClient(DockerClient client, ILogger<PostgresServerCli
             logger.LogInformation("Container is already stopped");
             return;
         }
+
         await client.Containers
             .StopContainerAsync(DockerNamingHelper.GetContainerName(requestId), new ContainerStopParameters());
         logger.LogInformation("Container stopped");
@@ -207,8 +242,58 @@ public class PostgresServerClient(DockerClient client, ILogger<PostgresServerCli
             logger.LogInformation("Container is already stopped");
             return;
         }
+
         await client.Containers
             .RestartContainerAsync(DockerNamingHelper.GetContainerName(requestId), new ContainerRestartParameters());
         logger.LogInformation("Container restarted");
+    }
+
+    public async Task<string> RunQueryAsync(
+        Guid serverId,
+        string saUsername,
+        string saPassword,
+        string database,
+        string impersonateUser,
+        string requestQuery)
+    {
+        var container = await client.Containers.InspectContainerAsync(DockerNamingHelper.GetContainerName(serverId));
+        if (container == null || !container.State.Running)
+        {
+            logger.LogInformation("Container is not running");
+            return string.Empty;
+        }
+
+        var exec = await client.Exec.ExecCreateContainerAsync(
+            container.ID,
+            new ContainerExecCreateParameters
+            {
+                AttachStdin = true,
+                AttachStdout = true,
+                AttachStderr = true,
+                Env = new List<string> { $"PGPASSWORD={saPassword}" },
+                Cmd = new List<string>
+                {
+                    "psql",
+                    "-U",
+                    saUsername,
+                    "-d",
+                    database,
+                    "-P",
+                    "pager=off",
+                    "-P",
+                    "format=csv",
+                    "-c",
+                    "SET ROLE {impersonateUser}; {requestQuery}"
+                        .Replace("{impersonateUser}", impersonateUser)
+                        .Replace("{requestQuery}", requestQuery)
+                },
+                Tty = true,
+                Detach = false
+            });
+        logger.LogInformation("Exec created");
+        var execStart = await client.Exec.StartAndAttachContainerExecAsync(exec.ID, true);
+        var (stdOut, stdErr) = await execStart.ReadOutputToEndAsync(CancellationToken.None);
+        logger.LogInformation("Query executed. StdErr: {StdErr}", stdErr);
+        return stdOut;
     }
 }
