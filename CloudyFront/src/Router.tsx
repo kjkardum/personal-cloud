@@ -6,6 +6,8 @@ import { ViewPostgresServerPage } from '@/pages/postgres/view/viewPostgresServer
 import { HomePage } from './pages/Home.page';
 import { ViewPostgresDatabasePage } from './pages/postgres/view/viewPostgresDatabase.page';
 import { ViewResourceGroupPage } from '@/pages/resourceGroup/view/viewResourceGroup.page';
+import { NewKafkaPage } from '@/pages/kafka/createNew/NewKafka.page';
+import { ViewKafkaClusterPage } from '@/pages/kafka/view/viewKafkaCluster.page';
 
 
 export const routes = createBrowserRouter([
@@ -44,6 +46,29 @@ export const routes = createBrowserRouter([
                 path: 'database/:id',
                 element: <ViewPostgresDatabasePage/>,
               }
+            ]
+          }
+        ]
+      },
+      {
+        path: 'kafka',
+        children: [
+          {
+            path: 'new',
+            children: [
+              {
+                path: 'cluster',
+                element: <NewKafkaPage/>,
+              },
+            ]
+          },
+          {
+            path: 'view',
+            children: [
+              {
+                path: 'cluster/:id',
+                element: <ViewKafkaClusterPage/>,
+              },
             ]
           }
         ]

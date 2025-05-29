@@ -47,6 +47,29 @@ public class GeneralContainerStatusClient(DockerClient client, ILogger<GeneralCo
         {
             logger.LogWarning(ex, "Failed to remove container {container}, it may not exist.", container);
         }
+
+        for (var i = 0;; i++)
+        {
+            var scalableContainerName = DockerNamingHelper.GetScalableContainerName(requestId, i);
+            try
+            {
+                await client.Containers.RemoveContainerAsync(
+                    scalableContainerName,
+                    new ContainerRemoveParameters
+                    {
+                        Force = true,
+                        RemoveVolumes = true
+                    });
+                logger.LogInformation("Successfully removed scalable container {scalableContainerName}.", scalableContainerName);
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Failed to remove scalable container {scalableContainerName}, it may not exist.", scalableContainerName);
+                logger.LogInformation("No more scalable containers found to remove for {id}.", requestId);
+                break;
+            }
+        }
+
         try
         {
             var telemetryContainer = DockerNamingHelper.GetSidecarTelemetryName(requestId);
@@ -62,6 +85,7 @@ public class GeneralContainerStatusClient(DockerClient client, ILogger<GeneralCo
         {
             logger.LogWarning(ex, "Failed to remove telemetry container for {id}, it may not exist.", requestId);
         }
+
         try
         {
             var volumeName = DockerNamingHelper.GetVolumeName(requestId);
@@ -72,6 +96,23 @@ public class GeneralContainerStatusClient(DockerClient client, ILogger<GeneralCo
         {
             logger.LogWarning(ex, "Failed to remove volume for {id}, it may not exist.", requestId);
         }
+
+        for (var i = 0;; i++)
+        {
+            var scalableVolumeName = DockerNamingHelper.GetScalableVolumeName(requestId, i);
+            try
+            {
+                await client.Volumes.RemoveAsync(scalableVolumeName, true);
+                logger.LogInformation("Successfully removed scalable volume {scalableVolumeName}.", scalableVolumeName);
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Failed to remove scalable volume {scalableVolumeName}, it may not exist.", scalableVolumeName);
+                logger.LogInformation("No more scalable volumes found to remove for {id}.", requestId);
+                break;
+            }
+        }
+
         try
         {
             var networkName = DockerNamingHelper.GetNetworkName(requestId);

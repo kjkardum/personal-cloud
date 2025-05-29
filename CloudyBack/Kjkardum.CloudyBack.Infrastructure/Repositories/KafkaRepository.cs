@@ -22,4 +22,10 @@ public class KafkaRepository(ApplicationDbContext dbContext): IKafkaRepository
 
         return kafkaClusterResource;
     }
+
+    public async Task Delete(KafkaClusterResource resource)
+    {
+        dbContext.KafkaClusterResources.Remove(resource);
+        await dbContext.SaveChangesAsync();
+    }
 }

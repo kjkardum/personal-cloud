@@ -4,30 +4,30 @@ using Kjkardum.CloudyBack.Application.Repositories;
 using Kjkardum.CloudyBack.Domain.Entities;
 using MediatR;
 
-namespace Kjkardum.CloudyBack.Application.UseCases.Postgres.Commands.ServerContainerAction;
+namespace Kjkardum.CloudyBack.Application.UseCases.Kafka.Commands.ClusterContainerAction;
 
-internal class PostgresServerContainerActionCommandHandler(
+public class KafkaClusterContainerActionCommandHandler(
     IBaseResourceRepository baseResourceRepository,
-    IPostgresServerClient postgresServerClient) : IRequestHandler<PostgresServerContainerActionCommand>
+    IKafkaClient kafkaClient): IRequestHandler<KafkaClusterContainerActionCommand>
 {
-    public async Task Handle(PostgresServerContainerActionCommand request, CancellationToken cancellationToken)
+    public async Task Handle(KafkaClusterContainerActionCommand request, CancellationToken cancellationToken)
     {
         await baseResourceRepository.LogResourceAction(new AuditLogEntry
             {
-                ActionName = nameof(PostgresServerContainerActionCommand),
+                ActionName = nameof(KafkaClusterContainerActionCommand),
                 ActionDisplayText = $"Trigger docker action {request.ActionId} on server",
                 ResourceId = request.Id
             });
         switch (request.ActionId)
         {
             case "start":
-                await postgresServerClient.StartServerAsync(request.Id);
+                await kafkaClient.StartServerAsync(request.Id);
                 break;
             case "stop":
-                await postgresServerClient.StopServerAsync(request.Id);
+                await kafkaClient.StopServerAsync(request.Id);
                 break;
             case "restart":
-                await postgresServerClient.RestartServerAsync(request.Id);
+                await kafkaClient.RestartServerAsync(request.Id);
                 break;
             default:
                 throw new EntityNotFoundException("Invalid action id");

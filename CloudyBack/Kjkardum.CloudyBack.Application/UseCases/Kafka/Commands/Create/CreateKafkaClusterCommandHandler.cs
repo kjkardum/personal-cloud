@@ -41,10 +41,7 @@ public class CreateKafkaClusterCommandHandler(
 
         await kafkaClient.CreateClusterAsync(
             kafkaClusterResource.Id,
-            kafkaClusterResource.Name,
-            kafkaClusterResource.SaUsername,
-            kafkaClusterResource.SaPassword,
-            kafkaClusterResource.Port);
+            kafkaClusterResource.Name);
 
         await baseResourceRepository.LogResourceAction(new AuditLogEntry
             {

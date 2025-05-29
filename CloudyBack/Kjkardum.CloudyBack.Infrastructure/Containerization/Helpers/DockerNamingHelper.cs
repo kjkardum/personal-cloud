@@ -3,7 +3,9 @@ namespace Kjkardum.CloudyBack.Infrastructure.Containerization.Helpers;
 public class DockerNamingHelper
 {
     public static string GetVolumeName(Guid id) => $"cloudy{id:N}volume";
+    public static string GetScalableVolumeName(Guid id, int index) => $"cloudy{id:N}volumescale{index}";
     public static string GetContainerName(Guid id) => $"cloudy{id:N}container";
+    public static string GetScalableContainerName(Guid id, int index) => $"cloudy{id:N}containerscale{index}";
     public static string GetSidecarName(Guid id, string type) => $"cloudy{id:N}sidecar{type}";
     public static string GetSidecarTelemetryName(Guid id) => GetSidecarName(id, "telemetry");
     public static string GetNetworkName(Guid id) => $"cloudy{id:N}network";

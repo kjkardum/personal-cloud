@@ -227,6 +227,84 @@ paths:
             text/json:
               schema:
                 $ref: '#/components/schemas/KafkaClusterResourceDto'
+    delete:
+      tags:
+        - KafkaClusterResource
+      parameters:
+        - name: serverId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+  '/api/resource/KafkaClusterResource/{serverId}/topics':
+    get:
+      tags:
+        - KafkaClusterResource
+      parameters:
+        - name: serverId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/KafkaTopicDto'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/KafkaTopicDto'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/KafkaTopicDto'
+  '/api/resource/KafkaClusterResource/{serverId}/topics/{topicId}/consumeLive':
+    get:
+      tags:
+        - KafkaClusterResource
+      parameters:
+        - name: serverId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: topicId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  type: string
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+            text/json:
+              schema:
+                type: array
+                items:
+                  type: string
   /api/resource/KafkaClusterResource:
     post:
       tags:
@@ -255,6 +333,24 @@ paths:
             text/json:
               schema:
                 $ref: '#/components/schemas/KafkaClusterResourceDto'
+  '/api/resource/KafkaClusterResource/{serverId}/containerAction':
+    post:
+      tags:
+        - KafkaClusterResource
+      parameters:
+        - name: serverId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: actionId
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
   /api/resource/PostgresServerResource:
     get:
       tags:
@@ -873,6 +969,50 @@ components:
           format: uuid
         resourceGroupName:
           type: string
+      additionalProperties: false
+    KafkaPartitionDto:
+      type: object
+      properties:
+        topic:
+          type: string
+        partition:
+          type: integer
+          format: int32
+        leader:
+          type: integer
+          format: int32
+        replicas:
+          type: array
+          items:
+            type: integer
+            format: int32
+        isr:
+          type: array
+          items:
+            type: integer
+            format: int32
+        elr:
+          type: string
+        lastKnownElr:
+          type: string
+      additionalProperties: false
+    KafkaTopicDto:
+      type: object
+      properties:
+        name:
+          type: string
+        topicId:
+          type: string
+        partitionCount:
+          type: integer
+          format: int32
+        replicationFactor:
+          type: integer
+          format: int32
+        partitions:
+          type: array
+          items:
+            $ref: '#/components/schemas/KafkaPartitionDto'
       additionalProperties: false
     LoggedInUserDto:
       type: object

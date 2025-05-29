@@ -95,6 +95,34 @@ const injectedRtkApi = api
         query: (queryArg) => ({ url: `/api/resource/KafkaClusterResource/${queryArg.serverId}` }),
         providesTags: ['KafkaClusterResource'],
       }),
+      deleteApiResourceKafkaClusterResourceByServerId: build.mutation<
+        DeleteApiResourceKafkaClusterResourceByServerIdApiResponse,
+        DeleteApiResourceKafkaClusterResourceByServerIdApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/resource/KafkaClusterResource/${queryArg.serverId}`,
+          method: 'DELETE',
+        }),
+        invalidatesTags: ['KafkaClusterResource'],
+      }),
+      getApiResourceKafkaClusterResourceByServerIdTopics: build.query<
+        GetApiResourceKafkaClusterResourceByServerIdTopicsApiResponse,
+        GetApiResourceKafkaClusterResourceByServerIdTopicsApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/resource/KafkaClusterResource/${queryArg.serverId}/topics`,
+        }),
+        providesTags: ['KafkaClusterResource'],
+      }),
+      getApiResourceKafkaClusterResourceByServerIdTopicsAndTopicIdConsumeLive: build.query<
+        GetApiResourceKafkaClusterResourceByServerIdTopicsAndTopicIdConsumeLiveApiResponse,
+        GetApiResourceKafkaClusterResourceByServerIdTopicsAndTopicIdConsumeLiveApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/resource/KafkaClusterResource/${queryArg.serverId}/topics/${queryArg.topicId}/consumeLive`,
+        }),
+        providesTags: ['KafkaClusterResource'],
+      }),
       postApiResourceKafkaClusterResource: build.mutation<
         PostApiResourceKafkaClusterResourceApiResponse,
         PostApiResourceKafkaClusterResourceApiArg
@@ -103,6 +131,19 @@ const injectedRtkApi = api
           url: `/api/resource/KafkaClusterResource`,
           method: 'POST',
           body: queryArg.createKafkaClusterCommand,
+        }),
+        invalidatesTags: ['KafkaClusterResource'],
+      }),
+      postApiResourceKafkaClusterResourceByServerIdContainerAction: build.mutation<
+        PostApiResourceKafkaClusterResourceByServerIdContainerActionApiResponse,
+        PostApiResourceKafkaClusterResourceByServerIdContainerActionApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/resource/KafkaClusterResource/${queryArg.serverId}/containerAction`,
+          method: 'POST',
+          params: {
+            actionId: queryArg.actionId,
+          },
         }),
         invalidatesTags: ['KafkaClusterResource'],
       }),
@@ -322,10 +363,30 @@ export type GetApiResourceKafkaClusterResourceByServerIdApiResponse =
 export type GetApiResourceKafkaClusterResourceByServerIdApiArg = {
   serverId: string;
 };
+export type DeleteApiResourceKafkaClusterResourceByServerIdApiResponse = unknown;
+export type DeleteApiResourceKafkaClusterResourceByServerIdApiArg = {
+  serverId: string;
+};
+export type GetApiResourceKafkaClusterResourceByServerIdTopicsApiResponse =
+  /** status 200 OK */ KafkaTopicDto[];
+export type GetApiResourceKafkaClusterResourceByServerIdTopicsApiArg = {
+  serverId: string;
+};
+export type GetApiResourceKafkaClusterResourceByServerIdTopicsAndTopicIdConsumeLiveApiResponse =
+  /** status 200 OK */ string[];
+export type GetApiResourceKafkaClusterResourceByServerIdTopicsAndTopicIdConsumeLiveApiArg = {
+  serverId: string;
+  topicId: string;
+};
 export type PostApiResourceKafkaClusterResourceApiResponse =
   /** status 200 OK */ KafkaClusterResourceDto;
 export type PostApiResourceKafkaClusterResourceApiArg = {
   createKafkaClusterCommand: CreateKafkaClusterCommand;
+};
+export type PostApiResourceKafkaClusterResourceByServerIdContainerActionApiResponse = unknown;
+export type PostApiResourceKafkaClusterResourceByServerIdContainerActionApiArg = {
+  serverId: string;
+  actionId?: string;
 };
 export type GetApiResourcePostgresServerResourceApiResponse =
   /** status 200 OK */ PostgresServerResourceDtoPaginatedResponse;
@@ -516,6 +577,22 @@ export type KafkaClusterResourceDto = {
   resourceGroupId?: string;
   resourceGroupName?: string;
 };
+export type KafkaPartitionDto = {
+  topic?: string;
+  partition?: number;
+  leader?: number;
+  replicas?: number[];
+  isr?: number[];
+  elr?: string;
+  lastKnownElr?: string;
+};
+export type KafkaTopicDto = {
+  name?: string;
+  topicId?: string;
+  partitionCount?: number;
+  replicationFactor?: number;
+  partitions?: KafkaPartitionDto[];
+};
 export type CreateKafkaClusterCommand = {
   resourceGroupId: string;
   serverName: string;
@@ -640,7 +717,13 @@ export const {
   usePostApiResourceBaseResourceByResourceIdLokiMutation,
   useGetApiResourceKafkaClusterResourceByServerIdQuery,
   useLazyGetApiResourceKafkaClusterResourceByServerIdQuery,
+  useDeleteApiResourceKafkaClusterResourceByServerIdMutation,
+  useGetApiResourceKafkaClusterResourceByServerIdTopicsQuery,
+  useLazyGetApiResourceKafkaClusterResourceByServerIdTopicsQuery,
+  useGetApiResourceKafkaClusterResourceByServerIdTopicsAndTopicIdConsumeLiveQuery,
+  useLazyGetApiResourceKafkaClusterResourceByServerIdTopicsAndTopicIdConsumeLiveQuery,
   usePostApiResourceKafkaClusterResourceMutation,
+  usePostApiResourceKafkaClusterResourceByServerIdContainerActionMutation,
   useGetApiResourcePostgresServerResourceQuery,
   useLazyGetApiResourcePostgresServerResourceQuery,
   usePostApiResourcePostgresServerResourceMutation,

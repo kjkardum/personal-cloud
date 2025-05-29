@@ -9,11 +9,6 @@ receivers:
     collection_interval: 30s
     tls:
       insecure: true
-    auth:
-      sasl:
-        mechanism: "PLAIN"
-        username: "${KAFKA_SASL_USERNAME}"
-        password: "${KAFKA_SASL_PASSWORD}"
 
 processors:
   batch:
