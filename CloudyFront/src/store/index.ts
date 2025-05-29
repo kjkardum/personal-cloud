@@ -5,9 +5,11 @@ import { FLUSH, PAUSE, PERSIST, persistReducer, persistStore, PURGE, REGISTER, R
 import { persistConfig } from "@/store/persistConfig";
 import userStore from "@/store/stores/UserStore";
 import {api} from "@/services/rtk/api";
+import apiHelperStore from '@/store/stores/ApiHelperStore';
 
 const reducers = combineReducers({
     api: api.reducer,
+    apiHelper: apiHelperStore,
     user: userStore,
 });
 
@@ -20,6 +22,7 @@ const store = configureStore({
     middleware: (getDefaultMiddleware) => {
         const middlewares = getDefaultMiddleware({
             serializableCheck: {
+                ignoredPaths: ['apiHelper.activeStreams'],
                 ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
             },
         })
