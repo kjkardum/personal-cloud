@@ -5,14 +5,18 @@ import {
 import { API_BASE_URL } from '@/config';
 import { ApiHelperState, getAbortControllerForStream } from '@/store/stores/ApiHelperStore';
 
-const apiWithMoreEndpoints = cloudyApi.injectEndpoints({
+export const apiWithMoreEndpoints = cloudyApi
+  .enhanceEndpoints({
+    addTagTypes: ['KafkaClusterResourceStreams'],
+  })
+  .injectEndpoints({
   endpoints: (build) => ({
     streamApiResourceKafkaClusterResourceByServerIdTopicsAndTopicIdConsumeLive: build.query<
       string[],
       GetApiResourceKafkaClusterResourceByServerIdTopicsAndTopicIdConsumeLiveApiArg
     >({
       queryFn: async () => ({ data: [] }),
-      providesTags: ['KafkaClusterResource'],
+      providesTags: ['KafkaClusterResourceStreams'],
       async onCacheEntryAdded(
         queryArg,
         { updateCachedData, cacheDataLoaded, cacheEntryRemoved, getState }
@@ -63,12 +67,17 @@ const apiWithMoreEndpoints = cloudyApi.injectEndpoints({
             // Decode the Uint8Array to string
             const chunk = decoder.decode(value, { stream: true });
             buffer += chunk;
-            const currentResult = JSON.parse(`${buffer  }]`);
-            console.log('Current result:', currentResult); // Debug log
-            updateCachedData(draft => {
-              draft.length = 0;
-              draft.push(...currentResult);
-            });
+            try {
+              const currentResult = JSON.parse(`${buffer  }]`);
+              updateCachedData(draft => {
+                draft.length = 0;
+                draft.push(...currentResult);
+              });
+            } catch (e) {
+              // If parsing fails, it means we haven't received a complete JSON array yet
+              console.warn('Incomplete JSON received, waiting for more data...');
+              console.error(e);
+            }
           }
         } catch (error) {
           console.error('Streaming error:', error);

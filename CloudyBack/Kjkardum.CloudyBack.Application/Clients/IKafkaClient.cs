@@ -13,6 +13,9 @@ public interface IKafkaClient
     IAsyncEnumerable<string> StreamTopicMessagesAsync(
         Guid id,
         string topicName,
-        bool fromBeginning = false,
         CancellationToken cancellationToken = default);
+
+    Task CreateTopicAsync(Guid id, string topicName);
+
+    Task ProduceMessageAsync(Guid id, string topicName, string message, string? key = null);
 }

@@ -6,14 +6,14 @@ using Kjkardum.CloudyBack.Infrastructure.Containerization.Clients.Kafka.Helpers;
 using Kjkardum.CloudyBack.Infrastructure.Containerization.Helpers;
 using Microsoft.Extensions.Logging;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Kjkardum.CloudyBack.Infrastructure.Containerization.Clients.Kafka;
 
 public class KafkaClient(DockerClient client, ILogger<KafkaClient> logger) : IKafkaClient
 {
-    private const string ImageName = "apache/kafka:3.9.1";
+    private const string ImageName = "apache/kafka-native:3.9.1";
+    private const string ScriptRunnerImageName = "confluentinc/cp-kafkacat";
     private const string KafkaExporterImageName = "otel/opentelemetry-collector-contrib";
 
     public async Task CreateClusterAsync(
@@ -52,6 +52,7 @@ public class KafkaClient(DockerClient client, ILogger<KafkaClient> logger) : IKa
             new ContainerRestartParameters());
         logger.LogInformation("Kafka server restarted");
     }
+
 
     private async Task CreateCommonVolume(Guid id)
     {
@@ -107,6 +108,7 @@ public class KafkaClient(DockerClient client, ILogger<KafkaClient> logger) : IKa
                 },
             Env = new List<string>
             {
+                "KAFKA_HEAP_OPTS=-Xmx512M -Xms512M",
                 "KAFKA_LISTENERS=CONTROLLER://localhost:9091,DOCKER://0.0.0.0:9092",
                 $"KAFKA_ADVERTISED_LISTENERS=DOCKER://{DockerNamingHelper.GetContainerName(id)}:9092",
                 "KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,DOCKER:PLAINTEXT",
@@ -173,170 +175,247 @@ public class KafkaClient(DockerClient client, ILogger<KafkaClient> logger) : IKa
         logger.LogInformation("Kafka telemetry collector container started");
     }
 
-    public async Task CreateTopicAsync(Guid id, string topicName, int partitions = 3, int replicationFactor = 1)
+    public async Task CreateTopicAsync(Guid id, string topicName)
     {
-        var brokerName = DockerNamingHelper.GetContainerName(id);
-        var container = await client.Containers.InspectContainerAsync(brokerName);
-        logger.LogInformation("Creating Kafka topic: {TopicName}", topicName);
+        var args = new List<string>
+        {
+            "-X", "broker.version.fallback=3.9.1",
+            "-L",
+            "-t", topicName,
+            "-P",
+        };
 
-        var exec = await client.Exec.ExecCreateContainerAsync(
-            container.ID,
-            new ContainerExecCreateParameters
-            {
-                AttachStdin = true,
-                AttachStdout = true,
-                AttachStderr = true,
-                Cmd = new List<string>
-                {
-                    "/opt/kafka/bin/kafka-topics.sh",
-                    "--create",
-                    "--topic",
-                    topicName,
-                    "--bootstrap-server",
-                    $"localhost:9092",
-                    "--partitions",
-                    partitions.ToString(),
-                    "--replication-factor",
-                    replicationFactor.ToString()
-                },
-                Tty = true,
-                Detach = false
-            });
-
-        var execStart = await client.Exec.StartAndAttachContainerExecAsync(exec.ID, true);
-        var (stdOut, stdErr) = await execStart.ReadOutputToEndAsync(default);
-        logger.LogInformation("Topic created. Response: {StdOut}", stdOut);
+        logger.LogInformation("Creating Kafka topic {TopicName}", topicName);
+        var (stdOut, _) = await RunKafkacatContainerAsync(id, args, new List<string>(), false);
+        logger.LogInformation("Topic creation response:\n{StdOut}", stdOut);
     }
-
     public async Task<List<KafkaTopicDto>> GetTopicsAsync(Guid id)
     {
-        var brokerName = DockerNamingHelper.GetContainerName(id);
-        var container = await client.Containers.InspectContainerAsync(brokerName);
-        logger.LogInformation("Retrieving Kafka topics");
+        var args = new List<string>
+        {
+            "-L"
+        };
 
-        var exec = await client.Exec.ExecCreateContainerAsync(
-            container.ID,
-            new ContainerExecCreateParameters
-            {
-                AttachStdin = true,
-                AttachStdout = true,
-                AttachStderr = true,
-                Cmd = new List<string>
-                {
-                    "/opt/kafka/bin/kafka-topics.sh", "--describe", "--bootstrap-server", "localhost:9092"
-                },
-                Tty = true,
-                Detach = false
-            });
+        var (stdOut, _) = await RunKafkacatContainerAsync(id, args, new List<string>(), true);
+        logger.LogInformation("Raw topics metadata:\n{StdOut}", stdOut);
 
-        var execStart = await client.Exec.StartAndAttachContainerExecAsync(exec.ID, true);
-        var (stdOut, stdErr) = await execStart.ReadOutputToEndAsync(default);
+        // Parse output using your existing deserializer
         var result = KafkaTopicDeserializer.ParseKafkaTopicsOutput(stdOut);
-        logger.LogInformation("Topics retrieved. Response count: {StdOut}", result.Count);
+        logger.LogInformation("Parsed topics count: {Count}", result.Count);
+
         return result;
+    }
+
+    public async Task ProduceMessageAsync(
+        Guid id,
+        string topicName,
+        string message,
+        string? key = null)
+    {
+        var args = new List<string>
+        {
+            "-X",
+            "broker.version.fallback=3.9.1",
+            "-t",
+            topicName,
+            "-K:", // Use ':' as key-value separator
+            "-D",
+            "«",
+            "-P", // Produce mode
+            "-l",
+            "/data/msg.txt"
+        };
+
+        logger.LogInformation("Producing message to Kafka topic {TopicName}", topicName);
+        var (stdOut, stdErr) = await RunKafkacatContainerAsync(
+            id,
+            args,
+            [
+                $"{await SaveMessageToFileAsync($"{key ?? string.Empty}:" + message)}:/data/msg.txt"
+            ],
+            true);
+
+        if (!string.IsNullOrEmpty(stdErr))
+        {
+            logger.LogError("Error producing message: {StdErr}", stdErr);
+            throw new Exception($"Failed to produce message: {stdErr}");
+        }
+
+        logger.LogInformation("Message produced successfully: {StdOut}", stdOut);
     }
 
     public async IAsyncEnumerable<string> StreamTopicMessagesAsync(
         Guid id,
         string topicName,
-        bool fromBeginning = false,
         [System.Runtime.CompilerServices.EnumeratorCancellation]
         CancellationToken cancellationToken = default)
     {
-        var brokerName = DockerNamingHelper.GetContainerName(id);
-        var container = await client.Containers.InspectContainerAsync(brokerName, cancellationToken);
-        logger.LogInformation("Streaming messages from Kafka topic: {TopicName}", topicName);
-        var cmd = new List<string>
-        {
-            "/opt/kafka/bin/kafka-console-consumer.sh",
-            "--topic",
-            topicName,
-            "--bootstrap-server",
-            "localhost:9092"
-        };
-        if (fromBeginning)
-        {
-            cmd.Add("--from-beginning");
-        }
+        var broker = DockerNamingHelper.GetContainerName(id) + ":9092";
+        var format = "Key=%k\nPartition=%p\nOffset=%o\nValue=%s\n--=--\n";
 
-        var exec = await client.Exec.ExecCreateContainerAsync(
-            container.ID,
-            new ContainerExecCreateParameters
+        // Pull kafkacat image if necessary
+        await client.Images.CreateImageAsync(
+            new ImagesCreateParameters { FromImage = "confluentinc/cp-kafkacat", Tag = "latest" },
+            null,
+            new Progress<JSONMessage>()
+        );
+        logger.LogInformation("Pulled kafkacat image");
+
+        // Create a temporary container for kafkacat
+        var create = await client.Containers.CreateContainerAsync(
+            new CreateContainerParameters
             {
-                AttachStdin = true,
+                Image = "confluentinc/cp-kafkacat:latest",
+                Name = DockerNamingHelper.GetScalableContainerName(id, 0) + "-kcat-" + Guid.NewGuid().ToString("N"),
+                NetworkingConfig =
+                    new NetworkingConfig()
+                    {
+                        EndpointsConfig = new Dictionary<string, EndpointSettings>()
+                        {
+                            { DockerNamingHelper.GetNetworkName(id), new EndpointSettings() }
+                        }
+                    },
+                Cmd = new List<string>
+                    {
+                        "kafkacat",
+                        "-b",
+                        broker,
+                        "-C",
+                        "-K:",
+                        "-f",
+                        format,
+                        "-t",
+                        topicName
+                    }
+                    .Where(arg => arg is not null)
+                    .ToList(),
+                Tty = true,
                 AttachStdout = true,
-                AttachStderr = true,
-                Cmd = cmd,
-                Tty = false,
-                Detach = false
+                AttachStderr = true
             },
             cancellationToken);
 
-        var execStart = await client.Exec.StartAndAttachContainerExecAsync(exec.ID, true, cancellationToken);
-        logger.LogInformation("Kafka topic consumer started for topic: {TopicName}", topicName);
-        await foreach (var p in ConsumerAsAsyncEnumerable(execStart, cancellationToken))
-        {
-            yield return p;
-        }
-    }
+        var containerId = create.ID;
+        await client.Containers.StartContainerAsync(containerId, new ContainerStartParameters(), cancellationToken);
+        logger.LogInformation("Started kafkacat consumer container {Container}", containerId);
 
-    private async IAsyncEnumerable<string> ConsumerAsAsyncEnumerable(
-        MultiplexedStream execStart,
-        [EnumeratorCancellation] CancellationToken cancellationToken)
-    {
-        const int bufferSize = 4096; // Smaller buffer for more responsive line reading
-        var buffer = new byte[bufferSize];
-        var lineBuffer = new StringBuilder();
+        // Attach and read logs
+        var stream = await client.Containers.GetContainerLogsAsync(
+            containerId,
+            new ContainerLogsParameters { ShowStdout = true, ShowStderr = true, Follow = true, Tail = "all" },
+            cancellationToken);
+
+        using var reader = new StreamReader(stream);
+        var buffer = new StringBuilder();
+        string? line;
         try
         {
-            while (!cancellationToken.IsCancellationRequested)
+            while (!cancellationToken.IsCancellationRequested
+                   && (line = await reader.ReadLineAsync(cancellationToken)) != null)
             {
-                var result = await execStart.ReadOutputAsync(buffer, 0, buffer.Length, cancellationToken);
-                if (result.EOF)
+                buffer.AppendLine(line);
+                if (line == "--=--")
                 {
-                    break;
+                    // Emit full message block
+                    yield return buffer.ToString().TrimEnd();
+                    buffer.Clear();
                 }
-
-                // Convert the bytes to string
-                var chunk = Encoding.UTF8.GetString(buffer, 0, result.Count);
-
-                // Process character by character to detect line endings immediately
-                foreach (var c in chunk)
-                {
-                    if (c == '\n')
-                    {
-                        // Complete line found - yield it immediately
-                        var line = lineBuffer.ToString().TrimEnd('\r');
-                        lineBuffer.Clear();
-
-                        if (!string.IsNullOrEmpty(line))
-                        {
-                            yield return line;
-                        }
-                    }
-                    else
-                    {
-                        lineBuffer.Append(c);
-                    }
-                }
-            }
-
-            // Yield any remaining content in the buffer as the final line
-            if (lineBuffer.Length <= 0)
-            {
-                yield break;
-            }
-
-            var finalLine = lineBuffer.ToString().TrimEnd('\r', '\n');
-            if (!string.IsNullOrEmpty(finalLine))
-            {
-                yield return finalLine;
             }
         }
         finally
         {
-            logger.LogInformation("Kafka topic consumer finished");
-            execStart?.Dispose();
+            // Cleanup
+            await client.Containers.StopContainerAsync(containerId, new ContainerStopParameters());
+            await client.Containers.RemoveContainerAsync(containerId, new ContainerRemoveParameters { Force = true });
+            logger.LogInformation("Stopped and removed kafkacat container {Container}", containerId);
         }
+    }
+
+    private async Task<(string StdOut, string StdErr)> RunKafkacatContainerAsync(
+        Guid id,
+        IList<string> args,
+        IList<string> mountList,
+        bool stdout,
+        CancellationToken cancellationToken = default)
+    {
+        // Pull image if necessary
+        await client.Images.CreateImageAsync(
+            new ImagesCreateParameters { FromImage = ScriptRunnerImageName, Tag = "latest" },
+            null,
+            new Progress<JSONMessage>());
+
+        var broker = DockerNamingHelper.GetContainerName(id) + ":9092";
+        var containerName = DockerNamingHelper.GetScalableContainerName(id, 0)
+            + "-kcat-"
+            + Guid.NewGuid().ToString("N");
+
+        var create = await client.Containers.CreateContainerAsync(
+            new CreateContainerParameters
+            {
+                Image = ScriptRunnerImageName,
+                Name = containerName,
+                NetworkingConfig = new NetworkingConfig
+                {
+                    EndpointsConfig = new Dictionary<string, EndpointSettings>
+                    {
+                        { DockerNamingHelper.GetNetworkName(id), new EndpointSettings() }
+                    }
+                },
+                HostConfig = new HostConfig
+                {
+                    Binds = mountList
+                },
+                Cmd = args.Prepend(broker).Prepend("-b").Prepend("kafkacat").ToList(),
+                Tty = true,
+                AttachStdout = true,
+                AttachStderr = true
+            },
+            cancellationToken);
+
+        await client.Containers.StartContainerAsync(create.ID, new ContainerStartParameters(), cancellationToken);
+
+        var stdOut = new StringBuilder();
+        if (stdout)
+        {
+            var logs = await client.Containers.GetContainerLogsAsync(
+                create.ID,
+                new ContainerLogsParameters { ShowStdout = true, ShowStderr = true, Follow = true },
+                cancellationToken);
+
+            using var reader = new StreamReader(logs);
+            string? line;
+            while ((line = await reader.ReadLineAsync(cancellationToken)) != null)
+            {
+                stdOut.AppendLine(line);
+            }
+        }
+
+        await client.Containers.StopContainerAsync(create.ID, new ContainerStopParameters());
+        await client.Containers.RemoveContainerAsync(
+            create.ID,
+            new ContainerRemoveParameters { Force = true });
+
+        logger.LogInformation("Executed kafkacat container {ContainerName}", containerName);
+        return (stdOut.ToString(), string.Empty); // kafkacat logs everything to stdout by default
+    }
+    public static async Task<string> SaveMessageToFileAsync(string message)
+    {
+        var currentDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ??
+            throw new InvalidOperationException("Could not determine the current directory.");
+        var basePath = Path.Combine(
+            currentDirectory,
+            "Containerization/Clients/Kafka/FileTemplates/messages");
+        Directory.CreateDirectory(basePath);
+
+        // Create a subdirectory with a random GUID
+
+        // Create the file path
+        var filename = $"kafkamessage{Guid.NewGuid():N}.txt";
+        var filePath = Path.Combine(basePath, filename);
+
+        // Write the message to the file
+        await File.WriteAllTextAsync(filePath, message);
+
+        return filePath;
     }
 }

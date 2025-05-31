@@ -9,10 +9,15 @@ const slice = createSlice({
   initialState,
   reducers: {
     startTopicStream: (state, { payload: { serverId, topic}}: { payload: { serverId: string, topic: string } }) => {
+      const activeStream = state.activeStreams.find((stream) => stream.id === `${serverId}/${topic}`);
       console.log(`startTopicStream: ${serverId}/${topic}`);
-      if (!state.activeStreams.find((stream) => stream.id === `${serverId}/${topic}`)) {
+      if (!activeStream) {
         console.log(`Creating new stream for ${serverId}/${topic}`);
         state.activeStreams.push({id: `${serverId}/${topic}`, controller: new AbortController()});
+      } else {
+        console.log('Aborting existing stream and creating a new one');
+        activeStream.controller?.abort();
+        activeStream.controller = new AbortController();
       }
     },
     stopTopicStream: (state, { payload: { serverId, topic }}: { payload: { serverId: string, topic: string } }) => {

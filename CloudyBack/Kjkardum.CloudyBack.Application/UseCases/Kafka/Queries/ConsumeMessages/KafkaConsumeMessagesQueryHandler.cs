@@ -22,7 +22,6 @@ public class KafkaConsumeMessagesQueryHandler(
         var messages = kafkaClient.StreamTopicMessagesAsync(
             request.Id,
             request.Topic,
-            fromBeginning: true,
             cancellationToken: cancellationToken);
 
         await foreach (var message in messages)

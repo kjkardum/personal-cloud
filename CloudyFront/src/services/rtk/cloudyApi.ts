@@ -114,6 +114,28 @@ const injectedRtkApi = api
         }),
         providesTags: ['KafkaClusterResource'],
       }),
+      postApiResourceKafkaClusterResourceByServerIdTopics: build.mutation<
+        PostApiResourceKafkaClusterResourceByServerIdTopicsApiResponse,
+        PostApiResourceKafkaClusterResourceByServerIdTopicsApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/resource/KafkaClusterResource/${queryArg.serverId}/topics`,
+          method: 'POST',
+          body: queryArg.createKafkaTopicCommand,
+        }),
+        invalidatesTags: ['KafkaClusterResource'],
+      }),
+      postApiResourceKafkaClusterResourceByServerIdTopicsAndTopicId: build.mutation<
+        PostApiResourceKafkaClusterResourceByServerIdTopicsAndTopicIdApiResponse,
+        PostApiResourceKafkaClusterResourceByServerIdTopicsAndTopicIdApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/resource/KafkaClusterResource/${queryArg.serverId}/topics/${queryArg.topicId}`,
+          method: 'POST',
+          body: queryArg.produceKafkaTopicMessageCommand,
+        }),
+        invalidatesTags: ['KafkaClusterResource'],
+      }),
       getApiResourceKafkaClusterResourceByServerIdTopicsAndTopicIdConsumeLive: build.query<
         GetApiResourceKafkaClusterResourceByServerIdTopicsAndTopicIdConsumeLiveApiResponse,
         GetApiResourceKafkaClusterResourceByServerIdTopicsAndTopicIdConsumeLiveApiArg
@@ -372,6 +394,17 @@ export type GetApiResourceKafkaClusterResourceByServerIdTopicsApiResponse =
 export type GetApiResourceKafkaClusterResourceByServerIdTopicsApiArg = {
   serverId: string;
 };
+export type PostApiResourceKafkaClusterResourceByServerIdTopicsApiResponse = unknown;
+export type PostApiResourceKafkaClusterResourceByServerIdTopicsApiArg = {
+  serverId: string;
+  createKafkaTopicCommand: CreateKafkaTopicCommand;
+};
+export type PostApiResourceKafkaClusterResourceByServerIdTopicsAndTopicIdApiResponse = unknown;
+export type PostApiResourceKafkaClusterResourceByServerIdTopicsAndTopicIdApiArg = {
+  serverId: string;
+  topicId: string;
+  produceKafkaTopicMessageCommand: ProduceKafkaTopicMessageCommand;
+};
 export type GetApiResourceKafkaClusterResourceByServerIdTopicsAndTopicIdConsumeLiveApiResponse =
   /** status 200 OK */ string[];
 export type GetApiResourceKafkaClusterResourceByServerIdTopicsAndTopicIdConsumeLiveApiArg = {
@@ -593,6 +626,13 @@ export type KafkaTopicDto = {
   replicationFactor?: number;
   partitions?: KafkaPartitionDto[];
 };
+export type CreateKafkaTopicCommand = {
+  topicName?: string;
+};
+export type ProduceKafkaTopicMessageCommand = {
+  key?: string;
+  value?: string;
+};
 export type CreateKafkaClusterCommand = {
   resourceGroupId: string;
   serverName: string;
@@ -720,6 +760,8 @@ export const {
   useDeleteApiResourceKafkaClusterResourceByServerIdMutation,
   useGetApiResourceKafkaClusterResourceByServerIdTopicsQuery,
   useLazyGetApiResourceKafkaClusterResourceByServerIdTopicsQuery,
+  usePostApiResourceKafkaClusterResourceByServerIdTopicsMutation,
+  usePostApiResourceKafkaClusterResourceByServerIdTopicsAndTopicIdMutation,
   useGetApiResourceKafkaClusterResourceByServerIdTopicsAndTopicIdConsumeLiveQuery,
   useLazyGetApiResourceKafkaClusterResourceByServerIdTopicsAndTopicIdConsumeLiveQuery,
   usePostApiResourceKafkaClusterResourceMutation,

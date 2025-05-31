@@ -2,109 +2,87 @@ using Kjkardum.CloudyBack.Application.UseCases.Kafka.Dtos;
 
 namespace Kjkardum.CloudyBack.Infrastructure.Containerization.Clients.Kafka.Helpers;
 
-public static class KafkaTopicDeserializer
-{
-    private static readonly char[] LineSeparators = ['\n', '\r'];
-    private static readonly char[] KeyValueSeparators = [':'];
+using Kjkardum.CloudyBack.Application.UseCases.Kafka.Dtos;
+using System.Text.RegularExpressions;
 
-    public static List<KafkaTopicDto> ParseKafkaTopicsOutput(string input)
+public static partial class KafkaTopicDeserializer
+{
+    public static List<KafkaTopicDto> ParseKafkaTopicsOutput(string output)
     {
         var topics = new List<KafkaTopicDto>();
         KafkaTopicDto? currentTopic = null;
+        var partitionRegex = PartitionRegex();
 
-        var lines = input.Split(LineSeparators, StringSplitOptions.RemoveEmptyEntries);
-        foreach (var line in lines)
+        foreach (var line in output.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries))
         {
-            if (!line.StartsWith('\t')) // Topic header line
+            var trimmedLine = line.Trim();
+
+            // Match a new topic
+            if (trimmedLine.StartsWith("topic \""))
             {
-                var parts = line.Split('\t');
-                var topic = new KafkaTopicDto();
-
-                foreach (var part in parts)
+                // Finish any existing topic
+                if (currentTopic != null)
                 {
-                    var kv = part.Split(KeyValueSeparators, 2);
-                    if (kv.Length != 2)
-                    {
-                        continue;
-                    }
-
-                    var key = kv[0].Trim();
-                    var value = kv[1].Trim();
-
-                    switch (key)
-                    {
-                        case "Topic":
-                            topic.Name = value;
-                            break;
-                        case "TopicId":
-                            topic.TopicId = value;
-                            break;
-                        case "PartitionCount":
-                            topic.PartitionCount = int.Parse(value);
-                            break;
-                        case "ReplicationFactor":
-                            topic.ReplicationFactor = int.Parse(value);
-                            break;
-                    }
+                    topics.Add(currentTopic);
                 }
 
-                topics.Add(topic);
-                currentTopic = topic;
-            }
-            else if (line.Trim().StartsWith("Topic:")) // Partition line
-            {
-                var parts = line.Trim().Split('\t');
-                var partition = new KafkaPartitionDto();
-
-                foreach (var part in parts)
+                // Parse the topic name and initial partition count
+                var topicMatch = TopicNameAndCountRegex().Match(trimmedLine);
+                if (topicMatch.Success)
                 {
-                    var kv = part.Split(KeyValueSeparators, 2);
-                    if (kv.Length != 2)
+                    currentTopic = new KafkaTopicDto
                     {
-                        continue;
-                    }
-
-                    var key = kv[0].Trim();
-                    var value = kv[1].Trim();
-
-                    switch (key)
-                    {
-                        case "Topic":
-                            partition.Topic = value;
-                            break;
-                        case "Partition":
-                            partition.Partition = int.Parse(value);
-                            break;
-                        case "Leader":
-                            partition.Leader = int.Parse(value);
-                            break;
-                        case "Replicas":
-                            partition.Replicas = value
-                                .Split(',')
-                                .Where(v => !string.IsNullOrWhiteSpace(v))
-                                .Select(int.Parse)
-                                .ToList();
-                            break;
-                        case "Isr":
-                            partition.Isr = value
-                                .Split(',')
-                                .Where(v => !string.IsNullOrWhiteSpace(v))
-                                .Select(int.Parse)
-                                .ToList();
-                            break;
-                        case "Elr":
-                            partition.Elr = value;
-                            break;
-                        case "LastKnownElr":
-                            partition.LastKnownElr = value;
-                            break;
-                    }
+                        Name = topicMatch.Groups["name"].Value,
+                        PartitionCount = int.Parse(topicMatch.Groups["partitions"].Value),
+                        ReplicationFactor = 1, // KafkaCat doesn't directly show replication factor here, default to 1
+                        Partitions = new List<KafkaPartitionDto>()
+                    };
                 }
-
-                currentTopic?.Partitions.Add(partition);
             }
+            // Match partitions
+            else if (currentTopic != null)
+            {
+                var partitionMatch = partitionRegex.Match(trimmedLine);
+                if (partitionMatch.Success)
+                {
+                    var partitionId = int.Parse(partitionMatch.Groups["partition"].Value);
+                    var leader = int.Parse(partitionMatch.Groups["leader"].Value);
+
+                    var replicas = partitionMatch.Groups["replicas"].Value
+                        .Split(',')
+                        .Select(s => int.Parse(s.Trim()))
+                        .ToList();
+
+                    var isrs = partitionMatch.Groups["isrs"].Value
+                        .Split(',')
+                        .Select(s => int.Parse(s.Trim()))
+                        .ToList();
+
+                    currentTopic.Partitions.Add(new KafkaPartitionDto
+                        {
+                            Topic = currentTopic.Name,
+                            Partition = partitionId,
+                            Leader = leader,
+                            Replicas = replicas,
+                            Isr = isrs
+                        });
+                }
+            }
+        }
+
+        // Add the last topic if one was in progress
+        if (currentTopic != null)
+        {
+            topics.Add(currentTopic);
         }
 
         return topics;
     }
+
+    [GeneratedRegex(
+        @"^\s*partition\s+(?<partition>\d+),\s+leader\s+(?<leader>\d+),\s+replicas:\s+(?<replicas>[\d, ]+),\s+isrs:\s+(?<isrs>[\d, ]+)",
+        RegexOptions.Compiled)]
+    private static partial Regex PartitionRegex();
+    [GeneratedRegex(@"^topic\s+""(?<name>[^""]+)""\s+with\s+(?<partitions>\d+)\s+partitions:")]
+    private static partial Regex TopicNameAndCountRegex();
 }

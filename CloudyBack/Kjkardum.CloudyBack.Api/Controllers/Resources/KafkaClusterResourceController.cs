@@ -1,6 +1,8 @@
 using Kjkardum.CloudyBack.Application.UseCases.Kafka.Commands.ClusterContainerAction;
 using Kjkardum.CloudyBack.Application.UseCases.Kafka.Commands.Create;
+using Kjkardum.CloudyBack.Application.UseCases.Kafka.Commands.CreateTopic;
 using Kjkardum.CloudyBack.Application.UseCases.Kafka.Commands.Delete;
+using Kjkardum.CloudyBack.Application.UseCases.Kafka.Commands.ProduceTopicMessage;
 using Kjkardum.CloudyBack.Application.UseCases.Kafka.Dtos;
 using Kjkardum.CloudyBack.Application.UseCases.Kafka.Queries.ConsumeMessages;
 using Kjkardum.CloudyBack.Application.UseCases.Kafka.Queries.GetById;
@@ -32,6 +34,30 @@ public class KafkaClusterResourceController(IMediator mediator): ControllerBase
     {
         var result = await mediator.Send(new GetKafkaTopicsByClusterIdQuery { Id = serverId }, cancellationToken);
         return Ok(result);
+    }
+
+    [HttpPost("{serverId:guid}/topics")]
+    public async Task<IActionResult> CreateTopic(
+        Guid serverId,
+        CreateKafkaTopicCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        command.ServerId = serverId;
+        await mediator.Send(command, cancellationToken);
+        return NoContent();
+    }
+
+    [HttpPost("{serverId:guid}/topics/{topicId}")]
+    public async Task<IActionResult> ProduceMessageToTopic(
+        Guid serverId,
+        string topicId,
+        ProduceKafkaTopicMessageCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        command.ServerId = serverId;
+        command.Topic = topicId;
+        await mediator.Send(command, cancellationToken);
+        return NoContent();
     }
 
     [HttpGet("{serverId:guid}/topics/{topicId}/consumeLive")]
