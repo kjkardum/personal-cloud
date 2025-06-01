@@ -23,6 +23,7 @@
       <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" />
       <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
       <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />
+      <PackageReference Include="SharpZipLib" Version="1.4.2" />
       <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.5.2" />
       <PackageReference Include="YamlDotNet" Version="16.3.0" />
     </ItemGroup>
@@ -33,6 +34,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="Containerization\Clients\WebApplication\Dockerfiles\" />
       <Folder Include="Persistence\Migrations\" />
     </ItemGroup>
 
@@ -50,6 +52,9 @@
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
       <None Update="Containerization\Clients\Kafka\FileTemplates\collector.yml">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Containerization\Clients\WebApplication\Dockerfiles\WebApplicationBuilder.Dockerfile">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
     </ItemGroup>

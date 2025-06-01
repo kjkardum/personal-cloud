@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kjkardum.CloudyBack.Infrastructure.Repositories;
 
-public class KafkaRepository(ApplicationDbContext dbContext): IKafkaRepository
+public class KafkaServiceRepository(ApplicationDbContext dbContext): IKafkaServiceRepository
 {
     public async Task<KafkaClusterResource> Create(KafkaClusterResource kafkaClusterResource)
     {
@@ -17,6 +17,8 @@ public class KafkaRepository(ApplicationDbContext dbContext): IKafkaRepository
     public async Task<KafkaClusterResource?> GetById(Guid id)
     {
         var kafkaClusterResource = await dbContext.KafkaClusterResources
+            .Include(t => t.VirtuaLNetworks)!
+            .ThenInclude(t => t.VirtualNetwork)
             .Include(t => t.ResourceGroup)
             .FirstOrDefaultAsync(x => x.Id == id);
 

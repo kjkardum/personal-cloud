@@ -21,7 +21,7 @@ import {
   useGetApiResourcePostgresServerResourceDatabaseByDatabaseIdQuery,
 } from '@/services/rtk/cloudyApi';
 import { viewResourceOfType } from '@/util/navigation';
-import { ConnectionStringsSubpage } from '@/sections/database/postgres/view/ConnectionStringsSubpage';
+import { PostgresConnectionStringsSubpage } from '@/sections/database/postgres/view/PostgresConnectionStringsSubpage';
 import { QueryRunnerSubpage } from '@/sections/database/postgres/view/QueryRunnerSubpage';
 
 export function ViewPostgresDatabasePage() {
@@ -115,7 +115,7 @@ export function ViewPostgresDatabasePage() {
         </Stack>
       </ResourceViewPage>
       <ResourceViewPage title="Connection strings">
-        <ConnectionStringsSubpage resourceBaseData={resourceBaseData} />
+        <PostgresConnectionStringsSubpage resourceBaseData={resourceBaseData} />
       </ResourceViewPage>
       <ResourceViewPage title="Query runner">
         <QueryRunnerSubpage resourceBaseData={resourceBaseData} />

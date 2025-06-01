@@ -819,6 +819,239 @@ paths:
       responses:
         '200':
           description: OK
+  /api/resource/VirtualNetworkResource:
+    get:
+      tags:
+        - VirtualNetworkResource
+      parameters:
+        - name: Page
+          in: query
+          schema:
+            type: integer
+            format: int32
+        - name: PageSize
+          in: query
+          schema:
+            type: integer
+            format: int32
+        - name: FilterBy
+          in: query
+          schema:
+            type: string
+        - name: OrderBy
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/VirtualNetworkSimpleDtoPaginatedResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VirtualNetworkSimpleDtoPaginatedResponse'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/VirtualNetworkSimpleDtoPaginatedResponse'
+    post:
+      tags:
+        - VirtualNetworkResource
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateVirtualNetworkResourceCommand'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/CreateVirtualNetworkResourceCommand'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/CreateVirtualNetworkResourceCommand'
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/VirtualNetworkSimpleDto'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VirtualNetworkSimpleDto'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/VirtualNetworkSimpleDto'
+  '/api/resource/VirtualNetworkResource/{id}':
+    get:
+      tags:
+        - VirtualNetworkResource
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/VirtualNetworkResourceDto'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VirtualNetworkResourceDto'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/VirtualNetworkResourceDto'
+  '/api/resource/VirtualNetworkResource/{id}/connect':
+    post:
+      tags:
+        - VirtualNetworkResource
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConnectVirtualNetworkCommand'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/ConnectVirtualNetworkCommand'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/ConnectVirtualNetworkCommand'
+      responses:
+        '200':
+          description: OK
+  /api/resource/WebApplicationResource:
+    post:
+      tags:
+        - WebApplicationResource
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWebApplicationResourceCommand'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/CreateWebApplicationResourceCommand'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/CreateWebApplicationResourceCommand'
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/WebApplicationResourceDto'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebApplicationResourceDto'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/WebApplicationResourceDto'
+  '/api/resource/WebApplicationResource/{id}':
+    get:
+      tags:
+        - WebApplicationResource
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/WebApplicationResourceDto'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebApplicationResourceDto'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/WebApplicationResourceDto'
+  '/api/resource/WebApplicationResource/{id}/deploymentConfiguration':
+    put:
+      tags:
+        - WebApplicationResource
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateWebApplicationDeploymentConfigurationCommand'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/UpdateWebApplicationDeploymentConfigurationCommand'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/UpdateWebApplicationDeploymentConfigurationCommand'
+      responses:
+        '200':
+          description: OK
+  '/api/resource/WebApplicationResource/{id}/configuration':
+    post:
+      tags:
+        - WebApplicationResource
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ModifyWebApplicationConfigItemCommand'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/ModifyWebApplicationConfigItemCommand'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/ModifyWebApplicationConfigItemCommand'
+      responses:
+        '200':
+          description: OK
+  '/api/resource/WebApplicationResource/{id}/configuration/{configurationKey}':
+    delete:
+      tags:
+        - WebApplicationResource
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: configurationKey
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
 components:
   schemas:
     AuditLogEntry:
@@ -926,6 +1159,16 @@ components:
           items:
             $ref: '#/components/schemas/BaseResourceDto'
       additionalProperties: false
+    ConnectVirtualNetworkCommand:
+      type: object
+      properties:
+        networkId:
+          type: string
+          format: uuid
+        resourceId:
+          type: string
+          format: uuid
+      additionalProperties: false
     ContainerDto:
       type: object
       properties:
@@ -1004,6 +1247,28 @@ components:
         name:
           type: string
       additionalProperties: false
+    CreateVirtualNetworkResourceCommand:
+      type: object
+      properties:
+        resourceGroupId:
+          type: string
+          format: uuid
+        name:
+          type: string
+      additionalProperties: false
+    CreateWebApplicationResourceCommand:
+      type: object
+      properties:
+        webApplicationName:
+          type: string
+        resourceGroupId:
+          type: string
+          format: uuid
+        sourcePath:
+          type: string
+        sourceType:
+          $ref: '#/components/schemas/WebApplicationSourceType'
+      additionalProperties: false
     KafkaClusterResourceDto:
       required:
         - id
@@ -1029,6 +1294,10 @@ components:
           format: uuid
         resourceGroupName:
           type: string
+        virtualNetworks:
+          type: array
+          items:
+            $ref: '#/components/schemas/VirtualNetworkSimpleDto'
       additionalProperties: false
     KafkaPartitionDto:
       type: object
@@ -1083,6 +1352,14 @@ components:
         email:
           type: string
         token:
+          type: string
+      additionalProperties: false
+    ModifyWebApplicationConfigItemCommand:
+      type: object
+      properties:
+        key:
+          type: string
+        value:
           type: string
       additionalProperties: false
     PostgresDatabaseResourceDto:
@@ -1179,6 +1456,10 @@ components:
           format: uuid
         resourceGroupName:
           type: string
+        virtualNetworks:
+          type: array
+          items:
+            $ref: '#/components/schemas/VirtualNetworkSimpleDto'
         postgresDatabaseResources:
           type: array
           items:
@@ -1413,6 +1694,17 @@ components:
         query:
           type: string
       additionalProperties: false
+    UpdateWebApplicationDeploymentConfigurationCommand:
+      type: object
+      properties:
+        buildCommand:
+          type: string
+        startupCommand:
+          type: string
+        port:
+          type: integer
+          format: int32
+      additionalProperties: false
     UserLoginCommand:
       type: object
       properties:
@@ -1442,6 +1734,136 @@ components:
           type: string
           nullable: true
       additionalProperties: false
+    VirtualNetworkResourceDto:
+      required:
+        - id
+        - name
+        - resourceType
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        resourceType:
+          type: string
+        resourceGroupId:
+          type: string
+          format: uuid
+        resourceGroupName:
+          type: string
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/BaseResourceDto'
+      additionalProperties: false
+    VirtualNetworkSimpleDto:
+      required:
+        - id
+        - name
+        - resourceType
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        resourceType:
+          type: string
+      additionalProperties: false
+    VirtualNetworkSimpleDtoPaginatedResponse:
+      required:
+        - data
+      type: object
+      properties:
+        page:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        totalCount:
+          type: integer
+          format: int32
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/VirtualNetworkSimpleDto'
+      additionalProperties: false
+    WebApplicationConfigurationEntryDto:
+      type: object
+      properties:
+        key:
+          type: string
+        value:
+          type: string
+      additionalProperties: false
+    WebApplicationResourceDto:
+      required:
+        - id
+        - name
+        - resourceType
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        resourceType:
+          type: string
+        resourceGroupId:
+          type: string
+          format: uuid
+        resourceGroupName:
+          type: string
+        virtualNetworks:
+          type: array
+          items:
+            $ref: '#/components/schemas/VirtualNetworkSimpleDto'
+        sourcePath:
+          type: string
+        sourceType:
+          $ref: '#/components/schemas/WebApplicationSourceType'
+        buildCommand:
+          type: string
+        startupCommand:
+          type: string
+        healthCheckUrl:
+          type: string
+        port:
+          type: integer
+          format: int32
+        configuration:
+          type: array
+          items:
+            $ref: '#/components/schemas/WebApplicationConfigurationEntryDto'
+          nullable: true
+      additionalProperties: false
+    WebApplicationSourceType:
+      enum:
+        - PublicGitClone
+      type: string
   securitySchemes:
     Bearer:
       type: apiKey

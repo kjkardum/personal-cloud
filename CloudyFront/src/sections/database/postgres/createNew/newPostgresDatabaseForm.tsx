@@ -7,12 +7,14 @@ import {
 import {useForm, zodResolver} from "@mantine/form";
 import {z} from "zod";
 import {useEffect, useState} from "react";
-import {Link, useSearchParams} from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { viewResourceOfType } from '@/util/navigation';
 
 export const NewPostgresDatabaseForm = () => {
     const [createPostgresDatabaseResource] = usePostApiResourcePostgresServerResourceByServerIdDatabaseMutation();
     const [getServerById] = useLazyGetApiResourcePostgresServerResourceByServerIdQuery();
     const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
     useEffect(() => {
         const paramsServerId = searchParams.get('serverId')
         if (paramsServerId && paramsServerId !== serverId) {
@@ -42,8 +44,9 @@ export const NewPostgresDatabaseForm = () => {
         if (!serverId) {
             throw new Error('Server ID is required');
         }
-        await createPostgresDatabaseResource({ createPostgresDatabaseCommand: values, serverId: serverId || '' }).unwrap();
+        const result = await createPostgresDatabaseResource({ createPostgresDatabaseCommand: values, serverId: serverId || '' }).unwrap();
         form.reset();
+        navigate(viewResourceOfType('PostgresDatabaseResource', result.id));
     };
     return (
         <form onSubmit={form.onSubmit(submitForm)}>

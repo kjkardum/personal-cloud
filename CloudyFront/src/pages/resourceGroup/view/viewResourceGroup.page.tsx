@@ -7,7 +7,7 @@ import { ResourceViewAuditLog } from '@/components/ResourceView/ResourceViewAudi
 import { ResourceViewLayout, ResourceViewPage } from '@/components/ResourceView/ResourceViewLayout';
 import { ResourceViewSummary } from '@/components/ResourceView/ResourceViewSummary';
 import { ResourceViewToolbar, ResourceViewToolbarItem } from '@/components/ResourceView/ResourceViewToolbar';
-import { CloudyIconDatabase, defaultIconStyle } from '@/icons/Resources';
+import { CloudyIconDatabase, CloudyIconResourceGroup, defaultIconStyle } from '@/icons/Resources';
 import { useGetApiResourceResourceGroupByIdQuery } from '@/services/rtk/cloudyApi';
 import { viewResourceOfType } from '@/util/navigation';
 import { TypeToIcon, TypeToText } from '@/util/typeToDisplay';
@@ -24,7 +24,7 @@ export function ViewResourceGroupPage() {
     <ResourceViewLayout
       title={
         <>
-          <CloudyIconDatabase style={{ ...defaultIconStyle, marginRight: '4px' }} />
+          <CloudyIconResourceGroup style={{ ...defaultIconStyle, marginRight: '4px' }} />
           {resourceBaseData?.name || 'Loading'}
         </>
       }

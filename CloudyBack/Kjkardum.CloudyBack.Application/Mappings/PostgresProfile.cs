@@ -8,7 +8,11 @@ public class PostgresProfile: Profile
 {
     public PostgresProfile()
     {
-        CreateMap<PostgresServerResource, PostgresServerResourceDto>();
+        CreateMap<PostgresServerResource, PostgresServerResourceDto>()
+            .ForMember(
+                dest => dest.VirtualNetworks,
+                opt => opt.MapFrom(src => src.VirtuaLNetworks!
+                    .Select(vn => vn.VirtualNetwork)));
         CreateMap<PostgresDatabaseResource, PostgresDatabaseSimpleResourceDto>();
         CreateMap<PostgresDatabaseResource, PostgresDatabaseResourceDto>()
             .ForMember(dest => dest.ServerId, opt => opt.MapFrom(src => src.PostgresDatabaseServerResource!.Id))

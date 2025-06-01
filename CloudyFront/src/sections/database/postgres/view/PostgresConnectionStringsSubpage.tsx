@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { DockerNamingHelper } from '@/util/dockerNamingHelper';
 
 
-export const ConnectionStringsSubpage = ({resourceBaseData}: { resourceBaseData:  PostgresDatabaseResourceDto | undefined }) => {
+export const PostgresConnectionStringsSubpage = ({resourceBaseData}: { resourceBaseData:  PostgresDatabaseResourceDto | undefined }) => {
   const [enteredPassword, setEnteredPassword] = useState('');
   const passwordPlaceholder = enteredPassword ? enteredPassword : '***';
   const user = resourceBaseData?.adminUsername || '***';
@@ -13,6 +13,7 @@ export const ConnectionStringsSubpage = ({resourceBaseData}: { resourceBaseData:
   const adonetConnectionString = `Server=${host};Port=${port};Database=${resourceBaseData?.name};User Id=${user};Password=${passwordPlaceholder};`;
   const libpgConnectionString = `postgresql://${user}:${passwordPlaceholder}@${host}:${port}/${resourceBaseData?.name}`;
   const jdbcConnectionString = `jdbc:postgresql://${host}:${port}/${resourceBaseData?.name}?user=${user}&password=${passwordPlaceholder}`;
+  const asyncPgConnectionString = `postgresql+asyncpg://${user}:${passwordPlaceholder}@${host}:${port}/${resourceBaseData?.name}`;
   return (
       <Stack p='sm'>
         <Box>
@@ -58,6 +59,14 @@ export const ConnectionStringsSubpage = ({resourceBaseData}: { resourceBaseData:
           value={adonetConnectionString}
           readOnly
           description="Use for: EntityFramework, Dapper, ADO.NET"
+          placeholder="Input placeholder"
+        />
+        <Textarea
+          variant="filled"
+          label="AsyncPG"
+          value={asyncPgConnectionString}
+          readOnly
+          description="Use for: Python async applications, FastAPI, etc."
           placeholder="Input placeholder"
         />
       </Stack>

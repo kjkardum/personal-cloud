@@ -1,11 +1,10 @@
 import {
-  PostgresDatabaseResourceDto,
   useGetApiResourceBaseResourceByResourceIdAuditLogQuery,
 } from '@/services/rtk/cloudyApi';
 import React, { useState } from 'react';
 import { DataTable } from 'mantine-datatable';
 
-export const ResourceViewAuditLog =  ({resourceBaseData}: { resourceBaseData:  PostgresDatabaseResourceDto | undefined }) => {
+export const ResourceViewAuditLog =  ({resourceBaseData}: { resourceBaseData: {id: string} | undefined }) => {
   const [auditPage, setAuditPage] = useState(1);
   const { data: resourceAuditLogPaginated } = useGetApiResourceBaseResourceByResourceIdAuditLogQuery({
     resourceId: resourceBaseData?.id || '',

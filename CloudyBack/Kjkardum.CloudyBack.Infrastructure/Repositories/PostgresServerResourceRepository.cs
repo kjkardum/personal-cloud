@@ -19,6 +19,8 @@ public class PostgresServerResourceRepository(ApplicationDbContext dbContext): I
     public async Task<PostgresServerResource?> GetById(Guid id)
     {
         var postgresServerResource = await dbContext.PostgresServerResources
+            .Include(t => t.VirtuaLNetworks)!
+            .ThenInclude(t => t.VirtualNetwork)
             .Include(t => t.ResourceGroup)
             .Include(t => t.PostgresDatabaseResources)
             .FirstOrDefaultAsync(x => x.Id == id);

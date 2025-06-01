@@ -8,6 +8,10 @@ public class KafkaProfile: Profile
 {
     public KafkaProfile()
     {
-        CreateMap<KafkaClusterResource, KafkaClusterResourceDto>();
+        CreateMap<KafkaClusterResource, KafkaClusterResourceDto>()
+            .ForMember(
+                dest => dest.VirtualNetworks,
+                opt => opt.MapFrom(src => src.VirtuaLNetworks!
+                    .Select(vn => vn.VirtualNetwork)));
     }
 }

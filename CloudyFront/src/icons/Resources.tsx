@@ -1,12 +1,12 @@
 import React from 'react';
 import {
-  IconBrowser,
+  IconBrowser, IconCloudNetwork,
   IconDatabase,
   IconDatabaseShare,
   IconFolder,
   IconHome, IconMessage,
   IconPackage,
-  IconProps,
+  IconProps, IconTopologyRing2,
 } from '@tabler/icons-react';
 import {rem, useMantineColorScheme, useMantineTheme} from '@mantine/core';
 
@@ -50,4 +50,15 @@ export const CloudyIconHomepage = (props: IconProps) => {
 export const CloudyIconKafkaResource = (props: IconProps) => {
   const  theme = useMantineTheme();
   return <IconMessage {...defaultIconProps} color={theme.colors.blue[6]} {...props} />;
+}
+
+export const CloudyIconVirtualNetworkResource = (props: IconProps) => {
+  const  theme = useMantineTheme();
+  return <IconTopologyRing2 {...defaultIconProps} color={theme.colors.green[6]} {...props} />;
+}
+
+export const CloudyIconNetwork = (props: IconProps) => {
+  const  theme = useMantineTheme();
+  return <IconCloudNetwork {...defaultIconProps} color={theme.colors.blue[6]} {...props} />;
+
 }

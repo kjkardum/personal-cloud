@@ -20,6 +20,9 @@ export function DashboardButtonNewResource() {
     alert('Message broker selector is not implemented yet. Navigating to kafka creation');
     navigate('/kafka/new/cluster');
   }
+  const goToNewWebApplicationPage = () => {
+    navigate('webApplication/new')
+  }
   return (
     <>
       <CreateNewDatabaseDialog open={databaseDialogOpened} onClose={closeDatabaseDialog} />
@@ -37,7 +40,7 @@ export function DashboardButtonNewResource() {
           </DashboardButton>
         </Menu.Target>
         <Menu.Dropdown>
-          <Menu.Item leftSection={<CloudyIconWebApplication />}>Web application</Menu.Item>
+          <Menu.Item leftSection={<CloudyIconWebApplication />} onClick={goToNewWebApplicationPage}>Web application</Menu.Item>
           <Menu.Item leftSection={<CloudyIconDatabase />} onClick={openDatabaseDialog}>Database</Menu.Item>
           <Menu.Item leftSection={<CloudyIconKafkaResource />} onClick={openMessageBrokerDialog}>Message broker</Menu.Item>
           <Menu.Item

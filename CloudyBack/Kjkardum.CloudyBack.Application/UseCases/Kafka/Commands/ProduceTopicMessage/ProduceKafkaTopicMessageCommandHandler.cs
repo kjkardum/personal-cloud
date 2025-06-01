@@ -6,13 +6,13 @@ using MediatR;
 namespace Kjkardum.CloudyBack.Application.UseCases.Kafka.Commands.ProduceTopicMessage;
 
 public class ProduceKafkaTopicMessageCommandHandler(
-    IKafkaRepository kafkaRepository,
+    IKafkaServiceRepository kafkaServiceRepository,
     IBaseResourceRepository baseResourceRepository,
     IKafkaClient kafkaClient) : IRequestHandler<ProduceKafkaTopicMessageCommand>
 {
     public async Task Handle(ProduceKafkaTopicMessageCommand request, CancellationToken cancellationToken)
     {
-        var kafkaClusterResource = await kafkaRepository.GetById(request.ServerId);
+        var kafkaClusterResource = await kafkaServiceRepository.GetById(request.ServerId);
         if (kafkaClusterResource is null)
         {
             throw new KeyNotFoundException($"Kafka cluster with id {request.ServerId} not found.");

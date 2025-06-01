@@ -117,6 +117,51 @@ namespace Kjkardum.CloudyBack.Infrastructure.Persistence.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("Kjkardum.CloudyBack.Domain.Entities.VirtualNetworkConnection", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ResourceId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("VirtualNetworkId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ResourceId");
+
+                    b.HasIndex("VirtualNetworkId");
+
+                    b.ToTable("VirtualNetworkConnections");
+                });
+
+            modelBuilder.Entity("Kjkardum.CloudyBack.Domain.Entities.WebApplicationConfigurationEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Key")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("WebApplicationResourceId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("WebApplicationResourceId");
+
+                    b.ToTable("WebApplicationConfigurationEntries");
+                });
+
             modelBuilder.Entity("Kjkardum.CloudyBack.Domain.Entities.ResourceGroup", b =>
                 {
                     b.HasBaseType("Kjkardum.CloudyBack.Domain.Entities.BaseResource");
@@ -134,24 +179,6 @@ namespace Kjkardum.CloudyBack.Infrastructure.Persistence.Migrations
                     b.HasIndex("ResourceGroupId");
 
                     b.ToTable((string)null);
-                });
-
-            modelBuilder.Entity("Kjkardum.CloudyBack.Domain.Entities.KafkaClusterResource", b =>
-                {
-                    b.HasBaseType("Kjkardum.CloudyBack.Domain.Entities.ResourceGroupedBaseResource");
-
-                    b.Property<int>("Port")
-                        .HasColumnType("int");
-
-                    b.Property<string>("SaPassword")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("SaUsername")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.ToTable("KafkaClusterResources");
                 });
 
             modelBuilder.Entity("Kjkardum.CloudyBack.Domain.Entities.PostgresDatabaseResource", b =>
@@ -178,9 +205,41 @@ namespace Kjkardum.CloudyBack.Infrastructure.Persistence.Migrations
                     b.ToTable("PostgresDatabaseResources");
                 });
 
-            modelBuilder.Entity("Kjkardum.CloudyBack.Domain.Entities.PostgresServerResource", b =>
+            modelBuilder.Entity("Kjkardum.CloudyBack.Domain.Entities.VirtualNetworkResource", b =>
                 {
                     b.HasBaseType("Kjkardum.CloudyBack.Domain.Entities.ResourceGroupedBaseResource");
+
+                    b.ToTable("VirtualNetworkResources");
+                });
+
+            modelBuilder.Entity("Kjkardum.CloudyBack.Domain.Entities.VirtualNetworkableBaseResource", b =>
+                {
+                    b.HasBaseType("Kjkardum.CloudyBack.Domain.Entities.ResourceGroupedBaseResource");
+
+                    b.ToTable((string)null);
+                });
+
+            modelBuilder.Entity("Kjkardum.CloudyBack.Domain.Entities.KafkaClusterResource", b =>
+                {
+                    b.HasBaseType("Kjkardum.CloudyBack.Domain.Entities.VirtualNetworkableBaseResource");
+
+                    b.Property<int>("Port")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SaPassword")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SaUsername")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.ToTable("KafkaClusterResources");
+                });
+
+            modelBuilder.Entity("Kjkardum.CloudyBack.Domain.Entities.PostgresServerResource", b =>
+                {
+                    b.HasBaseType("Kjkardum.CloudyBack.Domain.Entities.VirtualNetworkableBaseResource");
 
                     b.Property<int>("Port")
                         .HasColumnType("int");
@@ -196,6 +255,35 @@ namespace Kjkardum.CloudyBack.Infrastructure.Persistence.Migrations
                     b.ToTable("PostgresServerResources");
                 });
 
+            modelBuilder.Entity("Kjkardum.CloudyBack.Domain.Entities.WebApplicationResource", b =>
+                {
+                    b.HasBaseType("Kjkardum.CloudyBack.Domain.Entities.VirtualNetworkableBaseResource");
+
+                    b.Property<string>("BuildCommand")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("HealthCheckUrl")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Port")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SourcePath")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("SourceType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("StartupCommand")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.ToTable("WebApplicationResources");
+                });
+
             modelBuilder.Entity("Kjkardum.CloudyBack.Domain.Entities.AuditLogEntry", b =>
                 {
                     b.HasOne("Kjkardum.CloudyBack.Domain.Entities.BaseResource", "Resource")
@@ -205,6 +293,36 @@ namespace Kjkardum.CloudyBack.Infrastructure.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("Resource");
+                });
+
+            modelBuilder.Entity("Kjkardum.CloudyBack.Domain.Entities.VirtualNetworkConnection", b =>
+                {
+                    b.HasOne("Kjkardum.CloudyBack.Domain.Entities.VirtualNetworkableBaseResource", "Resource")
+                        .WithMany("VirtuaLNetworks")
+                        .HasForeignKey("ResourceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Kjkardum.CloudyBack.Domain.Entities.VirtualNetworkResource", "VirtualNetwork")
+                        .WithMany("NetworkConnections")
+                        .HasForeignKey("VirtualNetworkId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Resource");
+
+                    b.Navigation("VirtualNetwork");
+                });
+
+            modelBuilder.Entity("Kjkardum.CloudyBack.Domain.Entities.WebApplicationConfigurationEntry", b =>
+                {
+                    b.HasOne("Kjkardum.CloudyBack.Domain.Entities.WebApplicationResource", "WebApplicationResource")
+                        .WithMany("Configuration")
+                        .HasForeignKey("WebApplicationResourceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("WebApplicationResource");
                 });
 
             modelBuilder.Entity("Kjkardum.CloudyBack.Domain.Entities.ResourceGroupedBaseResource", b =>
@@ -239,9 +357,24 @@ namespace Kjkardum.CloudyBack.Infrastructure.Persistence.Migrations
                     b.Navigation("Resources");
                 });
 
+            modelBuilder.Entity("Kjkardum.CloudyBack.Domain.Entities.VirtualNetworkResource", b =>
+                {
+                    b.Navigation("NetworkConnections");
+                });
+
+            modelBuilder.Entity("Kjkardum.CloudyBack.Domain.Entities.VirtualNetworkableBaseResource", b =>
+                {
+                    b.Navigation("VirtuaLNetworks");
+                });
+
             modelBuilder.Entity("Kjkardum.CloudyBack.Domain.Entities.PostgresServerResource", b =>
                 {
                     b.Navigation("PostgresDatabaseResources");
+                });
+
+            modelBuilder.Entity("Kjkardum.CloudyBack.Domain.Entities.WebApplicationResource", b =>
+                {
+                    b.Navigation("Configuration");
                 });
 #pragma warning restore 612, 618
         }

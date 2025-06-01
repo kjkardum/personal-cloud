@@ -9,7 +9,7 @@ using System.Security.Cryptography;
 namespace Kjkardum.CloudyBack.Application.UseCases.Kafka.Commands.Create;
 
 public class CreateKafkaClusterCommandHandler(
-    IKafkaRepository repository,
+    IKafkaServiceRepository serviceRepository,
     IBaseResourceRepository baseResourceRepository,
     IKafkaClient kafkaClient,
     IObservabilityClient observabilityClient,
@@ -35,7 +35,7 @@ public class CreateKafkaClusterCommandHandler(
             SaUsername = "CloudyAdmin",
             SaPassword = password
         };
-        kafkaClusterResource = await repository.Create(kafkaClusterResource);
+        kafkaClusterResource = await serviceRepository.Create(kafkaClusterResource);
 
         await observabilityClient.AttachCollector(kafkaClusterResource.Id, request.ServerName);
 

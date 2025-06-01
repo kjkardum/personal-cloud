@@ -2,7 +2,7 @@ import {
   CloudyIconDatabase,
   CloudyIconDatabaseServer,
   CloudyIconKafkaResource,
-  CloudyIconResourceGroup,
+  CloudyIconResourceGroup, CloudyIconVirtualNetworkResource, CloudyIconWebApplication,
 } from '@/icons/Resources';
 import {ReactElement} from "react";
 
@@ -11,6 +11,8 @@ export const TypeToIcon: {[key: string]: ReactElement} = {
     'PostgresDatabaseResource': <CloudyIconDatabase />,
     'ResourceGroup': <CloudyIconResourceGroup />,
     'KafkaClusterResource': <CloudyIconKafkaResource />,
+    'VirtualNetworkResource': <CloudyIconVirtualNetworkResource />,
+    'WebApplicationResource': <CloudyIconWebApplication />,
 }
 
 export const TypeToText: {[key: string]: string} = {
@@ -18,4 +20,6 @@ export const TypeToText: {[key: string]: string} = {
     'PostgresDatabaseResource': 'Postgres Database',
     'ResourceGroup': 'Resource Group',
     'KafkaClusterResource': 'Kafka Cluster',
+    'VirtualNetworkResource': 'Virtual Network',
+    'WebApplicationResource': 'Web Application',
 }

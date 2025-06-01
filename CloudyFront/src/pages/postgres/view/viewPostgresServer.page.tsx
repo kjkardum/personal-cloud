@@ -26,6 +26,7 @@ import { PredefinedLokiQuery, PredefinedPrometheusQuery, PrometheusResultDto, us
 import { viewResourceOfType } from '@/util/navigation';
 import { ResourceViewSummary } from '@/components/ResourceView/ResourceViewSummary';
 import { ResourceViewAuditLog } from '@/components/ResourceView/ResourceViewAuditLog';
+import { PostgresServerNetworkSubpage } from '@/sections/database/postgres/view/PostgresServerNetworkSubpage';
 
 export const ViewPostgresServerPage = () => {
   const navigate = useNavigate();
@@ -188,7 +189,9 @@ export const ViewPostgresServerPage = () => {
         <ResourceViewAuditLog resourceBaseData={resourceBaseData} />
       </ResourceViewPage>
       <ResourceViewPage title="Backup">Soon</ResourceViewPage>
-      <ResourceViewPage title="Networking">Soon</ResourceViewPage>
+      <ResourceViewPage title="Networking">
+        {resourceBaseData ? <PostgresServerNetworkSubpage resourceBaseData={resourceBaseData} /> : 'Loading...'}
+      </ResourceViewPage>
       <ResourceViewPage title="Logs">Soon</ResourceViewPage>
     </ResourceViewLayout>
   );

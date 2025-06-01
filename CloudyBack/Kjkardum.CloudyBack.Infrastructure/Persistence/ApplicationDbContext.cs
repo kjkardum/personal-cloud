@@ -10,11 +10,18 @@ namespace Kjkardum.CloudyBack.Infrastructure.Persistence
         public DbSet<BaseResource> Resources => Set<BaseResource>();
         public DbSet<AuditLogEntry> AuditLogEntries => Set<AuditLogEntry>();
         public DbSet<ResourceGroupedBaseResource> ResourceGroupedBaseResources => Set<ResourceGroupedBaseResource>();
+        public DbSet<VirtualNetworkResource> VirtualNetworkResources => Set<VirtualNetworkResource>();
+        public DbSet<VirtualNetworkConnection> VirtualNetworkConnections => Set<VirtualNetworkConnection>();
+        public DbSet<VirtualNetworkableBaseResource> VirtualNetworkableBaseResources
+            => Set<VirtualNetworkableBaseResource>();
 
         public DbSet<ResourceGroup> ResourceGroups => Set<ResourceGroup>();
         public DbSet<PostgresServerResource> PostgresServerResources => Set<PostgresServerResource>();
         public DbSet<PostgresDatabaseResource> PostgresDatabaseResources => Set<PostgresDatabaseResource>();
         public DbSet<KafkaClusterResource> KafkaClusterResources => Set<KafkaClusterResource>();
+        public DbSet<WebApplicationResource> WebApplicationResources => Set<WebApplicationResource>();
+        public DbSet<WebApplicationConfigurationEntry> WebApplicationConfigurationEntries
+            => Set<WebApplicationConfigurationEntry>();
 
         public DbSet<User> Users => Set<User>();
 

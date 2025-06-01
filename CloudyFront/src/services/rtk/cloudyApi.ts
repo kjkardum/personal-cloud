@@ -9,6 +9,8 @@ export const addTagTypes = [
   'ResourceGroupedResource',
   'Status',
   'TenantManagement',
+  'VirtualNetworkResource',
+  'WebApplicationResource',
 ] as const;
 const injectedRtkApi = api
   .enhanceEndpoints({
@@ -338,6 +340,100 @@ const injectedRtkApi = api
         }),
         invalidatesTags: ['TenantManagement'],
       }),
+      getApiResourceVirtualNetworkResource: build.query<
+        GetApiResourceVirtualNetworkResourceApiResponse,
+        GetApiResourceVirtualNetworkResourceApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/resource/VirtualNetworkResource`,
+          params: {
+            Page: queryArg.page,
+            PageSize: queryArg.pageSize,
+            FilterBy: queryArg.filterBy,
+            OrderBy: queryArg.orderBy,
+          },
+        }),
+        providesTags: ['VirtualNetworkResource'],
+      }),
+      postApiResourceVirtualNetworkResource: build.mutation<
+        PostApiResourceVirtualNetworkResourceApiResponse,
+        PostApiResourceVirtualNetworkResourceApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/resource/VirtualNetworkResource`,
+          method: 'POST',
+          body: queryArg.createVirtualNetworkResourceCommand,
+        }),
+        invalidatesTags: ['VirtualNetworkResource'],
+      }),
+      getApiResourceVirtualNetworkResourceById: build.query<
+        GetApiResourceVirtualNetworkResourceByIdApiResponse,
+        GetApiResourceVirtualNetworkResourceByIdApiArg
+      >({
+        query: (queryArg) => ({ url: `/api/resource/VirtualNetworkResource/${queryArg.id}` }),
+        providesTags: ['VirtualNetworkResource'],
+      }),
+      postApiResourceVirtualNetworkResourceByIdConnect: build.mutation<
+        PostApiResourceVirtualNetworkResourceByIdConnectApiResponse,
+        PostApiResourceVirtualNetworkResourceByIdConnectApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/resource/VirtualNetworkResource/${queryArg.id}/connect`,
+          method: 'POST',
+          body: queryArg.connectVirtualNetworkCommand,
+        }),
+        invalidatesTags: ['VirtualNetworkResource'],
+      }),
+      postApiResourceWebApplicationResource: build.mutation<
+        PostApiResourceWebApplicationResourceApiResponse,
+        PostApiResourceWebApplicationResourceApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/resource/WebApplicationResource`,
+          method: 'POST',
+          body: queryArg.createWebApplicationResourceCommand,
+        }),
+        invalidatesTags: ['WebApplicationResource'],
+      }),
+      getApiResourceWebApplicationResourceById: build.query<
+        GetApiResourceWebApplicationResourceByIdApiResponse,
+        GetApiResourceWebApplicationResourceByIdApiArg
+      >({
+        query: (queryArg) => ({ url: `/api/resource/WebApplicationResource/${queryArg.id}` }),
+        providesTags: ['WebApplicationResource'],
+      }),
+      putApiResourceWebApplicationResourceByIdDeploymentConfiguration: build.mutation<
+        PutApiResourceWebApplicationResourceByIdDeploymentConfigurationApiResponse,
+        PutApiResourceWebApplicationResourceByIdDeploymentConfigurationApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/resource/WebApplicationResource/${queryArg.id}/deploymentConfiguration`,
+          method: 'PUT',
+          body: queryArg.updateWebApplicationDeploymentConfigurationCommand,
+        }),
+        invalidatesTags: ['WebApplicationResource'],
+      }),
+      postApiResourceWebApplicationResourceByIdConfiguration: build.mutation<
+        PostApiResourceWebApplicationResourceByIdConfigurationApiResponse,
+        PostApiResourceWebApplicationResourceByIdConfigurationApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/resource/WebApplicationResource/${queryArg.id}/configuration`,
+          method: 'POST',
+          body: queryArg.modifyWebApplicationConfigItemCommand,
+        }),
+        invalidatesTags: ['WebApplicationResource'],
+      }),
+      deleteApiResourceWebApplicationResourceByIdConfigurationAndConfigurationKey: build.mutation<
+        DeleteApiResourceWebApplicationResourceByIdConfigurationAndConfigurationKeyApiResponse,
+        DeleteApiResourceWebApplicationResourceByIdConfigurationAndConfigurationKeyApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/resource/WebApplicationResource/${queryArg.id}/configuration/${queryArg.configurationKey}`,
+          method: 'DELETE',
+        }),
+        invalidatesTags: ['WebApplicationResource'],
+      }),
     }),
     overrideExisting: false,
   });
@@ -503,6 +599,55 @@ export type DeleteApiTenantManagementDeleteUserByIdApiResponse = unknown;
 export type DeleteApiTenantManagementDeleteUserByIdApiArg = {
   id: string;
 };
+export type GetApiResourceVirtualNetworkResourceApiResponse =
+  /** status 200 OK */ VirtualNetworkSimpleDtoPaginatedResponse;
+export type GetApiResourceVirtualNetworkResourceApiArg = {
+  page?: number;
+  pageSize?: number;
+  filterBy?: string;
+  orderBy?: string;
+};
+export type PostApiResourceVirtualNetworkResourceApiResponse =
+  /** status 200 OK */ VirtualNetworkSimpleDto;
+export type PostApiResourceVirtualNetworkResourceApiArg = {
+  createVirtualNetworkResourceCommand: CreateVirtualNetworkResourceCommand;
+};
+export type GetApiResourceVirtualNetworkResourceByIdApiResponse =
+  /** status 200 OK */ VirtualNetworkResourceDto;
+export type GetApiResourceVirtualNetworkResourceByIdApiArg = {
+  id: string;
+};
+export type PostApiResourceVirtualNetworkResourceByIdConnectApiResponse = unknown;
+export type PostApiResourceVirtualNetworkResourceByIdConnectApiArg = {
+  id: string;
+  connectVirtualNetworkCommand: ConnectVirtualNetworkCommand;
+};
+export type PostApiResourceWebApplicationResourceApiResponse =
+  /** status 200 OK */ WebApplicationResourceDto;
+export type PostApiResourceWebApplicationResourceApiArg = {
+  createWebApplicationResourceCommand: CreateWebApplicationResourceCommand;
+};
+export type GetApiResourceWebApplicationResourceByIdApiResponse =
+  /** status 200 OK */ WebApplicationResourceDto;
+export type GetApiResourceWebApplicationResourceByIdApiArg = {
+  id: string;
+};
+export type PutApiResourceWebApplicationResourceByIdDeploymentConfigurationApiResponse = unknown;
+export type PutApiResourceWebApplicationResourceByIdDeploymentConfigurationApiArg = {
+  id: string;
+  updateWebApplicationDeploymentConfigurationCommand: UpdateWebApplicationDeploymentConfigurationCommand;
+};
+export type PostApiResourceWebApplicationResourceByIdConfigurationApiResponse = unknown;
+export type PostApiResourceWebApplicationResourceByIdConfigurationApiArg = {
+  id: string;
+  modifyWebApplicationConfigItemCommand: ModifyWebApplicationConfigItemCommand;
+};
+export type DeleteApiResourceWebApplicationResourceByIdConfigurationAndConfigurationKeyApiResponse =
+  unknown;
+export type DeleteApiResourceWebApplicationResourceByIdConfigurationAndConfigurationKeyApiArg = {
+  id: string;
+  configurationKey: string;
+};
 export type LoggedInUserDto = {
   id?: string;
   email?: string;
@@ -601,6 +746,13 @@ export type QueryLokiQuery = {
   timeout?: string | null;
   limit?: number | null;
 };
+export type VirtualNetworkSimpleDto = {
+  id: string;
+  name: string;
+  createdAt?: string;
+  updatedAt?: string;
+  resourceType: string;
+};
 export type KafkaClusterResourceDto = {
   id: string;
   name: string;
@@ -609,6 +761,7 @@ export type KafkaClusterResourceDto = {
   resourceType: string;
   resourceGroupId?: string;
   resourceGroupName?: string;
+  virtualNetworks?: VirtualNetworkSimpleDto[];
 };
 export type KafkaPartitionDto = {
   topic?: string;
@@ -655,6 +808,7 @@ export type PostgresServerResourceDto = {
   resourceType: string;
   resourceGroupId?: string;
   resourceGroupName?: string;
+  virtualNetworks?: VirtualNetworkSimpleDto[];
   postgresDatabaseResources?: PostgresDatabaseSimpleResourceDto[];
 };
 export type PostgresServerResourceDtoPaginatedResponse = {
@@ -735,6 +889,66 @@ export type UserRegistrationCommandRead = {
 export type UserUpdateCommand = {
   newPassword?: string | null;
 };
+export type VirtualNetworkSimpleDtoPaginatedResponse = {
+  page?: number;
+  pageSize?: number;
+  totalCount?: number;
+  data: VirtualNetworkSimpleDto[];
+};
+export type CreateVirtualNetworkResourceCommand = {
+  resourceGroupId?: string;
+  name?: string;
+};
+export type VirtualNetworkResourceDto = {
+  id: string;
+  name: string;
+  createdAt?: string;
+  updatedAt?: string;
+  resourceType: string;
+  resourceGroupId?: string;
+  resourceGroupName?: string;
+  resources?: BaseResourceDto[];
+};
+export type ConnectVirtualNetworkCommand = {
+  networkId?: string;
+  resourceId?: string;
+};
+export type WebApplicationConfigurationEntryDto = {
+  key?: string;
+  value?: string;
+};
+export type WebApplicationResourceDto = {
+  id: string;
+  name: string;
+  createdAt?: string;
+  updatedAt?: string;
+  resourceType: string;
+  resourceGroupId?: string;
+  resourceGroupName?: string;
+  virtualNetworks?: VirtualNetworkSimpleDto[];
+  sourcePath?: string;
+  sourceType?: WebApplicationSourceType;
+  buildCommand?: string;
+  startupCommand?: string;
+  healthCheckUrl?: string;
+  port?: number;
+  configuration?: WebApplicationConfigurationEntryDto[] | null;
+};
+export type CreateWebApplicationResourceCommand = {
+  webApplicationName?: string;
+  resourceGroupId?: string;
+  sourcePath?: string;
+  sourceType?: WebApplicationSourceType;
+};
+export type UpdateWebApplicationDeploymentConfigurationCommand = {
+  buildCommand?: string;
+  startupCommand?: string;
+  port?: number;
+};
+export type ModifyWebApplicationConfigItemCommand = {
+  key?: string;
+  value?: string;
+};
 export enum PredefinedPrometheusQuery {
   PostgresProcessesCount = 'PostgresProcessesCount',
   PostgresEntriesInserted = 'PostgresEntriesInserted',
@@ -744,6 +958,9 @@ export enum PredefinedPrometheusQuery {
 }
 export enum PredefinedLokiQuery {
   Demo = 'Demo',
+}
+export enum WebApplicationSourceType {
+  PublicGitClone = 'PublicGitClone',
 }
 export const {
   usePostApiAuthenticationLoginMutation,
@@ -791,4 +1008,16 @@ export const {
   usePostApiTenantManagementCreateUserMutation,
   usePutApiTenantManagementUpdateUserByIdMutation,
   useDeleteApiTenantManagementDeleteUserByIdMutation,
+  useGetApiResourceVirtualNetworkResourceQuery,
+  useLazyGetApiResourceVirtualNetworkResourceQuery,
+  usePostApiResourceVirtualNetworkResourceMutation,
+  useGetApiResourceVirtualNetworkResourceByIdQuery,
+  useLazyGetApiResourceVirtualNetworkResourceByIdQuery,
+  usePostApiResourceVirtualNetworkResourceByIdConnectMutation,
+  usePostApiResourceWebApplicationResourceMutation,
+  useGetApiResourceWebApplicationResourceByIdQuery,
+  useLazyGetApiResourceWebApplicationResourceByIdQuery,
+  usePutApiResourceWebApplicationResourceByIdDeploymentConfigurationMutation,
+  usePostApiResourceWebApplicationResourceByIdConfigurationMutation,
+  useDeleteApiResourceWebApplicationResourceByIdConfigurationAndConfigurationKeyMutation,
 } = injectedRtkApi;
