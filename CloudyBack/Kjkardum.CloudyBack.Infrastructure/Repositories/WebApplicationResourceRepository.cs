@@ -17,6 +17,7 @@ public class WebApplicationResourceRepository(ApplicationDbContext dbContext): I
     public async Task<WebApplicationResource?> GetById(Guid id)
     {
         var webApplicationResource = await dbContext.WebApplicationResources
+            .Include(t => t.PublicProxyConfigurations)
             .Include(t => t.VirtuaLNetworks)!
             .ThenInclude(t => t.VirtualNetwork)
             .Include(t => t.ResourceGroup)

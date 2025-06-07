@@ -12,6 +12,7 @@ namespace Kjkardum.CloudyBack.Infrastructure.Persistence
         public DbSet<ResourceGroupedBaseResource> ResourceGroupedBaseResources => Set<ResourceGroupedBaseResource>();
         public DbSet<VirtualNetworkResource> VirtualNetworkResources => Set<VirtualNetworkResource>();
         public DbSet<VirtualNetworkConnection> VirtualNetworkConnections => Set<VirtualNetworkConnection>();
+        public DbSet<PublicProxyConfiguration> PublicProxyConfigurations => Set<PublicProxyConfiguration>();
         public DbSet<VirtualNetworkableBaseResource> VirtualNetworkableBaseResources
             => Set<VirtualNetworkableBaseResource>();
 

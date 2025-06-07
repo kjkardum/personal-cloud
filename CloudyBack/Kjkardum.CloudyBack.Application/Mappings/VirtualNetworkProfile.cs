@@ -17,6 +17,7 @@ public class VirtualNetworkProfile: Profile
                 opt => opt.MapFrom(src => src.VirtuaLNetworks!
                     .Select(vn => vn.VirtualNetwork)));
         CreateMap<VirtualNetworkResource, VirtualNetworkSimpleDto>();
+        CreateMap<PublicProxyConfiguration, PublicProxyConfigurationDto>();
 
         CreateMap<VirtualNetworkResource, VirtualNetworkResourceDto>()
             .ForMember(

@@ -50,6 +50,20 @@ public class VirtualNetworkConnection
 public abstract class VirtualNetworkableBaseResource : ResourceGroupedBaseResource
 {
     public ICollection<VirtualNetworkConnection>? VirtuaLNetworks { get; set; }
+    public ICollection<PublicProxyConfiguration>? PublicProxyConfigurations { get; set; }
+    public abstract int GetProxyablePort();
+    public abstract bool IsHttpProtocol();
+}
+
+public class PublicProxyConfiguration
+{
+    public Guid Id { get; set; }
+    public bool UseHttps { get; set; }
+    public string Domain { get; set; }
+    public int Port { get; set; }
+
+    public Guid VirtualNetworkableBaseResourceId { get; set; }
+    public VirtualNetworkableBaseResource? VirtualNetworkableBaseResource { get; set; }
 }
 
 public class PostgresServerResource: VirtualNetworkableBaseResource
@@ -59,6 +73,8 @@ public class PostgresServerResource: VirtualNetworkableBaseResource
 
     public List<PostgresDatabaseResource>? PostgresDatabaseResources { get; set; }
     public int Port { get; set; }
+    public override int GetProxyablePort() => 5432;
+    public override bool IsHttpProtocol() => false;
 }
 
 public class PostgresDatabaseResource: ResourceGroupedBaseResource
@@ -76,6 +92,9 @@ public class KafkaClusterResource: VirtualNetworkableBaseResource
     public required string SaUsername { get; set; }
     public required string SaPassword { get; set; }
     public int Port { get; set; }
+    public override int GetProxyablePort() => 9092;
+
+    public override bool IsHttpProtocol() => false;
 }
 
 public class WebApplicationResource: VirtualNetworkableBaseResource
@@ -87,6 +106,9 @@ public class WebApplicationResource: VirtualNetworkableBaseResource
     public string HealthCheckUrl { get; set; } = string.Empty;
     public int Port { get; set; }
     public ICollection<WebApplicationConfigurationEntry>? Configuration { get; set; }
+    public override int GetProxyablePort() => Port;
+
+    public override bool IsHttpProtocol() => true;
 }
 
 public class WebApplicationConfigurationEntry

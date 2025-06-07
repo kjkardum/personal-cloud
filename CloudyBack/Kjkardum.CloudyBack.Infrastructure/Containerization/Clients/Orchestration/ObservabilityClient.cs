@@ -141,7 +141,8 @@ public class ObservabilityClient(
         var yamlToEditFolder = Path.Combine(
             currentDirectory,
             "Containerization/Clients/Orchestration/FileTemplates");
-        var yamlToEdit = Path.Combine(yamlToEditFolder, "prometheus_edited.yml");
+        var yamlToEdit = DockerLocalStorageHelper.FileCopyLocation(
+            Path.Combine(yamlToEditFolder, "prometheus_edited.yml"));
         if (!duplicateFirst)
         {
             return yamlToEdit;
@@ -175,9 +176,9 @@ public class ObservabilityClient(
         var yamlTemplate = Path.Combine(
             currentDirectory,
             "Containerization/Clients/Orchestration/FileTemplates/web_template.yml");
-        var yamlDestination = Path.Combine(
+        var yamlDestination = DockerLocalStorageHelper.FileCopyLocation(Path.Combine(
             currentDirectory,
-            "Containerization/Clients/Orchestration/FileTemplates/web.yml");
+            "Containerization/Clients/Orchestration/FileTemplates/web.yml"));
         //first copy into web.yml then just string.format as there is {0} for bcrypt hashed password of password
         File.Copy(yamlTemplate, yamlDestination, true);
         var yaml = await File.ReadAllTextAsync(yamlDestination);

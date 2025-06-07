@@ -34,6 +34,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="Containerization\Clients\ReverseProxy\Dockerfiles\" />
       <Folder Include="Containerization\Clients\WebApplication\Dockerfiles\" />
       <Folder Include="Persistence\Migrations\" />
     </ItemGroup>
@@ -55,6 +56,12 @@
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
       <None Update="Containerization\Clients\WebApplication\Dockerfiles\WebApplicationBuilder.Dockerfile">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Containerization\Clients\ReverseProxy\Dockerfiles\Caddy.Dockerfile">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Containerization\Clients\ReverseProxy\FileTemplates\Caddy.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
     </ItemGroup>

@@ -6,9 +6,29 @@ services:
       - ACCEPT_EULA=Y
       - MSSQL_SA_PASSWORD=Passw0rd_
     volumes:
-      - db-data:/var/opt/mssql
-    ports:
-      - "1433:1433"
+      - cloudyadminvolume:/var/opt/mssql
     container_name: cloudy-db
+    networks:
+        - cloudyadminnetwork
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Server=db;Database=CloudyDb;User Id=sa;Password=Passw0rd_;
+    volumes:
+      - ./config_storage:/app/persist
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "80:8080"
+    depends_on:
+      - db
+    container_name: cloudyadminapp
+    networks:
+        - cloudyadminnetwork
 volumes:
-  db-data:
+  cloudyadminvolume:
+networks:
+  cloudyadminnetwork:
+    driver: bridge

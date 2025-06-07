@@ -728,6 +728,82 @@ paths:
             text/json:
               schema:
                 $ref: '#/components/schemas/ResourceGroupedBaseResourceDto'
+  '/api/resource/ReverseProxy/connect/{resourceId}':
+    post:
+      tags:
+        - ReverseProxy
+      parameters:
+        - name: resourceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConnectReverseProxyCommand'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/ConnectReverseProxyCommand'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/ConnectReverseProxyCommand'
+      responses:
+        '200':
+          description: OK
+  '/api/resource/ReverseProxy/disconnect/{resourceId}':
+    post:
+      tags:
+        - ReverseProxy
+      parameters:
+        - name: resourceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DisconnectReverseProxyCommand'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/DisconnectReverseProxyCommand'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/DisconnectReverseProxyCommand'
+      responses:
+        '200':
+          description: OK
+  /api/resource/ReverseProxy/preCheckDns:
+    get:
+      tags:
+        - ReverseProxy
+      parameters:
+        - name: url
+          in: query
+          schema:
+            type: string
+        - name: myAdminUrl
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/DnsCheckDto'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DnsCheckDto'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/DnsCheckDto'
   /health:
     get:
       tags:
@@ -1159,6 +1235,14 @@ components:
           items:
             $ref: '#/components/schemas/BaseResourceDto'
       additionalProperties: false
+    ConnectReverseProxyCommand:
+      type: object
+      properties:
+        urlForHost:
+          type: string
+        useHttps:
+          type: boolean
+      additionalProperties: false
     ConnectVirtualNetworkCommand:
       type: object
       properties:
@@ -1269,6 +1353,29 @@ components:
         sourceType:
           $ref: '#/components/schemas/WebApplicationSourceType'
       additionalProperties: false
+    DisconnectReverseProxyCommand:
+      type: object
+      properties:
+        connectionId:
+          type: string
+          format: uuid
+      additionalProperties: false
+    DnsCheckDto:
+      type: object
+      properties:
+        hostname:
+          type: string
+        ipsBehindHostname:
+          type: array
+          items:
+            type: string
+        adminHostname:
+          type: string
+        ipsBehindAdminHostname:
+          type: array
+          items:
+            type: string
+      additionalProperties: false
     KafkaClusterResourceDto:
       required:
         - id
@@ -1298,6 +1405,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/VirtualNetworkSimpleDto'
+        publicProxyConfigurations:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicProxyConfigurationDto'
       additionalProperties: false
     KafkaPartitionDto:
       type: object
@@ -1460,6 +1571,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/VirtualNetworkSimpleDto'
+        publicProxyConfigurations:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicProxyConfigurationDto'
         postgresDatabaseResources:
           type: array
           items:
@@ -1558,6 +1673,20 @@ components:
           items:
             type: array
             items: { }
+      additionalProperties: false
+    PublicProxyConfigurationDto:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        useHttps:
+          type: boolean
+        domain:
+          type: string
+        port:
+          type: integer
+          format: int32
       additionalProperties: false
     QueryLokiQuery:
       type: object
@@ -1841,6 +1970,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/VirtualNetworkSimpleDto'
+        publicProxyConfigurations:
+          type: array
+          items:
+            $ref: '#/components/schemas/PublicProxyConfigurationDto'
         sourcePath:
           type: string
         sourceType:

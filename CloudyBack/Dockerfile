@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-FROM mcr.microsoft.com/dotnet/sdk:7.0-alpine AS build-env
+FROM mcr.microsoft.com/dotnet/sdk:8.0-alpine AS build-env
 WORKDIR /app
 
 # Copy csproj and restore as distinct layers
@@ -12,7 +12,7 @@ COPY Tests/Kjkardum.CloudyBack.Api.Tests/Kjkardum.CloudyBack.Api.Tests.csproj Te
 COPY Tests/Kjkardum.CloudyBack.Application.Tests/Kjkardum.CloudyBack.Application.Tests.csproj Tests/Kjkardum.CloudyBack.Application.Tests/
 COPY Tests/Kjkardum.CloudyBack.Infrastructure.Tests/Kjkardum.CloudyBack.Infrastructure.Tests.csproj Tests/Kjkardum.CloudyBack.Infrastructure.Tests/
 
-RUN dotnet restore
+RUN dotnet restore Kjkardum.CloudyBack.Api/Kjkardum.CloudyBack.Api.csproj
 
 # Copy everything else and build
 COPY . .
@@ -20,7 +20,7 @@ COPY . .
 RUN dotnet publish -c Release -o out
 
 # Build runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:7.0-alpine
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine
 WORKDIR /app
 COPY --from=build-env /app/out .
 

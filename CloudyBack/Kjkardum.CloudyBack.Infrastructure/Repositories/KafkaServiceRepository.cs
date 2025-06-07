@@ -17,6 +17,7 @@ public class KafkaServiceRepository(ApplicationDbContext dbContext): IKafkaServi
     public async Task<KafkaClusterResource?> GetById(Guid id)
     {
         var kafkaClusterResource = await dbContext.KafkaClusterResources
+            .Include(t => t.PublicProxyConfigurations)
             .Include(t => t.VirtuaLNetworks)!
             .ThenInclude(t => t.VirtualNetwork)
             .Include(t => t.ResourceGroup)

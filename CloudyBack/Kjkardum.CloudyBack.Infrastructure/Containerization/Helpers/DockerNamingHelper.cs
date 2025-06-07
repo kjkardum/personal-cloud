@@ -17,4 +17,8 @@ public class DockerNamingHelper
     public const string LokiContainerName = "cloudylokicontainer";
     public const string CadvisorContainerName = "cloudycadvisorcontainer";
     public const string WebApplicationBuilderImageName = "cloudywebapplicationbuilder";
+    public const string CaddyBuilderImageName = "cloudycaddybuilder";
+    public const string CaddyVolumeName = "cloudycaddyvolume";
+    public const string CaddyContainerName = "cloudycaddycontainer";
+    public const string CaddyNetworkName = "cloudycaddynetwork";
 }

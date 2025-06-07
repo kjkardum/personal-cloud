@@ -45,23 +45,22 @@ public class WebApplicationClient(DockerClient client, ILogger<WebApplicationCli
             new ImagesCreateParameters { FromImage = tempRunnerImageName, Tag = "latest" },
             null,
             new Progress<JSONMessage>());
+        await CreateNetworkForApplicationIfNotExists(id);
+        var networksDictionary = virtualNetworks.ToDictionary(
+            DockerNamingHelper.GetVirtualNetworkResourceName,
+            _ => new EndpointSettings());
+        networksDictionary[DockerNamingHelper.GetNetworkName(id)] = new EndpointSettings();
         var containerParameters = new CreateContainerParameters
         {
             Image = tempRunnerImageName,
             Name = appContainer,
             HostConfig = new HostConfig
             {
-                Binds = [ $"{volumeName}:/appsrc" ],
-                PortBindings = new Dictionary<string, IList<PortBinding>>
-                {
-                    { $"{port}/tcp", new List<PortBinding> { new() { HostPort = "8080" } } }
-                }
+                Binds = [ $"{volumeName}:/appsrc" ]
             },
             NetworkingConfig = new NetworkingConfig
             {
-                EndpointsConfig = virtualNetworks.ToDictionary(
-                    DockerNamingHelper.GetVirtualNetworkResourceName,
-                    _ => new EndpointSettings())
+                EndpointsConfig = networksDictionary
             },
             Env = environmentVariables,
             ExposedPorts = new Dictionary<string, EmptyStruct> { { $"{port}/tcp", default } },
@@ -69,6 +68,20 @@ public class WebApplicationClient(DockerClient client, ILogger<WebApplicationCli
         };
         var containerReference = await client.Containers.CreateContainerAsync(containerParameters);
         await client.Containers.StartContainerAsync(containerReference.ID, new ContainerStartParameters());
+    }
+
+    private async Task CreateNetworkForApplicationIfNotExists(Guid id)
+    {
+        var networks = await client.Networks.ListNetworksAsync();
+        if (networks.All(n => n.Name != DockerNamingHelper.GetNetworkName(id)))
+        {
+            logger.LogInformation($"Web application {id} network does not exist. Creating...");
+            await client.Networks.CreateNetworkAsync(new NetworksCreateParameters
+                {
+                    Name = DockerNamingHelper.GetNetworkName(id),
+                    Driver = "bridge"
+                });
+        }
     }
 
     private async Task RemoveExistingContainer(Guid id)
@@ -187,7 +200,8 @@ public class WebApplicationClient(DockerClient client, ILogger<WebApplicationCli
 
     private async Task<string> GetBuilderDockerImage()
     {
-        var builderDockerfileContext = GetWebApplicationBuilderDockerfileName();
+        //previous this was not await using
+        await using var builderDockerfileContext = GetWebApplicationBuilderDockerfileContext();
         await client.Images.BuildImageFromDockerfileAsync(
             new ImageBuildParameters
             {
@@ -198,41 +212,10 @@ public class WebApplicationClient(DockerClient client, ILogger<WebApplicationCli
             null,
             new Dictionary<string, string>(),
             new Progress<JSONMessage>());
-        builderDockerfileContext.Close();
+        //previously here was manual close of stream
         return DockerNamingHelper.WebApplicationBuilderImageName;
     }
-    private Stream GetWebApplicationBuilderDockerfileName()
-    {
-        var currentDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ??
-            throw new InvalidOperationException("Could not determine the current directory.");
-        var dockerFile = Path.Combine(
-            currentDirectory,
-            "Containerization/Clients/WebApplication/Dockerfiles/WebApplicationBuilder.Dockerfile");
 
-        var tarball = new MemoryStream();
-        using var archive = new TarOutputStream(tarball, Encoding.UTF8)
-        {
-            IsStreamOwner = false
-        };
-        var entry = TarEntry.CreateTarEntry(dockerFile);
-        using var fileStream = File.OpenRead(dockerFile);
-        entry.Size = fileStream.Length;
-        entry.Name = Path.GetFileName(dockerFile);
-        archive.PutNextEntry(entry);
-        var localBuffer = new byte[32 * 1024];
-        while (true)
-        {
-            var numRead = fileStream.Read(localBuffer, 0, localBuffer.Length);
-            if (numRead <= 0)
-            {
-                break;
-            }
-
-            archive.Write(localBuffer, 0, numRead);
-        }
-        archive.CloseEntry();
-        archive.Close();
-        tarball.Position = 0;
-        return tarball;
-    }
+    private static Stream GetWebApplicationBuilderDockerfileContext()
+        => DockerBuilderHelper.GetDockerfileContext("WebApplication/Dockerfiles/WebApplicationBuilder.Dockerfile");
 }

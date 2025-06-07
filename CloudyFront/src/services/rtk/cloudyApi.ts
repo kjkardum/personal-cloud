@@ -7,6 +7,7 @@ export const addTagTypes = [
   'PostgresServerResource',
   'ResourceGroup',
   'ResourceGroupedResource',
+  'ReverseProxy',
   'Status',
   'TenantManagement',
   'VirtualNetworkResource',
@@ -300,6 +301,41 @@ const injectedRtkApi = api
         }),
         providesTags: ['ResourceGroupedResource'],
       }),
+      postApiResourceReverseProxyConnectByResourceId: build.mutation<
+        PostApiResourceReverseProxyConnectByResourceIdApiResponse,
+        PostApiResourceReverseProxyConnectByResourceIdApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/resource/ReverseProxy/connect/${queryArg.resourceId}`,
+          method: 'POST',
+          body: queryArg.connectReverseProxyCommand,
+        }),
+        invalidatesTags: ['ReverseProxy'],
+      }),
+      postApiResourceReverseProxyDisconnectByResourceId: build.mutation<
+        PostApiResourceReverseProxyDisconnectByResourceIdApiResponse,
+        PostApiResourceReverseProxyDisconnectByResourceIdApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/resource/ReverseProxy/disconnect/${queryArg.resourceId}`,
+          method: 'POST',
+          body: queryArg.disconnectReverseProxyCommand,
+        }),
+        invalidatesTags: ['ReverseProxy'],
+      }),
+      getApiResourceReverseProxyPreCheckDns: build.query<
+        GetApiResourceReverseProxyPreCheckDnsApiResponse,
+        GetApiResourceReverseProxyPreCheckDnsApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/resource/ReverseProxy/preCheckDns`,
+          params: {
+            url: queryArg.url,
+            myAdminUrl: queryArg.myAdminUrl,
+          },
+        }),
+        providesTags: ['ReverseProxy'],
+      }),
       getHealth: build.query<GetHealthApiResponse, GetHealthApiArg>({
         query: () => ({ url: `/health` }),
         providesTags: ['Status'],
@@ -582,6 +618,21 @@ export type GetApiResourceResourceGroupedResourceByResourceIdApiResponse =
 export type GetApiResourceResourceGroupedResourceByResourceIdApiArg = {
   resourceId: string;
 };
+export type PostApiResourceReverseProxyConnectByResourceIdApiResponse = unknown;
+export type PostApiResourceReverseProxyConnectByResourceIdApiArg = {
+  resourceId: string;
+  connectReverseProxyCommand: ConnectReverseProxyCommand;
+};
+export type PostApiResourceReverseProxyDisconnectByResourceIdApiResponse = unknown;
+export type PostApiResourceReverseProxyDisconnectByResourceIdApiArg = {
+  resourceId: string;
+  disconnectReverseProxyCommand: DisconnectReverseProxyCommand;
+};
+export type GetApiResourceReverseProxyPreCheckDnsApiResponse = /** status 200 OK */ DnsCheckDto;
+export type GetApiResourceReverseProxyPreCheckDnsApiArg = {
+  url?: string;
+  myAdminUrl?: string;
+};
 export type GetHealthApiResponse = /** status 200 OK */ string;
 export type GetHealthApiArg = void;
 export type GetAuthenticatedApiResponse = /** status 200 OK */ string;
@@ -753,6 +804,12 @@ export type VirtualNetworkSimpleDto = {
   updatedAt?: string;
   resourceType: string;
 };
+export type PublicProxyConfigurationDto = {
+  id?: string;
+  useHttps?: boolean;
+  domain?: string;
+  port?: number;
+};
 export type KafkaClusterResourceDto = {
   id: string;
   name: string;
@@ -762,6 +819,7 @@ export type KafkaClusterResourceDto = {
   resourceGroupId?: string;
   resourceGroupName?: string;
   virtualNetworks?: VirtualNetworkSimpleDto[];
+  publicProxyConfigurations?: PublicProxyConfigurationDto[];
 };
 export type KafkaPartitionDto = {
   topic?: string;
@@ -809,6 +867,7 @@ export type PostgresServerResourceDto = {
   resourceGroupId?: string;
   resourceGroupName?: string;
   virtualNetworks?: VirtualNetworkSimpleDto[];
+  publicProxyConfigurations?: PublicProxyConfigurationDto[];
   postgresDatabaseResources?: PostgresDatabaseSimpleResourceDto[];
 };
 export type PostgresServerResourceDtoPaginatedResponse = {
@@ -877,6 +936,19 @@ export type ResourceGroupedBaseResourceDto = {
   resourceGroupId?: string;
   resourceGroupName?: string;
 };
+export type ConnectReverseProxyCommand = {
+  urlForHost?: string;
+  useHttps?: boolean;
+};
+export type DisconnectReverseProxyCommand = {
+  connectionId?: string;
+};
+export type DnsCheckDto = {
+  hostname?: string;
+  ipsBehindHostname?: string[];
+  adminHostname?: string;
+  ipsBehindAdminHostname?: string[];
+};
 export type UserRegistrationCommand = {
   email?: string;
   password?: string;
@@ -926,6 +998,7 @@ export type WebApplicationResourceDto = {
   resourceGroupId?: string;
   resourceGroupName?: string;
   virtualNetworks?: VirtualNetworkSimpleDto[];
+  publicProxyConfigurations?: PublicProxyConfigurationDto[];
   sourcePath?: string;
   sourceType?: WebApplicationSourceType;
   buildCommand?: string;
@@ -1001,6 +1074,10 @@ export const {
   useLazyGetApiResourceResourceGroupByIdQuery,
   useGetApiResourceResourceGroupedResourceByResourceIdQuery,
   useLazyGetApiResourceResourceGroupedResourceByResourceIdQuery,
+  usePostApiResourceReverseProxyConnectByResourceIdMutation,
+  usePostApiResourceReverseProxyDisconnectByResourceIdMutation,
+  useGetApiResourceReverseProxyPreCheckDnsQuery,
+  useLazyGetApiResourceReverseProxyPreCheckDnsQuery,
   useGetHealthQuery,
   useLazyGetHealthQuery,
   useGetAuthenticatedQuery,

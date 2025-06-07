@@ -9,6 +9,7 @@ using Kjkardum.CloudyBack.Infrastructure.Containerization.Clients.General;
 using Kjkardum.CloudyBack.Infrastructure.Containerization.Clients.Kafka;
 using Kjkardum.CloudyBack.Infrastructure.Containerization.Clients.Orchestration;
 using Kjkardum.CloudyBack.Infrastructure.Containerization.Clients.Postgres;
+using Kjkardum.CloudyBack.Infrastructure.Containerization.Clients.ReverseProxy;
 using Kjkardum.CloudyBack.Infrastructure.Containerization.Clients.VirtualNetwork;
 using Kjkardum.CloudyBack.Infrastructure.Containerization.Clients.WebApplication;
 using Kjkardum.CloudyBack.Infrastructure.Identity;
@@ -46,6 +47,7 @@ public static class ServiceExtensions
         services.AddTransient<IKafkaClient, KafkaClient>();
         services.AddTransient<IWebApplicationClient, WebApplicationClient>();
         services.AddTransient<IVirtualNetworkClient, VirtualNetworkClient>();
+        services.AddTransient<IReverseProxyClient, CaddyReverseProxyClient>();
 
         services.AddTransient<ISignInService, SignInService>();
 
@@ -58,6 +60,7 @@ public static class ServiceExtensions
         services.AddTransient<IKafkaServiceRepository, KafkaServiceRepository>();
         services.AddTransient<IWebApplicationResourceRepository, WebApplicationResourceRepository>();
         services.AddTransient<IVirtualNetworkRepository, VirtualNetworkRepository>();
+        services.AddTransient<IVirtualNetworkableBaseResourceRepository, VirtualNetworkableBaseResourceRepository>();
         return services;
     }
 }
