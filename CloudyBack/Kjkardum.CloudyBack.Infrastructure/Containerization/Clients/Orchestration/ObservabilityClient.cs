@@ -238,7 +238,7 @@ public class ObservabilityClient(
                 Binds = new List<string>
                 {
                     $"{DockerNamingHelper.LokiVolumeName}:/loki",
-                    $"{GetLokiConfigYaml()}:/etc/loki/loki-config.yaml"
+                    $"{DockerLocalStorageHelper.CopyAndResolvePersistedPath(GetLokiConfigYaml())}:/etc/loki/loki-config.yaml"
                 },
                 PortBindings = new Dictionary<string, IList<PortBinding>>
                 {
@@ -317,9 +317,9 @@ public class ObservabilityClient(
             {
                 Binds = new List<string>
                 {
-                    $"{GetPrometheusConfigYaml(true)}:/etc/prometheus/prometheus.yml",
+                    $"{DockerLocalStorageHelper.CopyAndResolvePersistedPath(GetPrometheusConfigYaml(true))}:/etc/prometheus/prometheus.yml",
                     $"{DockerNamingHelper.PrometheusVolumeName}:/prometheus",
-                    $"{await CreateWebConfigForPasswordAndReturnFilename(_prometheusPassword)}:/etc/prometheus/web.yml",
+                    $"{DockerLocalStorageHelper.CopyAndResolvePersistedPath(await CreateWebConfigForPasswordAndReturnFilename(_prometheusPassword))}:/etc/prometheus/web.yml",
                 },
                 PortBindings = new Dictionary<string, IList<PortBinding>>
                 {

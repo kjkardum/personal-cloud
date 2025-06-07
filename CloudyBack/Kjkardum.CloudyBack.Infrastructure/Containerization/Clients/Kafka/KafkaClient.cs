@@ -145,28 +145,34 @@ public class KafkaClient(DockerClient client, ILogger<KafkaClient> logger) : IKa
         var brokerName = DockerNamingHelper.GetContainerName(id);
 
         await client.Containers.CreateContainerAsync(new CreateContainerParameters
-        {
-            Name = DockerNamingHelper.GetSidecarTelemetryName(id),
-            Image = KafkaExporterImageName,
-            NetworkingConfig =
-                new NetworkingConfig()
-                {
-                    EndpointsConfig = new Dictionary<string, EndpointSettings>()
-                    {
-                        { DockerNamingHelper.GetNetworkName(id), new EndpointSettings() },
-                        { DockerNamingHelper.ObservabilityNetworkName, new EndpointSettings() }
-                    }
-                },
-            HostConfig =
-                new HostConfig { Binds = new List<string> { $"{collectorYamlTemplate}:/conf/collector.yml" } },
-            Env = new List<string>
             {
-                $"KAFKA_BOOTSTRAP_SERVERS={brokerName}:9092",
-                $"KAFKA_CLUSTER_NAME={clusterName}",
-                $"OTLP_ENDPOINT=http://{DockerNamingHelper.LokiContainerName}:3100/otlp"
-            },
-            Cmd = new List<string> { "--config=/conf/collector.yml" }
-        });
+                Name = DockerNamingHelper.GetSidecarTelemetryName(id),
+                Image = KafkaExporterImageName,
+                NetworkingConfig =
+                    new NetworkingConfig()
+                    {
+                        EndpointsConfig = new Dictionary<string, EndpointSettings>()
+                        {
+                            { DockerNamingHelper.GetNetworkName(id), new EndpointSettings() },
+                            { DockerNamingHelper.ObservabilityNetworkName, new EndpointSettings() }
+                        }
+                    },
+                HostConfig =
+                    new HostConfig
+                    {
+                        Binds = new List<string>
+                        {
+                            $"{DockerLocalStorageHelper.CopyAndResolvePersistedPath(collectorYamlTemplate)}:/conf/collector.yml"
+                        }
+                    },
+                Env = new List<string>
+                {
+                    $"KAFKA_BOOTSTRAP_SERVERS={brokerName}:9092",
+                    $"KAFKA_CLUSTER_NAME={clusterName}",
+                    $"OTLP_ENDPOINT=http://{DockerNamingHelper.LokiContainerName}:3100/otlp"
+                },
+                Cmd = new List<string> { "--config=/conf/collector.yml" }
+            });
         logger.LogInformation("Kafka telemetry collector container created");
 
         await client.Containers.StartContainerAsync(
@@ -231,7 +237,7 @@ public class KafkaClient(DockerClient client, ILogger<KafkaClient> logger) : IKa
             id,
             args,
             [
-                $"{await SaveMessageToFileAsync($"{key ?? string.Empty}:" + message)}:/data/msg.txt"
+                $"{DockerLocalStorageHelper.ResolveOuterPersistedPath(await SaveMessageToFileAsync($"{key ?? string.Empty}:" + message))}:/data/msg.txt"
             ],
             true);
 

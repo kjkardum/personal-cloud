@@ -20,12 +20,8 @@ var app = builder.Build();
 // Seed the database
 await FillDatabase(app.Services, builder.Configuration);
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 app.UseProblemDetails();

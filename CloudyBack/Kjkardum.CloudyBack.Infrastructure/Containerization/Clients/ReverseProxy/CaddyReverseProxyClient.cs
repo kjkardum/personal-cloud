@@ -31,7 +31,9 @@ public class CaddyReverseProxyClient(DockerClient client, ILogger<CaddyReversePr
                 await client.Containers.StopContainerAsync(
                     DockerNamingHelper.CaddyContainerName, new ContainerStopParameters());
             }
-            await client.Containers.StartContainerAsync(DockerNamingHelper.CaddyContainerName, new ContainerStartParameters());
+
+            await client.Containers.StartContainerAsync(DockerNamingHelper.CaddyContainerName,
+                new ContainerStartParameters());
             logger.LogInformation("Caddy Container restarted successfully.");
         }
         catch (Exception ex)
@@ -53,6 +55,7 @@ public class CaddyReverseProxyClient(DockerClient client, ILogger<CaddyReversePr
         {
             content = await reader.ReadToEndAsync();
         }
+
         var caddyConfigDto = JsonSerializer.Deserialize<CaddyConfigDto>(content);
         if (caddyConfigDto == null)
         {
@@ -152,19 +155,22 @@ public class CaddyReverseProxyClient(DockerClient client, ILogger<CaddyReversePr
         {
             throw new InvalidOperationException("Failed to deserialize Caddy configuration.");
         }
+
         var serverName = $"{DockerNamingHelper.GetContainerName(proxiedContainerId)}:{proxiedPort}";
         var hostPort = useHttps ? ":443" : ":80";
         var server = caddyConfigDto.apps.http.servers
             .FirstOrDefault(srv => srv.Value.listen.Contains(hostPort)
-                && srv.Value.routes.Any(r =>
-                    r.match.Any(m => m.host.Contains(hostName)) &&
-                        r.handle.Any(h => h.routes.Any(u =>
-                            u.handle.Any(up => up.upstreams.Any(upstream => upstream.dial == serverName))))));
+                                   && srv.Value.routes.Any(r =>
+                                       r.match.Any(m => m.host.Contains(hostName)) &&
+                                       r.handle.Any(h => h.routes.Any(u =>
+                                           u.handle.Any(up =>
+                                               up.upstreams.Any(upstream => upstream.dial == serverName))))));
         if (server.Value == null)
         {
             logger.LogWarning("No matching server found for host {HostName} and port {Port}.", hostName, proxiedPort);
             return;
         }
+
         caddyConfigDto.apps.http.servers.Remove(server.Key);
         //write back to file
         var contentNew = JsonSerializer.Serialize(caddyConfigDto);
@@ -211,12 +217,12 @@ public class CaddyReverseProxyClient(DockerClient client, ILogger<CaddyReversePr
             Name = DockerNamingHelper.CaddyContainerName,
             HostConfig = new HostConfig
             {
-                Binds =
-                [
+                Binds = new List<string>
+                {
                     $"{DockerNamingHelper.CaddyVolumeName}data:/data",
                     $"{DockerNamingHelper.CaddyVolumeName}config:/config",
-                    $"{GetCaddyConfigFile()}:/etc/caddy/caddy.json"
-                ],
+                    $"{DockerLocalStorageHelper.CopyAndResolvePersistedPath(GetCaddyConfigFile())}:/etc/caddy/caddy.json"
+                },
                 PortBindings = new Dictionary<string, IList<PortBinding>>
                 {
                     { "80/tcp", [new PortBinding { HostPort = "80" }] },
@@ -237,7 +243,7 @@ public class CaddyReverseProxyClient(DockerClient client, ILogger<CaddyReversePr
     private static string GetCaddyConfigFile(bool justReturn = false)
     {
         var currentDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ??
-            throw new InvalidOperationException("Could not determine the current directory.");
+                               throw new InvalidOperationException("Could not determine the current directory.");
         var collectorCopiableTemplateFolder = Path.Combine(
             currentDirectory,
             "Containerization/Clients/ReverseProxy/FileTemplates");

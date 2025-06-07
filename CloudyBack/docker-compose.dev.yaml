@@ -16,12 +16,13 @@ services:
       dockerfile: Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ConnectionStrings__DefaultConnection=Server=cloudyadmindb;Database=CloudyDb;User Id=sa;Password=Passw0rd_;
+      - CLOUDYBACK_OUTER_PERSIST_FOLDER=${PWD}/config_storage
+      - ConnectionStrings__DefaultConnection=Server=cloudyadmindb;Database=CloudyDb;User Id=sa;Password=Passw0rd_;Encrypt=False;TrustServerCertificate=True;
     volumes:
-      - ./config_storage:/app/persist
+      - ./config_storage:/app/bin/Debug/net8.0/persist
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
-      - "80:8080"
+      - "8080:8080"
     depends_on:
       - cloudyadmindb
     container_name: cloudyadminapp

@@ -74,7 +74,13 @@ public class PostgresServerClient(DockerClient client, ILogger<PostgresServerCli
                         }
                     },
                 HostConfig =
-                    new HostConfig { Binds = new List<string> { $"{collectorYamlTemplate}:/conf/collector.yml", }, },
+                    new HostConfig
+                    {
+                        Binds = new List<string>
+                        {
+                            $"{DockerLocalStorageHelper.CopyAndResolvePersistedPath(collectorYamlTemplate)}:/conf/collector.yml",
+                        },
+                    },
                 Env = new List<string>
                 {
                     $"DATA_SOURCE_URI={DockerNamingHelper.GetContainerName(id)}:5432",
