@@ -1,6 +1,6 @@
 version: "3.7"
 services:
-  db:
+  cloudyadmindb:
     image: mcr.microsoft.com/mssql/server:2019-latest
     environment:
       - ACCEPT_EULA=Y
@@ -10,20 +10,20 @@ services:
     container_name: cloudy-db
     networks:
         - cloudyadminnetwork
-  app:
+  cloudyadminapp:
     build:
       context: .
       dockerfile: Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ConnectionStrings__DefaultConnection=Server=db;Database=CloudyDb;User Id=sa;Password=Passw0rd_;
+      - ConnectionStrings__DefaultConnection=Server=cloudyadmindb;Database=CloudyDb;User Id=sa;Password=Passw0rd_;
     volumes:
       - ./config_storage:/app/persist
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - "80:8080"
     depends_on:
-      - db
+      - cloudyadmindb
     container_name: cloudyadminapp
     networks:
         - cloudyadminnetwork
