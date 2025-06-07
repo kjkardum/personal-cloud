@@ -64,6 +64,9 @@
       <None Update="Containerization\Clients\ReverseProxy\FileTemplates\Caddy.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+      <None Update="Containerization\Clients\ReverseProxy\FileTemplates\CaddyLocal.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>

@@ -20,13 +20,7 @@
                 }
               ]
             }
-          ],
-          "automatic_https": {
-            "skip": [
-              "*"
-            ],
-            "disable": true
-          }
+          ]
         }
       }
     }

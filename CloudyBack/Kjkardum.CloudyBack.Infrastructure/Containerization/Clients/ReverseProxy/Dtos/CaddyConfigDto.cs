@@ -1,8 +1,11 @@
+using System.Text.Json.Serialization;
+
 namespace Kjkardum.CloudyBack.Infrastructure.Containerization.Clients.ReverseProxy.Dtos;
 
 public class CaddyConfigDto
 {
     public Apps apps { get; set; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public Logging? logging { get; set; }
 }
 public class Logging
@@ -24,16 +27,13 @@ public class Apps
     public Http http { get; set; }
 }
 
-public class HandleRoutes
+public class Handler
 {
     public string handler { get; set; }
-    public List<RouteInHandlerUpstream> routes { get; set; }
-}
-
-public class HandleUpstreams
-{
-    public string handler { get; set; }
-    public List<Upstream> upstreams { get; set; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<RouteInHandlerUpstream>? routes { get; set; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<Upstream>? upstreams { get; set; }
 }
 
 public class Http
@@ -49,13 +49,13 @@ public class Match
 public class RouteMatch
 {
     public List<Match> match { get; set; }
-    public List<HandleRoutes> handle { get; set; }
+    public List<Handler> handle { get; set; }
     public bool terminal { get; set; }
 }
 
 public class RouteInHandlerUpstream
 {
-    public List<HandleUpstreams> handle { get; set; }
+    public List<Handler> handle { get; set; }
 }
 
 
@@ -63,12 +63,14 @@ public class Srv
 {
     public List<string> listen { get; set; }
     public List<RouteMatch> routes { get; set; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public AutomaticHttps? automatic_https { get; set; }
 }
 
 public class AutomaticHttps
 {
     public List<string> skip { get; set; }
+    public bool? disable { get; set; }
 }
 
 public class Upstream

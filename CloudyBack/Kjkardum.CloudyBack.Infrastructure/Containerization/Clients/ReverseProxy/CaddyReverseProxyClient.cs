@@ -1,16 +1,25 @@
 using Docker.DotNet;
 using Docker.DotNet.Models;
 using Kjkardum.CloudyBack.Application.Clients;
+using Kjkardum.CloudyBack.Application.Configuration;
 using Kjkardum.CloudyBack.Infrastructure.Containerization.Clients.ReverseProxy.Dtos;
 using Kjkardum.CloudyBack.Infrastructure.Containerization.Helpers;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System.Reflection;
 using System.Text.Json;
 
 namespace Kjkardum.CloudyBack.Infrastructure.Containerization.Clients.ReverseProxy;
 
-public class CaddyReverseProxyClient(DockerClient client, ILogger<CaddyReverseProxyClient> logger) : IReverseProxyClient
+public class CaddyReverseProxyClient(
+    DockerClient client,
+    ILogger<CaddyReverseProxyClient> logger,
+    IOptions<AppConfiguration> appConfiguration) : IReverseProxyClient
 {
+    private readonly bool InDocker = appConfiguration.Value.InDocker;
+
+    private string SuffixCaddyJson => InDocker ? ".json" : "Local.json";
+
     public async Task AddProxyConfiguration(Guid proxiedContainerId, int proxiedPort, string hostName, bool useHttps)
     {
         //has layer4 plugin added, prepared in CurrentDirectory + Containerization/Clients/ReverseProxy/Dockerfiles/Caddy.Dockerfile
@@ -64,52 +73,60 @@ public class CaddyReverseProxyClient(DockerClient client, ILogger<CaddyReversePr
 
         var serverName = $"{DockerNamingHelper.GetContainerName(proxiedContainerId)}:{proxiedPort}";
         var hostPort = useHttps ? ":443" : ":80";
-        var serverIndex = caddyConfigDto.apps.http.servers.Count;
-        caddyConfigDto.apps.http.servers.Add(
-            $"srv{serverIndex}",
-            new Srv
+        var existingServer = caddyConfigDto.apps.http.servers.Select(t => t.Value)
+            .FirstOrDefault(t => t.listen.Contains(hostPort));
+        if (existingServer == null)
+        {
+            var serverIndex = caddyConfigDto.apps.http.servers.Count;
+            existingServer = new Srv
             {
                 listen = new List<string> { hostPort },
-                routes =
-                    new List<RouteMatch>()
-                    {
-                        new()
+                routes = new List<RouteMatch>(),
+                automatic_https = useHttps ? null : new AutomaticHttps { skip = new List<string>() }
+            };
+            caddyConfigDto.apps.http.servers.Add($"srv{serverIndex}", existingServer);
+        }
+
+        if (!useHttps)
+        {
+            existingServer.automatic_https?.skip.Add(hostName);
+        }
+
+        existingServer.routes.Insert(
+            0,
+            new RouteMatch
+                {
+                    match = [new Match { host = [hostName] }],
+                    handle =
+                        new List<Handler>
                         {
-                            match = [new Match { host = [hostName] }],
-                            handle =
-                                new List<HandleRoutes>
-                                {
-                                    new()
+                            new()
+                            {
+                                handler = "subroute",
+                                routes =
+                                    new List<RouteInHandlerUpstream>
                                     {
-                                        handler = "subroute",
-                                        routes =
-                                            new List<RouteInHandlerUpstream>
-                                            {
-                                                new()
+                                        new()
+                                        {
+                                            handle =
+                                                new List<Handler>
                                                 {
-                                                    handle =
-                                                        new List<HandleUpstreams>
-                                                        {
-                                                            new HandleUpstreams
-                                                            {
-                                                                handler = "reverse_proxy",
-                                                                upstreams =
-                                                                    new List<Upstream> { new() { dial = serverName } }
-                                                            }
-                                                        }
+                                                    new()
+                                                    {
+                                                        handler = "reverse_proxy",
+                                                        upstreams =
+                                                            new List<Upstream> { new() { dial = serverName } }
+                                                    }
                                                 }
-                                            }
+                                        }
                                     }
-                                },
-                            terminal = true
-                        }
-                    },
-                automatic_https = useHttps ? null : new AutomaticHttps { skip = new List<string> { hostName } }
-            });
+                            }
+                        },
+                    terminal = true
+                });
         //write back to file
         var contentNew = JsonSerializer.Serialize(caddyConfigDto);
-        await using var fileStreamNew = new FileStream(fileToEdit, FileMode.Open, FileAccess.ReadWrite);
-        await using var writer = new StreamWriter(fileStreamNew);
+        await using var writer = new StreamWriter(fileToEdit, false);
         await writer.WriteAsync(contentNew);
         logger.LogDebug("New configuration:\n{NewConfiguration}", contentNew);
     }
@@ -117,6 +134,11 @@ public class CaddyReverseProxyClient(DockerClient client, ILogger<CaddyReversePr
     private async Task AttachCaddyToContainerNetwork(Guid proxiedContainerId)
     {
         var networkName = DockerNamingHelper.GetNetworkName(proxiedContainerId);
+        await AttachCaddyToContainerNetworkByName(networkName);
+    }
+
+    private async Task AttachCaddyToContainerNetworkByName(string networkName)
+    {
         try
         {
             var network = await client.Networks.InspectNetworkAsync(networkName);
@@ -171,7 +193,17 @@ public class CaddyReverseProxyClient(DockerClient client, ILogger<CaddyReversePr
             return;
         }
 
-        caddyConfigDto.apps.http.servers.Remove(server.Key);
+        if (!useHttps)
+        {
+            server.Value.automatic_https?.skip.Remove(hostName);
+        }
+
+        var route = server.Value.routes.First(r =>
+            r.match.Any(m => m.host.Contains(hostName)) &&
+                r.handle.Any(h => h.routes.Any(u =>
+                    u.handle.Any(up =>
+                        up.upstreams.Any(upstream => upstream.dial == serverName)))));
+        server.Value.routes.Remove(route);
         //write back to file
         var contentNew = JsonSerializer.Serialize(caddyConfigDto);
         await using var writer = new StreamWriter(fileToEdit, false);
@@ -206,6 +238,10 @@ public class CaddyReverseProxyClient(DockerClient client, ILogger<CaddyReversePr
         await RecreateCaddyVolume("data");
         await RecreateCaddyVolume("config");
         await CreateCaddyContainer();
+        if (InDocker)
+        {
+            await AttachCaddyToContainerNetworkByName("cloudyback_cloudyadminnetwork");
+        }
     }
 
     private async Task CreateCaddyContainer()
@@ -240,7 +276,7 @@ public class CaddyReverseProxyClient(DockerClient client, ILogger<CaddyReversePr
         logger.LogInformation("Caddy Container created and started successfully.");
     }
 
-    private static string GetCaddyConfigFile(bool justReturn = false)
+    private string GetCaddyConfigFile(bool justReturn = false)
     {
         var currentDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ??
                                throw new InvalidOperationException("Could not determine the current directory.");
@@ -249,7 +285,7 @@ public class CaddyReverseProxyClient(DockerClient client, ILogger<CaddyReversePr
             "Containerization/Clients/ReverseProxy/FileTemplates");
         var fileToEdit = DockerLocalStorageHelper.FileCopyLocation(
             Path.Combine(collectorCopiableTemplateFolder, "caddy_edit.json"));
-        var fileToEditOriginal = Path.Combine(collectorCopiableTemplateFolder, "caddy.json");
+        var fileToEditOriginal = Path.Combine(collectorCopiableTemplateFolder, "caddy" + SuffixCaddyJson);
         if (justReturn)
         {
             return fileToEdit;
