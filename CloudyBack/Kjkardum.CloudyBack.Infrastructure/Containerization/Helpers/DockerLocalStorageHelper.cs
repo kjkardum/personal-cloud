@@ -45,7 +45,10 @@ public static class DockerLocalStorageHelper
     public static string CopyAndResolvePersistedPath(string filePath)
     {
         var copiedPath = FileCopyLocation(filePath);
-        File.Copy(filePath, copiedPath, true);
+        if (filePath != copiedPath)
+        {
+            File.Copy(filePath, copiedPath, true);
+        }
         return ResolveOuterPersistedPath(copiedPath);
     }
     public static string ResolveOuterPersistedPath(string persistFilePath)
@@ -58,6 +61,7 @@ public static class DockerLocalStorageHelper
                 SavedOuterPersist = outerPersist;
             }
         }
+        Console.WriteLine("SAVE OUTER PERSIST: " + SavedOuterPersist);
         if (string.IsNullOrEmpty(SavedOuterPersist))
         {
             return persistFilePath;
@@ -67,7 +71,9 @@ public static class DockerLocalStorageHelper
         var innerPersistFolder = Path.Combine(
             currentDirectory,
             "persist");
-        return persistFilePath
+        var path = persistFilePath
             .Replace(innerPersistFolder, SavedOuterPersist);
+        Console.WriteLine($"Transforming {persistFilePath} to {path}");
+        return path;
     }
 }
