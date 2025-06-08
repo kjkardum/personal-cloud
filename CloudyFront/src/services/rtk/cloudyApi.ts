@@ -45,6 +45,13 @@ const injectedRtkApi = api
         }),
         providesTags: ['BaseResource'],
       }),
+      getApiResourceBaseResourceDockerEnvironment: build.query<
+        GetApiResourceBaseResourceDockerEnvironmentApiResponse,
+        GetApiResourceBaseResourceDockerEnvironmentApiArg
+      >({
+        query: () => ({ url: `/api/resource/BaseResource/dockerEnvironment` }),
+        providesTags: ['BaseResource'],
+      }),
       getApiResourceBaseResourceByResourceIdContainer: build.query<
         GetApiResourceBaseResourceByResourceIdContainerApiResponse,
         GetApiResourceBaseResourceByResourceIdContainerApiArg
@@ -438,6 +445,16 @@ const injectedRtkApi = api
         query: (queryArg) => ({ url: `/api/resource/WebApplicationResource/${queryArg.id}` }),
         providesTags: ['WebApplicationResource'],
       }),
+      deleteApiResourceWebApplicationResourceById: build.mutation<
+        DeleteApiResourceWebApplicationResourceByIdApiResponse,
+        DeleteApiResourceWebApplicationResourceByIdApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/resource/WebApplicationResource/${queryArg.id}`,
+          method: 'DELETE',
+        }),
+        invalidatesTags: ['WebApplicationResource'],
+      }),
       putApiResourceWebApplicationResourceByIdDeploymentConfiguration: build.mutation<
         PutApiResourceWebApplicationResourceByIdDeploymentConfigurationApiResponse,
         PutApiResourceWebApplicationResourceByIdDeploymentConfigurationApiArg
@@ -470,6 +487,19 @@ const injectedRtkApi = api
         }),
         invalidatesTags: ['WebApplicationResource'],
       }),
+      postApiResourceWebApplicationResourceByServerIdContainerAction: build.mutation<
+        PostApiResourceWebApplicationResourceByServerIdContainerActionApiResponse,
+        PostApiResourceWebApplicationResourceByServerIdContainerActionApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/resource/WebApplicationResource/${queryArg.serverId}/containerAction`,
+          method: 'POST',
+          params: {
+            actionId: queryArg.actionId,
+          },
+        }),
+        invalidatesTags: ['WebApplicationResource'],
+      }),
     }),
     overrideExisting: false,
   });
@@ -486,6 +516,9 @@ export type GetApiResourceBaseResourceApiArg = {
   filterBy?: string;
   orderBy?: string;
 };
+export type GetApiResourceBaseResourceDockerEnvironmentApiResponse =
+  /** status 200 OK */ DockerEnvironment;
+export type GetApiResourceBaseResourceDockerEnvironmentApiArg = void;
 export type GetApiResourceBaseResourceByResourceIdContainerApiResponse =
   /** status 200 OK */ ContainerDto;
 export type GetApiResourceBaseResourceByResourceIdContainerApiArg = {
@@ -683,6 +716,10 @@ export type GetApiResourceWebApplicationResourceByIdApiResponse =
 export type GetApiResourceWebApplicationResourceByIdApiArg = {
   id: string;
 };
+export type DeleteApiResourceWebApplicationResourceByIdApiResponse = unknown;
+export type DeleteApiResourceWebApplicationResourceByIdApiArg = {
+  id: string;
+};
 export type PutApiResourceWebApplicationResourceByIdDeploymentConfigurationApiResponse = unknown;
 export type PutApiResourceWebApplicationResourceByIdDeploymentConfigurationApiArg = {
   id: string;
@@ -698,6 +735,11 @@ export type DeleteApiResourceWebApplicationResourceByIdConfigurationAndConfigura
 export type DeleteApiResourceWebApplicationResourceByIdConfigurationAndConfigurationKeyApiArg = {
   id: string;
   configurationKey: string;
+};
+export type PostApiResourceWebApplicationResourceByServerIdContainerActionApiResponse = unknown;
+export type PostApiResourceWebApplicationResourceByServerIdContainerActionApiArg = {
+  serverId: string;
+  actionId?: string;
 };
 export type LoggedInUserDto = {
   id?: string;
@@ -733,6 +775,41 @@ export type BaseResourceDtoPaginatedResponse = {
   pageSize?: number;
   totalCount?: number;
   data: BaseResourceDto[];
+};
+export type DockerContainer = {
+  containerId?: string;
+  containerName?: string;
+  stateRunning?: boolean;
+  statePaused?: boolean;
+  stateRestarting?: boolean;
+  stateError?: string;
+  stateStartedAt?: string | null;
+  stateFinishedAt?: string | null;
+  networkIds?: string[] | null;
+  volumeIds?: string[] | null;
+};
+export type DockerImage = {
+  imageId?: string;
+  tag?: string;
+  createdAt?: string;
+  size?: number;
+};
+export type DockerNetwork = {
+  networkId?: string;
+  name?: string;
+  containerIds?: string[];
+};
+export type DockerVolume = {
+  volumeId?: string;
+  name?: string;
+  size?: number;
+  createdAt?: string;
+};
+export type DockerEnvironment = {
+  containers?: DockerContainer[];
+  images?: DockerImage[];
+  networks?: DockerNetwork[];
+  volumes?: DockerVolume[];
 };
 export type ContainerDto = {
   stateRunning?: boolean;
@@ -1003,6 +1080,7 @@ export type WebApplicationResourceDto = {
   sourceType?: WebApplicationSourceType;
   buildCommand?: string;
   startupCommand?: string;
+  runtimeType?: WebApplicationRuntimeType;
   healthCheckUrl?: string;
   port?: number;
   configuration?: WebApplicationConfigurationEntryDto[] | null;
@@ -1016,6 +1094,7 @@ export type CreateWebApplicationResourceCommand = {
 export type UpdateWebApplicationDeploymentConfigurationCommand = {
   buildCommand?: string;
   startupCommand?: string;
+  runtimeType?: WebApplicationRuntimeType;
   port?: number;
 };
 export type ModifyWebApplicationConfigItemCommand = {
@@ -1023,6 +1102,7 @@ export type ModifyWebApplicationConfigItemCommand = {
   value?: string;
 };
 export enum PredefinedPrometheusQuery {
+  HttpRequestsCount = 'HttpRequestsCount',
   PostgresProcessesCount = 'PostgresProcessesCount',
   PostgresEntriesInserted = 'PostgresEntriesInserted',
   PostgresEntriesReturned = 'PostgresEntriesReturned',
@@ -1030,15 +1110,22 @@ export enum PredefinedPrometheusQuery {
   GeneralMemoryUsage = 'GeneralMemoryUsage',
 }
 export enum PredefinedLokiQuery {
-  Demo = 'Demo',
+  ContainerLog = 'ContainerLog',
 }
 export enum WebApplicationSourceType {
   PublicGitClone = 'PublicGitClone',
+}
+export enum WebApplicationRuntimeType {
+  Python = 'Python',
+  NodeJs = 'NodeJs',
+  DotNet = 'DotNet',
 }
 export const {
   usePostApiAuthenticationLoginMutation,
   useGetApiResourceBaseResourceQuery,
   useLazyGetApiResourceBaseResourceQuery,
+  useGetApiResourceBaseResourceDockerEnvironmentQuery,
+  useLazyGetApiResourceBaseResourceDockerEnvironmentQuery,
   useGetApiResourceBaseResourceByResourceIdContainerQuery,
   useLazyGetApiResourceBaseResourceByResourceIdContainerQuery,
   useGetApiResourceBaseResourceByResourceIdAuditLogQuery,
@@ -1094,7 +1181,9 @@ export const {
   usePostApiResourceWebApplicationResourceMutation,
   useGetApiResourceWebApplicationResourceByIdQuery,
   useLazyGetApiResourceWebApplicationResourceByIdQuery,
+  useDeleteApiResourceWebApplicationResourceByIdMutation,
   usePutApiResourceWebApplicationResourceByIdDeploymentConfigurationMutation,
   usePostApiResourceWebApplicationResourceByIdConfigurationMutation,
   useDeleteApiResourceWebApplicationResourceByIdConfigurationAndConfigurationKeyMutation,
+  usePostApiResourceWebApplicationResourceByServerIdContainerActionMutation,
 } = injectedRtkApi;

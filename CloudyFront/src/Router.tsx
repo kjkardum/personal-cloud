@@ -1,9 +1,9 @@
 import { createBrowserRouter } from 'react-router-dom';
-import Layout from "@/Layout";
+import Layout from '@/Layout';
 import { NewKafkaPage } from '@/pages/kafka/createNew/NewKafka.page';
 import { ViewKafkaClusterPage } from '@/pages/kafka/view/viewKafkaCluster.page';
-import { NewPostgresDatabasePage } from "@/pages/postgres/createNew/NewPostgresDatabase.page";
-import { NewPostgresServerPage } from "@/pages/postgres/createNew/NewPostgresServer.page";
+import { NewPostgresDatabasePage } from '@/pages/postgres/createNew/NewPostgresDatabase.page';
+import { NewPostgresServerPage } from '@/pages/postgres/createNew/NewPostgresServer.page';
 import { ViewPostgresServerPage } from '@/pages/postgres/view/viewPostgresServer.page';
 import { ViewResourceGroupPage } from '@/pages/resourceGroup/view/viewResourceGroup.page';
 import { NewWebApplicationPage } from '@/pages/webApplication/createNew/NewWebApplication.page';
@@ -12,16 +12,26 @@ import { ViewPostgresDatabasePage } from './pages/postgres/view/viewPostgresData
 import { ViewWebApplicationPage } from './pages/webApplication/view/viewWebApplication.page';
 import { NewVirtualNetworkPage } from '@/pages/virtualNetwork/createNew/NewVirtualNetwork.page';
 import { ViewVirtualNetworkPage } from '@/pages/virtualNetwork/view/viewVirtualNetwork.page';
+import { ViewCloudyDockerPage } from '@/pages/cloudyDocker/view/ViewCloudyDocker.page';
 
 
 export const routes = createBrowserRouter([
   {
     path: '/',
-    element: <Layout/>,
+    element: <Layout />,
     children: [
       {
         path: '/',
-        element: <HomePage/>,
+        element: <HomePage />,
+      },
+      {
+        path: 'cloudyDocker',
+        children: [
+          {
+            path: 'view',
+            element: <ViewCloudyDockerPage />,
+          },
+        ],
       },
       {
         path: 'postgres',
@@ -31,28 +41,28 @@ export const routes = createBrowserRouter([
             children: [
               {
                 path: 'database',
-                element: <NewPostgresDatabasePage/>,
+                element: <NewPostgresDatabasePage />,
               },
               {
                 path: 'server',
-                element: <NewPostgresServerPage/>,
-              }
-            ]
+                element: <NewPostgresServerPage />,
+              },
+            ],
           },
           {
             path: 'view',
             children: [
               {
                 path: 'server/:id',
-                element: <ViewPostgresServerPage/>,
+                element: <ViewPostgresServerPage />,
               },
               {
                 path: 'database/:id',
-                element: <ViewPostgresDatabasePage/>,
-              }
-            ]
-          }
-        ]
+                element: <ViewPostgresDatabasePage />,
+              },
+            ],
+          },
+        ],
       },
       {
         path: 'kafka',
@@ -62,46 +72,46 @@ export const routes = createBrowserRouter([
             children: [
               {
                 path: 'cluster',
-                element: <NewKafkaPage/>,
+                element: <NewKafkaPage />,
               },
-            ]
+            ],
           },
           {
             path: 'view',
             children: [
               {
                 path: 'cluster/:id',
-                element: <ViewKafkaClusterPage/>,
+                element: <ViewKafkaClusterPage />,
               },
-            ]
-          }
-        ]
+            ],
+          },
+        ],
       },
       {
         path: 'webApplication',
         children: [
           {
             path: 'new',
-            element: <NewWebApplicationPage />
+            element: <NewWebApplicationPage />,
           },
           {
             path: 'view/:id',
             element: <ViewWebApplicationPage />,
-          }
-        ]
+          },
+        ],
       },
       {
         path: 'virtualNetwork',
         children: [
           {
             path: 'new',
-            element: <NewVirtualNetworkPage />
+            element: <NewVirtualNetworkPage />,
           },
           {
             path: 'view/:id',
             element: <ViewVirtualNetworkPage />,
-          }
-        ]
+          },
+        ],
       },
       {
         path: 'resourceGroup',
@@ -109,9 +119,9 @@ export const routes = createBrowserRouter([
           {
             path: 'view/:id',
             element: <ViewResourceGroupPage />,
-          }
-        ]
-      }
-    ]
-  }
+          },
+        ],
+      },
+    ],
+  },
 ]);

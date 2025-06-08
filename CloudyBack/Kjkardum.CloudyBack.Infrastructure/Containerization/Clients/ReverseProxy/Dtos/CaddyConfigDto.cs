@@ -58,9 +58,15 @@ public class RouteInHandlerUpstream
     public List<Handler> handle { get; set; }
 }
 
+public class SrvMetrics
+{
+    public bool per_host { get; set; }
+}
 
 public class Srv
 {
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public SrvMetrics? metrics { get; set; }
     public List<string> listen { get; set; }
     public List<RouteMatch> routes { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]

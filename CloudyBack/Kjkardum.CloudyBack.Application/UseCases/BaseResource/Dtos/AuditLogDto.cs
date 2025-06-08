@@ -7,4 +7,5 @@ public class AuditLogDto
     public required string ActionDisplayText { get; set; }
     public string? ActionMetadata { get; set; }
     public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+    public Guid ResourceId { get; set; }
 }

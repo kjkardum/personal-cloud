@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  IconBrandDocker,
   IconBrowser, IconCloudNetwork,
   IconDatabase,
   IconDatabaseShare,
@@ -16,6 +17,10 @@ const defaultIconProps = {
   style: defaultIconStyle,
   stroke: 1.5,
 };
+export const CloudyIconDocker = (props: IconProps) => {
+  const theme = useMantineTheme();
+  return <IconBrandDocker {...defaultIconProps} color={theme.colors.orange[6]} {...props} />;
+}
 
 export const CloudyIconWebApplication = (props: IconProps) => {
   const theme = useMantineTheme();

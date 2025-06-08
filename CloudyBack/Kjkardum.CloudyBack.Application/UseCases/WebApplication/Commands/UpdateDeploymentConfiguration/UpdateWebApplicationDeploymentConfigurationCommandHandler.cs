@@ -1,3 +1,4 @@
+using ApiExceptions.Exceptions;
 using Kjkardum.CloudyBack.Application.Clients;
 using Kjkardum.CloudyBack.Application.Repositories;
 using Kjkardum.CloudyBack.Domain.Entities;
@@ -23,6 +24,7 @@ public class UpdateWebApplicationDeploymentConfigurationCommandHandler(
 
         webApplicationResource.BuildCommand = request.BuildCommand;
         webApplicationResource.StartupCommand = request.StartupCommand;
+        webApplicationResource.RuntimeType = request.RuntimeType;
         webApplicationResource.Port = request.Port;
 
         await webApplicationResourceRepository.Update(webApplicationResource);
@@ -49,11 +51,16 @@ public class UpdateWebApplicationDeploymentConfigurationCommandHandler(
                     });
                 try
                 {
+                    var runtimeType = webApplicationResource.RuntimeType
+                        ?? throw new BadRequestException(
+                            "Runtime type must be specified for public git clone web applications.");
                     await webApplicationClient.BuildAndRunWebApplicationUsingGitRepo(
                         webApplicationResource.Id,
+                        webApplicationResource.Name,
                         webApplicationResource.SourcePath,
                         webApplicationResource.BuildCommand,
                         webApplicationResource.StartupCommand,
+                        runtimeType,
                         webApplicationResource.Port,
                         variablesAsList,
                         networksAsList);

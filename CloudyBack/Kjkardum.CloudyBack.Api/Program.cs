@@ -1,9 +1,13 @@
+using Docker.DotNet;
+using Docker.DotNet.Models;
 using Hellang.Middleware.ProblemDetails;
 using System.Reflection;
 using Kjkardum.CloudyBack.Api.Extensions;
 using Kjkardum.CloudyBack.Api.Services;
 using Kjkardum.CloudyBack.Application;
+using Kjkardum.CloudyBack.Application.Clients;
 using Kjkardum.CloudyBack.Infrastructure;
+using Kjkardum.CloudyBack.Infrastructure.Containerization.Helpers;
 using Kjkardum.CloudyBack.Infrastructure.Persistence;
 using Kjkardum.CloudyBack.Infrastructure.Persistence.Seed;
 using Microsoft.EntityFrameworkCore;
@@ -19,6 +23,7 @@ var app = builder.Build();
 
 // Seed the database
 await FillDatabase(app.Services, builder.Configuration);
+await CreateRequiredContainer(app.Services, builder.Configuration);
 
 app.UseSwagger();
 app.UseSwaggerUI();
@@ -84,5 +89,74 @@ public partial class Program
         }
 
         await TenantAndUserSeed.Seed(context);
+    }
+
+    public static async Task CreateRequiredContainer(IServiceProvider serviceProvider, IConfiguration configuration)
+    {
+        var inDocker = configuration.GetValue<bool>("ApplicationConfiguration__InDocker");
+        using var scope = serviceProvider.CreateScope();
+        var services = scope.ServiceProvider;
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        var observabilityClient = services.GetRequiredService<IObservabilityClient>();
+        await observabilityClient.EnsureCreated();
+        var reverseProxyClient = services.GetRequiredService<IReverseProxyClient>();
+        await reverseProxyClient.EnsureCreated();
+
+        var dockerClient = services.GetRequiredService<DockerClient>();
+        if (inDocker)
+        {
+            var selfContainer = await dockerClient.Containers.InspectContainerAsync("cloudyadminapp");
+            if (selfContainer.NetworkSettings.Networks.ContainsKey(DockerNamingHelper.ObservabilityNetworkName))
+            {
+                logger.LogInformation("Cloudy observability network already exists");
+            }
+            else
+            {
+                await dockerClient.Networks.ConnectNetworkAsync(
+                    DockerNamingHelper.ObservabilityNetworkName,
+                    new NetworkConnectParameters
+                    {
+                        Container = selfContainer.ID
+                    });
+            }
+        }
+        try
+        {
+            var lokiPlugin = await dockerClient.Plugin.InspectPluginAsync("loki");
+            if (!lokiPlugin.Enabled)
+            {
+                await dockerClient.Plugin.EnablePluginAsync(
+                    "loki",
+                    new PluginEnableParameters
+                        {
+                            Timeout = 30
+                        });
+                logger.LogInformation("Cloudy loki is enabled");
+            }
+        }
+        catch
+        {
+            var lokiPluginPrivilege = await dockerClient.Plugin.GetPluginPrivilegesAsync(
+                new PluginGetPrivilegeParameters {Remote = "grafana/loki-docker-driver:3.3.2-amd64"})
+                ?? new List<PluginPrivilege>();
+            await dockerClient.Plugin.InstallPluginAsync(
+                new PluginInstallParameters
+                {
+                    Remote = "grafana/loki-docker-driver:3.3.2-amd64",
+                    Name = "loki",
+                    Privileges = lokiPluginPrivilege
+                },
+                new Progress<JSONMessage>());
+            logger.LogInformation("Cloudy loki plugin installed successfully");
+            var plugin = await dockerClient.Plugin.InspectPluginAsync("cloudy-loki-plugin");
+            if (!plugin.Enabled)
+            {
+                await dockerClient.Plugin.EnablePluginAsync("cloudy-loki-plugin",  new PluginEnableParameters
+                {
+                    Timeout = 30
+                });
+                logger.LogInformation("Cloudy loki plugin enabled successfully");
+            }
+        }
     }
 }

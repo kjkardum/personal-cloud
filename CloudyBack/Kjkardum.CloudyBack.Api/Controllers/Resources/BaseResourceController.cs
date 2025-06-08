@@ -3,6 +3,7 @@ using Kjkardum.CloudyBack.Application.Response;
 using Kjkardum.CloudyBack.Application.UseCases.BaseResource.Dtos;
 using Kjkardum.CloudyBack.Application.UseCases.BaseResource.Queries.GetAuditLog;
 using Kjkardum.CloudyBack.Application.UseCases.BaseResource.Queries.GetContainer;
+using Kjkardum.CloudyBack.Application.UseCases.BaseResource.Queries.GetDockerEnvironment;
 using Kjkardum.CloudyBack.Application.UseCases.BaseResource.Queries.GetPaginated;
 using Kjkardum.CloudyBack.Application.UseCases.BaseResource.Queries.QueryLoki;
 using Kjkardum.CloudyBack.Application.UseCases.BaseResource.Queries.QueryPrometheus;
@@ -22,6 +23,14 @@ public class BaseResourceController(IMediator mediator): ControllerBase
         CancellationToken cancellationToken = default)
     {
         var result = await mediator.Send(new GetPaginatedBaseResourceQuery(request), cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpGet("dockerEnvironment")]
+    public async Task<ActionResult<DockerEnvironment>> GetDockerEnvironment(
+        CancellationToken cancellationToken = default)
+    {
+        var result = await mediator.Send(new GetDockerEnvironmentQuery(), cancellationToken);
         return Ok(result);
     }
 

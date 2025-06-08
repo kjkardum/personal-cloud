@@ -6,3 +6,7 @@ scrape_configs:
     static_configs:
       - targets:
           - cloudycadvisorcontainer:8080
+  - job_name: caddy
+    static_configs:
+      - targets:
+          - cloudycaddycontainer:80

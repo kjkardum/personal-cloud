@@ -67,6 +67,23 @@ paths:
             text/json:
               schema:
                 $ref: '#/components/schemas/BaseResourceDtoPaginatedResponse'
+  /api/resource/BaseResource/dockerEnvironment:
+    get:
+      tags:
+        - BaseResource
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/DockerEnvironment'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DockerEnvironment'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/DockerEnvironment'
   '/api/resource/BaseResource/{resourceId}/container':
     get:
       tags:
@@ -1059,6 +1076,19 @@ paths:
             text/json:
               schema:
                 $ref: '#/components/schemas/WebApplicationResourceDto'
+    delete:
+      tags:
+        - WebApplicationResource
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
   '/api/resource/WebApplicationResource/{id}/deploymentConfiguration':
     put:
       tags:
@@ -1123,6 +1153,24 @@ paths:
         - name: configurationKey
           in: path
           required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+  '/api/resource/WebApplicationResource/{serverId}/containerAction':
+    post:
+      tags:
+        - WebApplicationResource
+      parameters:
+        - name: serverId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: actionId
+          in: query
           schema:
             type: string
       responses:
@@ -1376,6 +1424,99 @@ components:
           items:
             type: string
       additionalProperties: false
+    DockerContainer:
+      type: object
+      properties:
+        containerId:
+          type: string
+        containerName:
+          type: string
+        stateRunning:
+          type: boolean
+        statePaused:
+          type: boolean
+        stateRestarting:
+          type: boolean
+        stateError:
+          type: string
+        stateStartedAt:
+          type: string
+          format: date-time
+          nullable: true
+        stateFinishedAt:
+          type: string
+          format: date-time
+          nullable: true
+        networkIds:
+          type: array
+          items:
+            type: string
+          nullable: true
+        volumeIds:
+          type: array
+          items:
+            type: string
+          nullable: true
+      additionalProperties: false
+    DockerEnvironment:
+      type: object
+      properties:
+        containers:
+          type: array
+          items:
+            $ref: '#/components/schemas/DockerContainer'
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/DockerImage'
+        networks:
+          type: array
+          items:
+            $ref: '#/components/schemas/DockerNetwork'
+        volumes:
+          type: array
+          items:
+            $ref: '#/components/schemas/DockerVolume'
+      additionalProperties: false
+    DockerImage:
+      type: object
+      properties:
+        imageId:
+          type: string
+        tag:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        size:
+          type: integer
+          format: int64
+      additionalProperties: false
+    DockerNetwork:
+      type: object
+      properties:
+        networkId:
+          type: string
+        name:
+          type: string
+        containerIds:
+          type: array
+          items:
+            type: string
+      additionalProperties: false
+    DockerVolume:
+      type: object
+      properties:
+        volumeId:
+          type: string
+        name:
+          type: string
+        size:
+          type: integer
+          format: int64
+        createdAt:
+          type: string
+      additionalProperties: false
     KafkaClusterResourceDto:
       required:
         - id
@@ -1601,10 +1742,11 @@ components:
       additionalProperties: false
     PredefinedLokiQuery:
       enum:
-        - Demo
+        - ContainerLog
       type: string
     PredefinedPrometheusQuery:
       enum:
+        - HttpRequestsCount
         - PostgresProcessesCount
         - PostgresEntriesInserted
         - PostgresEntriesReturned
@@ -1830,6 +1972,8 @@ components:
           type: string
         startupCommand:
           type: string
+        runtimeType:
+          $ref: '#/components/schemas/WebApplicationRuntimeType'
         port:
           type: integer
           format: int32
@@ -1982,6 +2126,8 @@ components:
           type: string
         startupCommand:
           type: string
+        runtimeType:
+          $ref: '#/components/schemas/WebApplicationRuntimeType'
         healthCheckUrl:
           type: string
         port:
@@ -1993,6 +2139,12 @@ components:
             $ref: '#/components/schemas/WebApplicationConfigurationEntryDto'
           nullable: true
       additionalProperties: false
+    WebApplicationRuntimeType:
+      enum:
+        - Python
+        - NodeJs
+        - DotNet
+      type: string
     WebApplicationSourceType:
       enum:
         - PublicGitClone

@@ -1,16 +1,47 @@
-import {
-  useGetApiResourceBaseResourceByResourceIdAuditLogQuery,
-} from '@/services/rtk/cloudyApi';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { DataTable } from 'mantine-datatable';
+import { useGetApiResourceBaseResourceByResourceIdAuditLogQuery } from '@/services/rtk/cloudyApi';
+import { EmptyGuid } from '@/util/guid';
+import { Stack, TextInput } from '@mantine/core';
+import { useDebouncedValue } from '@mantine/hooks';
 
-export const ResourceViewAuditLog =  ({resourceBaseData}: { resourceBaseData: {id: string} | undefined }) => {
+export const ResourceViewAuditLog = ({
+  resourceBaseData,
+}: {
+  resourceBaseData: { id: string } | undefined;
+}) => {
   const [auditPage, setAuditPage] = useState(1);
-  const { data: resourceAuditLogPaginated } = useGetApiResourceBaseResourceByResourceIdAuditLogQuery({
-    resourceId: resourceBaseData?.id || '',
-    page: auditPage,
-  });
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery] = useDebouncedValue(searchQuery, 300);
+  const { data: resourceAuditLogPaginated } =
+    useGetApiResourceBaseResourceByResourceIdAuditLogQuery({
+      resourceId: resourceBaseData?.id || '',
+      page: auditPage,
+      filterBy: debouncedSearchQuery,
+    });
+  const columns = useMemo(() => {
+    const base = [
+      { accessor: 'actionDisplayText', title: 'Action' },
+      {
+        accessor: 'timestamp',
+        title: 'Timestamp',
+        render: ({ timestamp: date }) =>
+          new Date(date.endsWith('Z') ? date : date + 'Z').toLocaleString(),
+      },
+    ];
+    if (resourceBaseData?.id === EmptyGuid) {
+      base.push({ accessor: 'resourceId', title: 'Resource ID' });
+    }
+    return base;
+  }, [resourceBaseData]);
   return (
+    <Stack gap='md'>
+      <TextInput
+        m='sm'
+        placeholder="Search audit log"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.currentTarget.value)}
+        />
     <DataTable
       borderRadius="sm"
       withColumnBorders
@@ -21,11 +52,9 @@ export const ResourceViewAuditLog =  ({resourceBaseData}: { resourceBaseData: {i
       recordsPerPage={resourceAuditLogPaginated?.pageSize || 0}
       page={auditPage}
       onPageChange={(page) => setAuditPage(page)}
-      columns={[
-        { accessor: 'actionDisplayText', title: 'Action' },
-        { accessor: 'timestamp', title: 'Timestamp', render: ({timestamp: date}) => new Date(date.endsWith('Z') ? date : date + 'Z').toLocaleString() },
-      ]}
+      columns={columns}
       onRowClick={({ record }) => alert(JSON.stringify(record))}
     />
-  )
-}
+    </Stack>
+  );
+};

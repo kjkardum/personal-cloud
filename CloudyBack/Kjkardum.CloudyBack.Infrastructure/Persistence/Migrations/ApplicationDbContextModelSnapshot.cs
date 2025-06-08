@@ -296,6 +296,9 @@ namespace Kjkardum.CloudyBack.Infrastructure.Persistence.Migrations
                     b.Property<int>("Port")
                         .HasColumnType("int");
 
+                    b.Property<int?>("RuntimeType")
+                        .HasColumnType("int");
+
                     b.Property<string>("SourcePath")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");

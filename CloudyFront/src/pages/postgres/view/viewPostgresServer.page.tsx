@@ -27,6 +27,7 @@ import { viewResourceOfType } from '@/util/navigation';
 import { ResourceViewSummary } from '@/components/ResourceView/ResourceViewSummary';
 import { ResourceViewAuditLog } from '@/components/ResourceView/ResourceViewAuditLog';
 import { PostgresServerNetworkSubpage } from '@/sections/database/postgres/view/PostgresServerNetworkSubpage';
+import { ResourceViewLogs } from '@/components/ResourceView/ResourceViewLogs';
 
 export const ViewPostgresServerPage = () => {
   const navigate = useNavigate();
@@ -39,21 +40,6 @@ export const ViewPostgresServerPage = () => {
   const { data: resourceBaseData } = useGetApiResourcePostgresServerResourceByServerIdQuery({
     serverId: resourceId || '',
   });
-  const [getLogs] = usePostApiResourceBaseResourceByResourceIdLokiMutation();
-  const [metricsData, setMetricsData] = useState<PrometheusResultDto | undefined>(undefined);
-  useEffect(() => {
-    if (!resourceId) return;
-    const now = new Date();
-    const hourAgo = new Date(now.getTime() - 8 * 60 * 60 * 1000);
-    getLogs({resourceId, queryLokiQuery: {
-      query: PredefinedLokiQuery.Demo,
-      start: hourAgo.toISOString(),
-      end: now.toISOString(),
-      step: undefined,
-      }}).unwrap().then((metrics) => {
-      setMetricsData(metrics);
-    });
-  }, [resourceId]);
 
   const [action] = usePostApiResourcePostgresServerResourceByServerIdContainerActionMutation();
   const [deleteResource] = useDeleteApiResourcePostgresServerResourceByServerIdMutation();
@@ -158,7 +144,6 @@ export const ViewPostgresServerPage = () => {
                 <MetricChart resourceId={resourceId || ''} query={PredefinedPrometheusQuery.GeneralMemoryUsage} range={{}} />
               </div>
             </SimpleGrid>
-            <pre>{JSON.stringify(metricsData, null, 2)}</pre>
           </Box>
         </Stack>
       </ResourceViewPage>
@@ -192,7 +177,9 @@ export const ViewPostgresServerPage = () => {
       <ResourceViewPage title="Networking">
         {resourceBaseData ? <PostgresServerNetworkSubpage resourceBaseData={resourceBaseData} /> : 'Loading...'}
       </ResourceViewPage>
-      <ResourceViewPage title="Logs">Soon</ResourceViewPage>
+      <ResourceViewPage title="Logs">
+        { resourceBaseData ? <ResourceViewLogs resourceBaseData={resourceBaseData} /> : 'Loading...' }
+      </ResourceViewPage>
     </ResourceViewLayout>
   );
 };

@@ -11,6 +11,7 @@ import { CloudyIconVirtualNetworkResource, defaultIconStyle } from '@/icons/Reso
 import { useGetApiResourceVirtualNetworkResourceByIdQuery } from '@/services/rtk/cloudyApi';
 import { viewResourceOfType } from '@/util/navigation';
 import { TypeToIcon, TypeToText } from '@/util/typeToDisplay';
+import { ResourceViewLogs } from '@/components/ResourceView/ResourceViewLogs';
 
 
 export function ViewVirtualNetworkPage() {
@@ -63,6 +64,9 @@ export function ViewVirtualNetworkPage() {
       </ResourceViewPage>
       <ResourceViewPage title="Audit log">
         <ResourceViewAuditLog resourceBaseData={resourceBaseData} />
+      </ResourceViewPage>
+      <ResourceViewPage title="Logs">
+        { resourceBaseData ? <ResourceViewLogs resourceBaseData={resourceBaseData} /> : 'Loading...' }
       </ResourceViewPage>
     </ResourceViewLayout>
   );

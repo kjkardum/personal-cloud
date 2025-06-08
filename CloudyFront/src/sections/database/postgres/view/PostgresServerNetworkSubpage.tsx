@@ -40,7 +40,7 @@ export const PostgresServerNetworkSubpage = ({
         </Tabs.Tab>
       </Tabs.List>
 
-      <Tabs.Panel value="public">TODO</Tabs.Panel>
+      <Tabs.Panel value="public">TODO - TCP stream (non-http) proxying not yet implemented</Tabs.Panel>
 
       <Tabs.Panel value="private">
         <VirtualNetworkConnectDrawer opened={openedNtworkDrawer} onClose={handleCloseNetworkDrawer} resourceId={resourceBaseData.id} />

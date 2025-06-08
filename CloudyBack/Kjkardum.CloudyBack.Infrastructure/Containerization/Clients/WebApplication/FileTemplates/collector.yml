@@ -1,0 +1,26 @@
+receivers:
+  loki:
+    protocols:
+      http:
+        endpoint: 0.0.0.0:3500
+    use_incoming_timestamp: true
+
+processors:
+  batch:
+  resource:
+    attributes:
+      - key: service.name
+        value: "${DATA_SOURCE_NAME}"
+        action: upsert
+exporters:
+  debug:
+    verbosity: detailed
+  otlphttp:
+    endpoint: "${OTLP_ENDPOINT}"
+
+service:
+  pipelines:
+    logs:
+      receivers: [loki]
+      processors: [batch, resource]
+      exporters: [otlphttp, debug]

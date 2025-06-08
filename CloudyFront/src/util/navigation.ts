@@ -17,3 +17,13 @@ export const viewResourceOfType = (resourceType: string, resourceId: string | un
       return '/'; // Fallback to home or some default route
   }
 }
+
+export const viewVirtualResource = (resourceType: string) => {
+  switch (resourceType) {
+    case 'CloudyDocker':
+      return '/cloudyDocker/view';
+    default:
+      console.error(`Unknown virtual resource type: ${resourceType}`);
+      return '/'; // Fallback to home or some default route
+  }
+}

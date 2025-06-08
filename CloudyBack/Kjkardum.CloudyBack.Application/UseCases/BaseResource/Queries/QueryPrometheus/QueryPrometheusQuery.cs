@@ -6,6 +6,7 @@ namespace Kjkardum.CloudyBack.Application.UseCases.BaseResource.Queries.QueryPro
 
 public enum PredefinedPrometheusQuery
 {
+    HttpRequestsCount,
     PostgresProcessesCount,
     PostgresEntriesInserted,
     PostgresEntriesReturned,

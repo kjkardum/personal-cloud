@@ -12,6 +12,11 @@ internal class PostgresServerContainerActionCommandHandler(
 {
     public async Task Handle(PostgresServerContainerActionCommand request, CancellationToken cancellationToken)
     {
+        var resource = await baseResourceRepository.GetById(request.Id);
+        if (resource is not PostgresServerResource)
+        {
+            throw new EntityNotFoundException($"Postgres server with id {request.Id} not found.");
+        }
         await baseResourceRepository.LogResourceAction(new AuditLogEntry
             {
                 ActionName = nameof(PostgresServerContainerActionCommand),

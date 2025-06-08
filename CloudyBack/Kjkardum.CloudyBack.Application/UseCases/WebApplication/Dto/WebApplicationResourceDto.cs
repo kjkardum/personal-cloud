@@ -9,6 +9,7 @@ public class WebApplicationResourceDto: VirtualNetworkableBaseResourceDto
     public WebApplicationSourceType SourceType { get; set; }
     public string BuildCommand { get; set; } = string.Empty;
     public string StartupCommand { get; set; } = string.Empty;
+    public WebApplicationRuntimeType? RuntimeType { get; set; }
     public string HealthCheckUrl { get; set; } = string.Empty;
     public int Port { get; set; }
     public ICollection<WebApplicationConfigurationEntryDto>? Configuration { get; set; }

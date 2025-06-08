@@ -12,6 +12,7 @@ using Kjkardum.CloudyBack.Infrastructure.Containerization.Clients.Postgres;
 using Kjkardum.CloudyBack.Infrastructure.Containerization.Clients.ReverseProxy;
 using Kjkardum.CloudyBack.Infrastructure.Containerization.Clients.VirtualNetwork;
 using Kjkardum.CloudyBack.Infrastructure.Containerization.Clients.WebApplication;
+using Kjkardum.CloudyBack.Infrastructure.Containerization.Helpers;
 using Kjkardum.CloudyBack.Infrastructure.Identity;
 using Kjkardum.CloudyBack.Infrastructure.Persistence;
 using Kjkardum.CloudyBack.Infrastructure.Repositories;
@@ -38,11 +39,13 @@ public static class ServiceExtensions
             }
         });
 
+        var inDocker = configuration.GetValue<bool>("ApplicationConfiguration__InDocker");
+
         services.AddSingleton<DockerClient>(_ => new DockerClientConfiguration().CreateClient());
         services.AddTransient<IGeneralContainerStatusClient, GeneralContainerStatusClient>();
         services.AddTransient<IObservabilityClient, ObservabilityClient>();
-        services.AddHttpClient("Prometheus", c => c.BaseAddress = new Uri("http://localhost:9090"));
-        services.AddHttpClient("Loki", c => c.BaseAddress = new Uri("http://localhost:3100/loki/"));
+        services.AddHttpClient("Prometheus", c => c.BaseAddress = new Uri(inDocker ? $"http://{DockerNamingHelper.PrometheusContainerName}:9090" : "http://localhost:9090"));
+        services.AddHttpClient("Loki", c => c.BaseAddress = new Uri(inDocker ? $"http://{DockerNamingHelper.LokiContainerName}:3100/loki/" : "http://localhost:3100/loki/"));
         services.AddTransient<IPostgresServerClient, PostgresServerClient>();
         services.AddTransient<IKafkaClient, KafkaClient>();
         services.AddTransient<IWebApplicationClient, WebApplicationClient>();

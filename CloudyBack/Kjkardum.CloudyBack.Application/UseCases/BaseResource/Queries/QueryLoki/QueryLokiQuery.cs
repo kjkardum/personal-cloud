@@ -6,7 +6,7 @@ namespace Kjkardum.CloudyBack.Application.UseCases.BaseResource.Queries.QueryLok
 
 public enum PredefinedLokiQuery
 {
-    Demo = 1
+    ContainerLog = 1
 }
 
 public class QueryLokiQuery: IRequest<PrometheusResultDto>

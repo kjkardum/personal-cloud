@@ -1,6 +1,8 @@
 using Kjkardum.CloudyBack.Application.UseCases.WebApplication.Commands.Create;
+using Kjkardum.CloudyBack.Application.UseCases.WebApplication.Commands.Delete;
 using Kjkardum.CloudyBack.Application.UseCases.WebApplication.Commands.DeleteConfigItem;
 using Kjkardum.CloudyBack.Application.UseCases.WebApplication.Commands.ModifyConfigItem;
+using Kjkardum.CloudyBack.Application.UseCases.WebApplication.Commands.ServerContainerAction;
 using Kjkardum.CloudyBack.Application.UseCases.WebApplication.Commands.UpdateDeploymentConfiguration;
 using Kjkardum.CloudyBack.Application.UseCases.WebApplication.Dto;
 using Kjkardum.CloudyBack.Application.UseCases.WebApplication.Queries.GetById;
@@ -72,6 +74,22 @@ public class WebApplicationResourceController(IMediator mediator): ControllerBas
         await mediator.Send(
             new DeleteWebApplicationConfigItemCommand { WebApplicationId = id, Key = configurationKey },
             cancellationToken);
+        return NoContent();
+    }
+
+    [HttpPost("{serverId:guid}/containerAction")]
+    public async Task<IActionResult> ExecuteContainerAction(Guid serverId, [FromQuery] string actionId)
+    {
+        await mediator.Send(new WebApplicationContainerActionCommand { Id = serverId, ActionId = actionId });
+        return Ok();
+    }
+
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> DeleteWebApplicationResource(
+        Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        await mediator.Send(new DeleteWebApplicationResourceCommand { Id = id }, cancellationToken);
         return NoContent();
     }
 }

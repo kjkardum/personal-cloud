@@ -42,9 +42,9 @@ public class PostgresServerClient(DockerClient client, ILogger<PostgresServerCli
         }
 
         await client.Networks.CreateNetworkAsync(new NetworksCreateParameters
-            {
-                Name = networkName, Driver = "bridge"
-            });
+        {
+            Name = networkName, Driver = "bridge"
+        });
         logger.LogInformation("Network created");
     }
 
@@ -61,36 +61,37 @@ public class PostgresServerClient(DockerClient client, ILogger<PostgresServerCli
             new Progress<JSONMessage>());
         logger.LogInformation("Otel Postgres Collector Image pulled");
         await client.Containers.CreateContainerAsync(new CreateContainerParameters
-            {
-                Name = DockerNamingHelper.GetSidecarTelemetryName(id),
-                Image = PostgresExporterImageName,
-                NetworkingConfig =
-                    new NetworkingConfig()
-                    {
-                        EndpointsConfig = new Dictionary<string, EndpointSettings>()
-                        {
-                            { DockerNamingHelper.GetNetworkName(id), new EndpointSettings() },
-                            { DockerNamingHelper.ObservabilityNetworkName, new EndpointSettings() }
-                        }
-                    },
-                HostConfig =
-                    new HostConfig
-                    {
-                        Binds = new List<string>
-                        {
-                            $"{DockerLocalStorageHelper.CopyAndResolvePersistedPath(collectorYamlTemplate)}:/conf/collector.yml",
-                        },
-                    },
-                Env = new List<string>
+        {
+            Name = DockerNamingHelper.GetSidecarTelemetryName(id),
+            Image = PostgresExporterImageName,
+            NetworkingConfig =
+                new NetworkingConfig()
                 {
-                    $"DATA_SOURCE_URI={DockerNamingHelper.GetContainerName(id)}:5432",
-                    $"DATA_SOURCE_USER={saUsername}",
-                    $"DATA_SOURCE_PASS={saPassword}",
-                    $"DATA_SOURCE_NAME={serverName}",
-                    $"OTLP_ENDPOINT=http://{DockerNamingHelper.LokiContainerName}:3100/otlp"
+                    EndpointsConfig = new Dictionary<string, EndpointSettings>()
+                    {
+                        { DockerNamingHelper.GetNetworkName(id), new EndpointSettings() },
+                        { DockerNamingHelper.ObservabilityNetworkName, new EndpointSettings() }
+                    }
                 },
-                Cmd = new List<string> { "--config=/conf/collector.yml" }
-            });
+            HostConfig =
+                new HostConfig
+                {
+                    Binds = new List<string>
+                    {
+                        $"{DockerLocalStorageHelper.CopyAndResolvePersistedPath(collectorYamlTemplate)}:/conf/collector.yml",
+                    },
+                    RestartPolicy = new RestartPolicy { Name = RestartPolicyKind.Always, MaximumRetryCount = 0 },
+                },
+            Env = new List<string>
+            {
+                $"DATA_SOURCE_URI={DockerNamingHelper.GetContainerName(id)}:5432",
+                $"DATA_SOURCE_USER={saUsername}",
+                $"DATA_SOURCE_PASS={saPassword}",
+                $"DATA_SOURCE_NAME={serverName}",
+                $"OTLP_ENDPOINT=http://{DockerNamingHelper.LokiContainerName}:3100/otlp"
+            },
+            Cmd = new List<string> { "--config=/conf/collector.yml" }
+        });
         logger.LogInformation("Otel Postgres Collector Container created");
         await client.Containers
             .StartContainerAsync(DockerNamingHelper.GetSidecarTelemetryName(id), new ContainerStartParameters());
@@ -126,9 +127,16 @@ public class PostgresServerClient(DockerClient client, ILogger<PostgresServerCli
                             {
                                 { "5432/tcp", new List<PortBinding> { new() { HostPort = $"{serverPort}" } } }
                             },
+                        RestartPolicy = new RestartPolicy { Name = RestartPolicyKind.Always, MaximumRetryCount = 0 },
+                        LogConfig = DockerLoggingHelper.DefaultLogConfig(id)
                     },
                 ExposedPorts = new Dictionary<string, EmptyStruct> { { "5432/tcp", default } },
-                Env = new List<string> { $"POSTGRES_PASSWORD={saPassword}", $"POSTGRES_USER={saUsername}" },
+                Env = new List<string>
+                {
+                    $"POSTGRES_PASSWORD={saPassword}",
+                    $"POSTGRES_USER={saUsername}",
+                    DockerLoggingHelper.LogEnvironmentVariable(id)
+                },
                 Cmd = new List<string>
                 {
                     "postgres",

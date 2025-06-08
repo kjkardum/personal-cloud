@@ -87,39 +87,42 @@ public class KafkaClient(DockerClient client, ILogger<KafkaClient> logger) : IKa
 
         var controllerName = DockerNamingHelper.GetContainerName(id);
         await client.Containers.CreateContainerAsync(new CreateContainerParameters
-        {
-            Name = controllerName,
-            Image = ImageName,
-            NetworkingConfig =
-                new NetworkingConfig()
-                {
-                    EndpointsConfig = new Dictionary<string, EndpointSettings>
-                    {
-                        { DockerNamingHelper.GetNetworkName(id), new EndpointSettings() }
-                    }
-                },
-            HostConfig =
-                new HostConfig
-                {
-                    Binds = new List<string>
-                    {
-                        $"{DockerNamingHelper.GetVolumeName(id)}_controller:/var/lib/kafka/data",
-                    }
-                },
-            Env = new List<string>
             {
-                "KAFKA_HEAP_OPTS=-Xmx512M -Xms512M",
-                "KAFKA_LISTENERS=CONTROLLER://localhost:9091,DOCKER://0.0.0.0:9092",
-                $"KAFKA_ADVERTISED_LISTENERS=DOCKER://{DockerNamingHelper.GetContainerName(id)}:9092",
-                "KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,DOCKER:PLAINTEXT",
-                "KAFKA_NODE_ID=1",
-                "KAFKA_PROCESS_ROLES=broker,controller",
-                "KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER",
-                "KAFKA_CONTROLLER_QUORUM_VOTERS=1@localhost:9091",
-                "KAFKA_INTER_BROKER_LISTENER_NAME=DOCKER",
-                "KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1"
-            }
-        });
+                Name = controllerName,
+                Image = ImageName,
+                NetworkingConfig =
+                    new NetworkingConfig()
+                    {
+                        EndpointsConfig = new Dictionary<string, EndpointSettings>
+                        {
+                            { DockerNamingHelper.GetNetworkName(id), new EndpointSettings() }
+                        }
+                    },
+                HostConfig =
+                    new HostConfig
+                    {
+                        Binds = new List<string>
+                        {
+                            $"{DockerNamingHelper.GetVolumeName(id)}_controller:/var/lib/kafka/data",
+                        },
+                        RestartPolicy = new RestartPolicy { Name = RestartPolicyKind.Always, MaximumRetryCount = 0 },
+                        LogConfig = DockerLoggingHelper.DefaultLogConfig(id),
+                    },
+                Env = new List<string>
+                {
+                    DockerLoggingHelper.LogEnvironmentVariable(id),
+                    "KAFKA_HEAP_OPTS=-Xmx512M -Xms512M",
+                    "KAFKA_LISTENERS=CONTROLLER://localhost:9091,DOCKER://0.0.0.0:9092",
+                    $"KAFKA_ADVERTISED_LISTENERS=DOCKER://{DockerNamingHelper.GetContainerName(id)}:9092",
+                    "KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,DOCKER:PLAINTEXT",
+                    "KAFKA_NODE_ID=1",
+                    "KAFKA_PROCESS_ROLES=broker,controller",
+                    "KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER",
+                    "KAFKA_CONTROLLER_QUORUM_VOTERS=1@localhost:9091",
+                    "KAFKA_INTER_BROKER_LISTENER_NAME=DOCKER",
+                    "KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1"
+                }
+            });
         logger.LogInformation("Kafka controller container created");
 
         await client.Containers.StartContainerAsync(
@@ -163,7 +166,8 @@ public class KafkaClient(DockerClient client, ILogger<KafkaClient> logger) : IKa
                         Binds = new List<string>
                         {
                             $"{DockerLocalStorageHelper.CopyAndResolvePersistedPath(collectorYamlTemplate)}:/conf/collector.yml"
-                        }
+                        },
+                        RestartPolicy = new RestartPolicy { Name = RestartPolicyKind.Always, MaximumRetryCount = 0 }
                     },
                 Env = new List<string>
                 {

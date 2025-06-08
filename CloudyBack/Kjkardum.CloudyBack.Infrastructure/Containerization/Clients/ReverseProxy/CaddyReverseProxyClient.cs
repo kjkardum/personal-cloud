@@ -20,6 +20,8 @@ public class CaddyReverseProxyClient(
 
     private string SuffixCaddyJson => InDocker ? ".json" : "Local.json";
 
+    public async Task EnsureCreated() => await CreateCaddyContainerIfNotExistsAsync();
+
     public async Task AddProxyConfiguration(Guid proxiedContainerId, int proxiedPort, string hostName, bool useHttps)
     {
         //has layer4 plugin added, prepared in CurrentDirectory + Containerization/Clients/ReverseProxy/Dockerfiles/Caddy.Dockerfile
@@ -80,6 +82,7 @@ public class CaddyReverseProxyClient(
             var serverIndex = caddyConfigDto.apps.http.servers.Count;
             existingServer = new Srv
             {
+                metrics = new SrvMetrics { per_host = true },
                 listen = new List<string> { hostPort },
                 routes = new List<RouteMatch>(),
                 automatic_https = useHttps ? null : new AutomaticHttps { skip = new List<string>() }
@@ -95,35 +98,35 @@ public class CaddyReverseProxyClient(
         existingServer.routes.Insert(
             0,
             new RouteMatch
-                {
-                    match = [new Match { host = [hostName] }],
-                    handle =
-                        new List<Handler>
+            {
+                match = [new Match { host = [hostName] }],
+                handle =
+                    new List<Handler>
+                    {
+                        new()
                         {
-                            new()
-                            {
-                                handler = "subroute",
-                                routes =
-                                    new List<RouteInHandlerUpstream>
+                            handler = "subroute",
+                            routes =
+                                new List<RouteInHandlerUpstream>
+                                {
+                                    new()
                                     {
-                                        new()
-                                        {
-                                            handle =
-                                                new List<Handler>
+                                        handle =
+                                            new List<Handler>
+                                            {
+                                                new()
                                                 {
-                                                    new()
-                                                    {
-                                                        handler = "reverse_proxy",
-                                                        upstreams =
-                                                            new List<Upstream> { new() { dial = serverName } }
-                                                    }
+                                                    handler = "reverse_proxy",
+                                                    upstreams =
+                                                        new List<Upstream> { new() { dial = serverName } }
                                                 }
-                                        }
+                                            }
                                     }
-                            }
-                        },
-                    terminal = true
-                });
+                                }
+                        }
+                    },
+                terminal = true
+            });
         //write back to file
         var contentNew = JsonSerializer.Serialize(caddyConfigDto);
         await using var writer = new StreamWriter(fileToEdit, false);
@@ -200,9 +203,9 @@ public class CaddyReverseProxyClient(
 
         var route = server.Value.routes.First(r =>
             r.match.Any(m => m.host.Contains(hostName)) &&
-                r.handle.Any(h => h.routes.Any(u =>
-                    u.handle.Any(up =>
-                        up.upstreams.Any(upstream => upstream.dial == serverName)))));
+            r.handle.Any(h => h.routes.Any(u =>
+                u.handle.Any(up =>
+                    up.upstreams.Any(upstream => upstream.dial == serverName)))));
         server.Value.routes.Remove(route);
         //write back to file
         var contentNew = JsonSerializer.Serialize(caddyConfigDto);
@@ -212,6 +215,8 @@ public class CaddyReverseProxyClient(
             "Removed proxy configuration for host {HostName} and port {Port} from Caddy configuration.",
             hostName, proxiedPort);
         logger.LogDebug("New configuration:\n{NewConfiguration}", contentNew);
+        await RestartCaddyContainerAsync();
+        logger.LogInformation("Caddy Container restarted after removing proxy configuration.");
     }
 
     private async Task CreateCaddyContainerIfNotExistsAsync()
@@ -251,21 +256,38 @@ public class CaddyReverseProxyClient(
         {
             Image = caddyImage,
             Name = DockerNamingHelper.CaddyContainerName,
-            HostConfig = new HostConfig
-            {
-                Binds = new List<string>
+            HostConfig =
+                new HostConfig
                 {
-                    $"{DockerNamingHelper.CaddyVolumeName}data:/data",
-                    $"{DockerNamingHelper.CaddyVolumeName}config:/config",
-                    $"{DockerLocalStorageHelper.CopyAndResolvePersistedPath(GetCaddyConfigFile())}:/etc/caddy/caddy.json"
+                    RestartPolicy = new RestartPolicy { Name = RestartPolicyKind.Always, MaximumRetryCount = 0 },
+                    Binds =
+                        new List<string>
+                        {
+                            $"{DockerNamingHelper.CaddyVolumeName}data:/data",
+                            $"{DockerNamingHelper.CaddyVolumeName}config:/config",
+                            $"{DockerLocalStorageHelper.CopyAndResolvePersistedPath(GetCaddyConfigFile())}:/etc/caddy/caddy.json"
+                        },
+                    PortBindings =
+                        new Dictionary<string, IList<PortBinding>>
+                        {
+                            { "80/tcp", [new PortBinding { HostPort = "80" }] },
+                            { "443/tcp", [new PortBinding { HostPort = "443" }] },
+                            { "13100/tcp", [new PortBinding { HostPort = "13100" }] }
+                        }
                 },
-                PortBindings = new Dictionary<string, IList<PortBinding>>
+            NetworkingConfig = new NetworkingConfig
+            {
+                EndpointsConfig = new Dictionary<string, EndpointSettings>
                 {
-                    { "80/tcp", [new PortBinding { HostPort = "80" }] },
-                    { "443/tcp", [new PortBinding { HostPort = "443" }] }
+                    { DockerNamingHelper.LokiNetworkName, new EndpointSettings() },
+                    { DockerNamingHelper.PrometheusNetworkName, new EndpointSettings() }
                 }
             },
-            ExposedPorts = new Dictionary<string, EmptyStruct> { { "80/tcp", default }, { "443/tcp", default }, },
+            ExposedPorts =
+                new Dictionary<string, EmptyStruct>
+                {
+                    { "80/tcp", default }, { "443/tcp", default }, { "13100/tcp", default }
+                },
             Cmd =
             [
                 "caddy", "run", "--config", "/etc/caddy/caddy.json"

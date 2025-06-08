@@ -3,6 +3,7 @@ using Docker.DotNet;
 using Docker.DotNet.Models;
 using ICSharpCode.SharpZipLib.Tar;
 using Kjkardum.CloudyBack.Application.Clients;
+using Kjkardum.CloudyBack.Domain.Enums;
 using Kjkardum.CloudyBack.Infrastructure.Containerization.Helpers;
 using Microsoft.Extensions.Logging;
 using System.Reflection;
@@ -10,39 +11,154 @@ using System.Text;
 
 namespace Kjkardum.CloudyBack.Infrastructure.Containerization.Clients.WebApplication;
 
-public class WebApplicationClient(DockerClient client, ILogger<WebApplicationClient> logger): IWebApplicationClient
+public class WebApplicationClient(DockerClient client, ILogger<WebApplicationClient> logger) : IWebApplicationClient
 {
-    // on build i will (delete if exists) and create volume for web application source
-    // i will mount that volume to the WebApplicationBuilder.Dockerfile container to /appsrc (this is already workdir of dockerfile)
-    // i will run the container with command of git clone <repo-url> && bash -c "<command method argument to build the app>"
-    // on run i will (delete if exists) and create container for this web application and mount /appsrc to the container's /appsrc
-    // i will run the container with command cd /appsrc && <command method argument to run the app>
+    private const string OtelCollectorImageName = "otel/opentelemetry-collector-contrib";
+
     public async Task BuildAndRunWebApplicationUsingGitRepo(
         Guid id,
+        string name, //TODO use this !!!!!!!!!
         string repoUrl,
         string buildCommand,
         string runCommand,
+        WebApplicationRuntimeType runtimeType,
         int port,
         List<string> environmentVariables,
         List<Guid> virtualNetworks)
     {
         logger.LogInformation("Building and running web application from repository: {RepoUrl}", repoUrl);
-
+        await CreateSidecarTelemetryCollector(id, name);
         await BuildWebApplicationUsingGitRepo(id, repoUrl, buildCommand, environmentVariables, virtualNetworks);
-        await RunWebApplicationUsingGitRepo(id, runCommand, port, environmentVariables, virtualNetworks);
+        await RunWebApplicationUsingGitRepo(id, runtimeType, runCommand, port, environmentVariables, virtualNetworks);
     }
 
-    private async Task RunWebApplicationUsingGitRepo(Guid id, string runCommand, int port, List<string> environmentVariables, List<Guid> virtualNetworks)
+    public async Task StartServerAsync(Guid requestId)
     {
-        //TODO offer runtime image as a parameter
-        //TODO offer port as a parameter, TODO dont expose port as there will be a reverse proxy in front of this
-        const string tempRunnerImageName = "python:bookworm";
+        logger.LogInformation($"Starting server {requestId}");
+        var container = await client.Containers.InspectContainerAsync(DockerNamingHelper.GetContainerName(requestId));
+        if (container.State.Running)
+        {
+            logger.LogInformation("Container is already running");
+            return;
+        }
+
+        await client.Containers
+            .StartContainerAsync(DockerNamingHelper.GetContainerName(requestId), new ContainerStartParameters());
+        logger.LogInformation("Container started");
+    }
+
+    public async Task StopServerAsync(Guid requestId)
+    {
+        logger.LogInformation($"Stopping server {requestId}");
+        var container = await client.Containers.InspectContainerAsync(DockerNamingHelper.GetContainerName(requestId));
+        if (!container.State.Running)
+        {
+            logger.LogInformation("Container is already stopped");
+            return;
+        }
+
+        await client.Containers
+            .StopContainerAsync(DockerNamingHelper.GetContainerName(requestId), new ContainerStopParameters());
+        logger.LogInformation("Container stopped");
+    }
+
+    public async Task RestartServerAsync(Guid requestId)
+    {
+        logger.LogInformation($"Restarting server {requestId}");
+        var container = await client.Containers.InspectContainerAsync(DockerNamingHelper.GetContainerName(requestId));
+        if (!container.State.Running)
+        {
+            logger.LogInformation("Container is already stopped");
+            return;
+        }
+
+        await client.Containers
+            .RestartContainerAsync(DockerNamingHelper.GetContainerName(requestId), new ContainerRestartParameters());
+        logger.LogInformation("Container restarted");
+    }
+
+    private async Task CreateSidecarTelemetryCollector(Guid id, string appName)
+    {
+        try
+        {
+            var existingTelemetryContainer = await client.Containers.InspectContainerAsync(
+                DockerNamingHelper.GetSidecarTelemetryName(id));
+            if (existingTelemetryContainer.State.Running)
+            {
+                return;
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogInformation("No existing telemetry container found for ID: {Id}. Creating a new one.", id);
+        }
+
+        var currentDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ??
+                               throw new InvalidOperationException("Could not determine the current directory.");
+        var collectorYamlTemplate = Path.Combine(
+            currentDirectory,
+            "Containerization/Clients/WebApplication/FileTemplates/collector.yml");
+        await client.Images.CreateImageAsync(
+            new ImagesCreateParameters { FromImage = OtelCollectorImageName, Tag = "latest" },
+            null,
+            new Progress<JSONMessage>());
+        logger.LogInformation("Otel Collector Image pulled");
+        await client.Containers.CreateContainerAsync(new CreateContainerParameters
+            {
+                Name = DockerNamingHelper.GetSidecarTelemetryName(id),
+                Image = OtelCollectorImageName,
+                NetworkingConfig =
+                    new NetworkingConfig
+                    {
+                        EndpointsConfig = new Dictionary<string, EndpointSettings>()
+                        {
+                            { DockerNamingHelper.GetNetworkName(id), new EndpointSettings() },
+                            { DockerNamingHelper.ObservabilityNetworkName, new EndpointSettings() }
+                        }
+                    },
+                HostConfig =
+                    new HostConfig
+                    {
+                        Binds = new List<string>
+                        {
+                            $"{DockerLocalStorageHelper.CopyAndResolvePersistedPath(collectorYamlTemplate)}:/conf/collector.yml",
+                        },
+                        RestartPolicy = new RestartPolicy { Name = RestartPolicyKind.Always, MaximumRetryCount = 0 }
+                    },
+                Env = new List<string>
+                {
+                    $"DATA_SOURCE_NAME={appName}",
+                    $"OTLP_ENDPOINT=http://{DockerNamingHelper.LokiContainerName}:3100/otlp"
+                },
+                Cmd = new List<string> { "--config=/conf/collector.yml" }
+            });
+        logger.LogInformation("Otel Collector Container created");
+        await client.Containers
+            .StartContainerAsync(DockerNamingHelper.GetSidecarTelemetryName(id), new ContainerStartParameters());
+        logger.LogInformation("Otel Collector Container started");
+    }
+
+    private async Task RunWebApplicationUsingGitRepo(
+        Guid id,
+        WebApplicationRuntimeType runtimeType,
+        string runCommand,
+        int port,
+        List<string> environmentVariables,
+        List<Guid> virtualNetworks)
+    {
+        var runnerImage = runtimeType switch
+        {
+            WebApplicationRuntimeType.DotNet => "mcr.microsoft.com/dotnet/aspnet:8.0-alpine",
+            WebApplicationRuntimeType.NodeJs => "node:20",
+            WebApplicationRuntimeType.Python => "python:bookworm",
+            _ => throw new NotSupportedException($"Runtime type {runtimeType} is not supported.")
+        };
         var volumeName = DockerNamingHelper.GetVolumeName(id);
         var appContainer = DockerNamingHelper.GetContainerName(id);
         logger.LogInformation("Running web application with ID: {Id} using command: {RunCommand}", id, runCommand);
         await RemoveExistingContainer(id);
         await client.Images.CreateImageAsync(
-            new ImagesCreateParameters { FromImage = tempRunnerImageName, Tag = "latest" },
+            new ImagesCreateParameters { FromImage = runnerImage, Tag = "latest" },
             null,
             new Progress<JSONMessage>());
         await CreateNetworkForApplicationIfNotExists(id);
@@ -52,17 +168,17 @@ public class WebApplicationClient(DockerClient client, ILogger<WebApplicationCli
         networksDictionary[DockerNamingHelper.GetNetworkName(id)] = new EndpointSettings();
         var containerParameters = new CreateContainerParameters
         {
-            Image = tempRunnerImageName,
+            Image = runnerImage,
             Name = appContainer,
-            HostConfig = new HostConfig
-            {
-                Binds = [ $"{volumeName}:/appsrc" ]
-            },
-            NetworkingConfig = new NetworkingConfig
-            {
-                EndpointsConfig = networksDictionary
-            },
-            Env = environmentVariables,
+            HostConfig =
+                new HostConfig
+                {
+                    LogConfig = DockerLoggingHelper.DefaultLogConfig(id),
+                    Binds = [$"{volumeName}:/appsrc"],
+                    RestartPolicy = new RestartPolicy { Name = RestartPolicyKind.Always, MaximumRetryCount = 0 }
+                },
+            NetworkingConfig = new NetworkingConfig { EndpointsConfig = networksDictionary },
+            Env = [..environmentVariables, DockerLoggingHelper.LogEnvironmentVariable(id)],
             ExposedPorts = new Dictionary<string, EmptyStruct> { { $"{port}/tcp", default } },
             Cmd = new List<string> { "bash", "-c", $"cd /appsrc && {runCommand}" }
         };
@@ -77,10 +193,9 @@ public class WebApplicationClient(DockerClient client, ILogger<WebApplicationCli
         {
             logger.LogInformation($"Web application {id} network does not exist. Creating...");
             await client.Networks.CreateNetworkAsync(new NetworksCreateParameters
-                {
-                    Name = DockerNamingHelper.GetNetworkName(id),
-                    Driver = "bridge"
-                });
+            {
+                Name = DockerNamingHelper.GetNetworkName(id), Driver = "bridge"
+            });
         }
     }
 
@@ -113,6 +228,7 @@ public class WebApplicationClient(DockerClient client, ILogger<WebApplicationCli
         {
             logger.LogWarning(ex, "Failed to remove volume {VolumeName}. It may not exist.", volumeName);
         }
+
         await client.Volumes.CreateAsync(new VolumesCreateParameters { Name = volumeName });
         return volumeName;
     }
@@ -133,33 +249,36 @@ public class WebApplicationClient(DockerClient client, ILogger<WebApplicationCli
         var container = new CreateContainerParameters
         {
             Image = builderImageName,
-            Name = DockerNamingHelper.GetContainerName(id)+ "builder",
-            HostConfig = new HostConfig
-            {
-                Binds = [ $"{volumeName}:/appsrc" ],
-            },
+            Name = DockerNamingHelper.GetContainerName(id) + "builder",
+            HostConfig =
+                new HostConfig
+                {
+                    LogConfig = DockerLoggingHelper.DefaultLogConfig(id), Binds = [$"{volumeName}:/appsrc"]
+                },
             NetworkingConfig = new NetworkingConfig
             {
                 EndpointsConfig = virtualNetworks.ToDictionary(
                     DockerNamingHelper.GetVirtualNetworkResourceName,
                     _ => new EndpointSettings())
             },
-            Env = environmentVariables,
+            Env = [..environmentVariables, DockerLoggingHelper.LogEnvironmentVariable(id)],
             Cmd = new List<string>()
             {
                 "bash",
                 "-c",
-                string.IsNullOrWhiteSpace(buildCommand) ?
-                    $"git clone {repoUrl} ."
+                string.IsNullOrWhiteSpace(buildCommand)
+                    ? $"git clone {repoUrl} ."
                     : $"git clone {repoUrl} . && {buildCommand}"
             }
         };
         var builderContainerReference = await client.Containers.CreateContainerAsync(container);
         try
         {
-            logger.LogInformation("Created container for building web application: {ContainerId}", builderContainerReference.ID);
+            logger.LogInformation("Created container for building web application: {ContainerId}",
+                builderContainerReference.ID);
             await client.Containers.StartContainerAsync(builderContainerReference.ID, new ContainerStartParameters());
-            logger.LogInformation("Started container for building web application: {ContainerId}", builderContainerReference.ID);
+            logger.LogInformation("Started container for building web application: {ContainerId}",
+                builderContainerReference.ID);
             var waitTask = client.Containers.WaitContainerAsync(builderContainerReference.ID);
             var timerTask = Task.Delay(TimeSpan.FromMinutes(5));
             var completedTask = await Task.WhenAny(waitTask, timerTask);
@@ -173,6 +292,7 @@ public class WebApplicationClient(DockerClient client, ILogger<WebApplicationCli
                     throw new BadRequestException(
                         $"Building web application failed with status code: {waitResult.StatusCode}");
                 }
+
                 logger.LogInformation("Container for building web application completed successfully.");
             }
             else
@@ -188,7 +308,8 @@ public class WebApplicationClient(DockerClient client, ILogger<WebApplicationCli
                 await client.Containers.RemoveContainerAsync(
                     builderContainerReference.ID,
                     new ContainerRemoveParameters { Force = true });
-                logger.LogInformation("Removed container for building web application: {ContainerId}", builderContainerReference.ID);
+                logger.LogInformation("Removed container for building web application: {ContainerId}",
+                    builderContainerReference.ID);
             }
             catch (Exception ex)
             {

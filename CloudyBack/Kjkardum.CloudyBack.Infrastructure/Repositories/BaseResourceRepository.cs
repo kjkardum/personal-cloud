@@ -7,7 +7,7 @@ using System.Linq.Expressions;
 
 namespace Kjkardum.CloudyBack.Infrastructure.Repositories;
 
-public class BaseResourceRepository(ApplicationDbContext dbContext): IBaseResourceRepository
+public class BaseResourceRepository(ApplicationDbContext dbContext) : IBaseResourceRepository
 {
     public async Task<BaseResource?> GetById(Guid id) =>
         await dbContext.Resources
@@ -20,6 +20,7 @@ public class BaseResourceRepository(ApplicationDbContext dbContext): IBaseResour
         {
             query = query.Where(x => x.Name.Contains(pagination.FilterBy));
         }
+
         var orderBy = (pagination.OrderBy ?? string.Empty).Split(',');
         if (orderBy.Length == 2)
         {
@@ -50,12 +51,28 @@ public class BaseResourceRepository(ApplicationDbContext dbContext): IBaseResour
 
     public async Task<(IEnumerable<AuditLogEntry>, int)> GetAuditLogEntries(
         Guid resourceId,
+        PaginatedRequest pagination) => resourceId != Guid.Empty
+        ? await InnerGetAuditLogEntries(resourceId, pagination)
+        : throw new ArgumentOutOfRangeException(nameof(resourceId));
+
+    public async Task<(IEnumerable<AuditLogEntry>, int)> GetGlobalAuditLogEntries(PaginatedRequest pagination)
+        => await InnerGetAuditLogEntries(Guid.Empty, pagination);
+
+    public async Task<(IEnumerable<AuditLogEntry>, int)> InnerGetAuditLogEntries(
+        Guid resourceId,
         PaginatedRequest pagination)
     {
         var query = dbContext.AuditLogEntries.AsQueryable();
         if (resourceId != Guid.Empty)
         {
             query = query.Where(x => x.ResourceId == resourceId);
+        }
+
+        if (!string.IsNullOrWhiteSpace(pagination.FilterBy))
+        {
+            query = query.Where(x => x.ActionName.Contains(pagination.FilterBy) ||
+                x.ActionDisplayText.Contains(pagination.FilterBy) ||
+                (x.ActionMetadata != null && x.ActionMetadata.Contains(pagination.FilterBy)));
         }
 
         var total = await query.CountAsync();

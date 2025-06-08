@@ -4,6 +4,7 @@ namespace Kjkardum.CloudyBack.Application.Clients;
 
 public interface IGeneralContainerStatusClient
 {
-    Task<DockerContainer> GetContainerStateAsync(Guid id);
+    Task<DockerContainer?> GetContainerStateAsync(Guid id);
     Task DeleteContainerAsync(Guid requestId);
+    Task<DockerEnvironment> GetDockerEnvironmentAsync();
 }

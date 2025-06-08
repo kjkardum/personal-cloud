@@ -27,7 +27,6 @@
 
     <ItemGroup>
       <Folder Include="UseCases\User\Queries\" />
-      <Folder Include="UseCases\WebApplication\Commands\Delete\" />
     </ItemGroup>
 
 </Project>

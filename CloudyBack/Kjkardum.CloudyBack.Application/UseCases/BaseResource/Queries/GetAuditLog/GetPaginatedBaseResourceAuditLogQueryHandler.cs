@@ -2,6 +2,7 @@ using AutoMapper;
 using Kjkardum.CloudyBack.Application.Repositories;
 using Kjkardum.CloudyBack.Application.Response;
 using Kjkardum.CloudyBack.Application.UseCases.BaseResource.Dtos;
+using Kjkardum.CloudyBack.Domain.Entities;
 using MediatR;
 
 namespace Kjkardum.CloudyBack.Application.UseCases.BaseResource.Queries.GetAuditLog;
@@ -15,9 +16,20 @@ public class GetPaginatedBaseResourceAuditLogQueryHandler(
         GetPaginatedBaseResourceAuditLogQuery request,
         CancellationToken cancellationToken)
     {
-        var (logs, count) = await baseResourceRepository.GetAuditLogEntries(
-            request.ResourceId,
-            request.Pagination);
+        IEnumerable<AuditLogEntry> logs;
+        int count;
+
+        if (request.ResourceId == Guid.Empty)
+        {
+            (logs, count) = await baseResourceRepository.GetGlobalAuditLogEntries(
+                request.Pagination);
+        }
+        else
+        {
+            (logs, count) = await baseResourceRepository.GetAuditLogEntries(
+                request.ResourceId,
+                request.Pagination);
+        }
 
         var auditLogDtos = logs.Select(mapper.Map<AuditLogDto>);
         var paginatedResponse = new PaginatedResponse<AuditLogDto>

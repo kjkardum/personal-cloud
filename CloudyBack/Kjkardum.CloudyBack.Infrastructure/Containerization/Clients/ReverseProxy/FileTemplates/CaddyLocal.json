@@ -4,23 +4,88 @@
     "http": {
       "servers": {
         "srv0": {
+          "metrics": {
+            "per_host": true
+          },
           "listen": [
             ":80"
           ],
           "routes": [
             {
+              "match": [
+                {
+                  "host": [
+                    "cloudycaddycontainer"
+                  ],
+                  "path": [
+                    "/metrics"
+                  ]
+                }
+              ],
               "handle": [
                 {
-                  "handler": "reverse_proxy",
-                  "upstreams": [
+                  "handler": "subroute",
+                  "routes": [
                     {
-                      "dial": "cloudyadminapp:8080"
+                      "handle": [
+                        {
+                          "handler": "metrics"
+                        }
+                      ]
                     }
                   ]
                 }
-              ]
+              ],
+              "terminal": true
             }
-          ]
+          ],
+          "automatic_https": {
+            "skip": [
+              "cloudycaddycontainer"
+            ]
+          }
+        },
+        "srv1": {
+          "listen": [
+            ":13100"
+          ],
+          "routes": [
+            {
+              "match": [
+                {
+                  "host": [
+                    "localhost"
+                  ]
+                }
+              ],
+              "handle": [
+                {
+                  "handler": "subroute",
+                  "routes": [
+                    {
+                      "handle": [
+                        {
+                          "handler": "reverse_proxy",
+                          "upstreams": [
+                            {
+                              "dial": "cloudylokicontainer:3100"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "terminal": true
+            }
+          ],
+          "automatic_https": {
+            "skip": [
+              "localhost"
+            ],
+            "disable": true
+          }
         }
       }
     }

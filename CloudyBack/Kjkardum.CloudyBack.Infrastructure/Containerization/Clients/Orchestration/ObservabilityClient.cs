@@ -40,11 +40,16 @@ public class ObservabilityClient(
         public PrometheusGlobalConfig global { get; set; }
         public ScrapeConfig[]? scrape_configs { get; set; }
     }
-    public async Task AttachCollector(Guid id, string jobName)
+
+    public async Task EnsureCreated()
     {
         await RestartOrCreateCadvisor();
         await RestartOrCreatePrometheus();
         await RestartOrCreateLoki();
+    }
+    public async Task AttachCollector(Guid id, string jobName)
+    {
+        await EnsureCreated();
         var containerName = DockerNamingHelper.GetSidecarTelemetryName(id);
         var url = $"{containerName}:8889";
         var yamlToEdit = GetPrometheusConfigYaml();
@@ -200,6 +205,16 @@ public class ObservabilityClient(
                     Driver = "bridge"
                 });
         }
+
+        if (networks.All(n => n.Name != DockerNamingHelper.LokiNetworkName))
+        {
+            logger.LogInformation("Loki network does not exist. Creating...");
+            await client.Networks.CreateNetworkAsync(new NetworksCreateParameters
+                {
+                    Name = DockerNamingHelper.LokiNetworkName,
+                    Driver = "bridge"
+                });
+        }
         await client.Volumes
             .CreateAsync(new VolumesCreateParameters { Name = DockerNamingHelper.LokiVolumeName });
 
@@ -235,6 +250,7 @@ public class ObservabilityClient(
             Image = LokiImageName,
             HostConfig = new HostConfig
             {
+                RestartPolicy = new RestartPolicy { Name = RestartPolicyKind.Always, MaximumRetryCount = 0 },
                 Binds = new List<string>
                 {
                     $"{DockerNamingHelper.LokiVolumeName}:/loki",
@@ -253,7 +269,8 @@ public class ObservabilityClient(
             {
                 EndpointsConfig = new Dictionary<string, EndpointSettings>
                 {
-                    { DockerNamingHelper.ObservabilityNetworkName, new EndpointSettings() }
+                    { DockerNamingHelper.ObservabilityNetworkName, new EndpointSettings() },
+                    { DockerNamingHelper.LokiNetworkName, new EndpointSettings() }
                 }
             },
             Cmd = new List<string>
@@ -276,6 +293,15 @@ public class ObservabilityClient(
             await client.Networks.CreateNetworkAsync(new NetworksCreateParameters
                 {
                     Name = DockerNamingHelper.ObservabilityNetworkName,
+                    Driver = "bridge"
+                });
+        }
+        if (networks.All(n => n.Name != DockerNamingHelper.PrometheusNetworkName))
+        {
+            logger.LogInformation("Prometheus network does not exist. Creating...");
+            await client.Networks.CreateNetworkAsync(new NetworksCreateParameters
+                {
+                    Name = DockerNamingHelper.PrometheusNetworkName,
                     Driver = "bridge"
                 });
         }
@@ -315,6 +341,7 @@ public class ObservabilityClient(
             Image = PrometheusImageName,
             HostConfig = new HostConfig
             {
+                RestartPolicy = new RestartPolicy { Name = RestartPolicyKind.Always, MaximumRetryCount = 0 },
                 Binds = new List<string>
                 {
                     $"{DockerLocalStorageHelper.CopyAndResolvePersistedPath(GetPrometheusConfigYaml(true))}:/etc/prometheus/prometheus.yml",
@@ -335,7 +362,8 @@ public class ObservabilityClient(
             {
                 EndpointsConfig = new Dictionary<string, EndpointSettings>
                 {
-                    { DockerNamingHelper.ObservabilityNetworkName, new EndpointSettings() }
+                    { DockerNamingHelper.ObservabilityNetworkName, new EndpointSettings() },
+                    { DockerNamingHelper.PrometheusNetworkName, new EndpointSettings() }
                 }
             },
             Cmd = new List<string>
@@ -391,6 +419,7 @@ public class ObservabilityClient(
             Image = CadvisorImageName,
             HostConfig = new HostConfig
             {
+                RestartPolicy = new RestartPolicy { Name = RestartPolicyKind.Always, MaximumRetryCount = 0 },
                 Binds = new List<string>
                 {
                     "/:/rootfs:ro",

@@ -20,8 +20,8 @@ public class QueryLokiQueryHandler(
 
         var query = request.Query switch
         {
-            PredefinedLokiQuery.Demo =>
-                $$"""{service_name="{{resource.Name}}"}""",
+            PredefinedLokiQuery.ContainerLog =>
+                $$"""{CLOUDY_RESOURCE_ID="{{resource.Id:N}}"}""",
             _ =>
                 throw new ArgumentOutOfRangeException(nameof(request.Query))
         };
