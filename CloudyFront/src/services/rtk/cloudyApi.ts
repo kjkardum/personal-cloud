@@ -550,7 +550,7 @@ export type GetApiResourceBaseResourceByResourceIdContainerApiArg = {
   resourceId: string;
 };
 export type GetApiResourceBaseResourceByResourceIdAuditLogApiResponse =
-  /** status 200 OK */ AuditLogEntryPaginatedResponse;
+  /** status 200 OK */ AuditLogDtoPaginatedResponse;
 export type GetApiResourceBaseResourceByResourceIdAuditLogApiArg = {
   resourceId: string;
   page?: number;
@@ -851,27 +851,19 @@ export type ContainerDto = {
   stateStartedAt?: string;
   stateFinishedAt?: string;
 };
-export type BaseResource = {
-  id?: string;
-  name: string;
-  createdAt?: string;
-  updatedAt?: string;
-  auditLogEntries?: AuditLogEntry[];
-};
-export type AuditLogEntry = {
+export type AuditLogDto = {
   id?: string;
   actionName: string;
   actionDisplayText: string;
   actionMetadata?: string | null;
   timestamp?: string;
   resourceId?: string;
-  resource?: BaseResource;
 };
-export type AuditLogEntryPaginatedResponse = {
+export type AuditLogDtoPaginatedResponse = {
   page?: number;
   pageSize?: number;
   totalCount?: number;
-  data: AuditLogEntry[];
+  data: AuditLogDto[];
 };
 export type PrometheusResultItemDto = {
   metric?: {

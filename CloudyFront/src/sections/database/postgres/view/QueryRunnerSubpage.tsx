@@ -27,7 +27,7 @@ import IStandaloneCodeEditor = editor.IStandaloneCodeEditor;
 
 
 export const QueryRunnerSubpage =  ({resourceBaseData}: { resourceBaseData:  PostgresDatabaseResourceDto | undefined }) => {
-  const editorRef = useRef<IStandaloneCodeEditor>(null);
+  const editorRef = useRef<IStandaloneCodeEditor | null>(null);
   const theme = useMantineTheme();
   const os = useOs();
   const { colorScheme } = useMantineColorScheme();
@@ -51,9 +51,9 @@ export const QueryRunnerSubpage =  ({resourceBaseData}: { resourceBaseData:  Pos
       run: runQuery,
     })
   }
-  const getCurrentValue = () => editorRef.current.getValue();
+  const getCurrentValue = () => editorRef.current?.getValue();
   const runQuery = async () => {
-    if (!resourceBaseData) return;
+    if (!resourceBaseData) { return; }
     const query = getCurrentValue();
     try {
       const result = await runQueryMutation({

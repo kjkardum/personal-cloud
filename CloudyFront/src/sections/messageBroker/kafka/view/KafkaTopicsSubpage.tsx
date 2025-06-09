@@ -80,7 +80,7 @@ export const KafkaTopicsSubpage = ({ resourceId }: { resourceId: string }) => {
     closeAddMessage();
   }, [createTopicMessageMutation, producerForm, selectedTopic, resourceId, closeAddMessage]);
   return (
-    <Stack spacing="md">
+    <Stack gap="md">
       <Modal opened={openedAddTopic} onClose={closeAddTopic} title="Add topic manually to kafka">
         <form onSubmit={form.onSubmit(submitNewTopicForm)}>
           <TextInput
@@ -150,6 +150,7 @@ export const KafkaTopicsSubpage = ({ resourceId }: { resourceId: string }) => {
           <DataTable
             borderRadius="sm"
             withColumnBorders
+            withTableBorder={false}
             highlightOnHover
             records={selectedTopic.partitions || []}
             columns={[
@@ -158,9 +159,9 @@ export const KafkaTopicsSubpage = ({ resourceId }: { resourceId: string }) => {
               {
                 accessor: 'replicas',
                 title: 'Replicas',
-                render: ({ replicas }) => replicas.join(', '),
+                render: ({ replicas }) => replicas?.join(', '),
               },
-              { accessor: 'isr', title: 'ISR', render: ({ isr }) => isr.join(', ') },
+              { accessor: 'isr', title: 'ISR', render: ({ isr }) => isr?.join(', ') },
               { accessor: 'elr', title: 'ELR' },
               { accessor: 'lastKnownElr', title: 'Last Known ELR' },
             ]}
@@ -178,6 +179,7 @@ export const KafkaTopicsSubpage = ({ resourceId }: { resourceId: string }) => {
           <DataTable
             borderRadius="sm"
             withColumnBorders
+            withTableBorder={false}
             highlightOnHover
             records={kafkaTopics || []}
             columns={[

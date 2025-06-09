@@ -8,7 +8,9 @@ import { ResourceViewSummary } from '@/components/ResourceView/ResourceViewSumma
 import { ResourceViewToolbar, ResourceViewToolbarItem } from '@/components/ResourceView/ResourceViewToolbar';
 import { CloudyIconWebApplication, defaultIconStyle } from '@/icons/Resources';
 import {
-  PredefinedPrometheusQuery, useDeleteApiResourceWebApplicationResourceByIdConfigurationAndConfigurationKeyMutation,
+  PredefinedPrometheusQuery,
+  useDeleteApiResourceWebApplicationResourceByIdConfigurationAndConfigurationKeyMutation,
+  useDeleteApiResourceWebApplicationResourceByIdMutation,
   useGetApiResourceBaseResourceByResourceIdContainerQuery,
   useGetApiResourceWebApplicationResourceByIdQuery,
   usePostApiResourceWebApplicationResourceByServerIdContainerActionMutation,
@@ -40,11 +42,11 @@ export function ViewWebApplicationPage() {
     await action({ serverId: resourceId || '', actionId: actionType }).unwrap();
     refetchContainer();
   };
-  const [deleteResource] = useDeleteApiResourceWebApplicationResourceByIdConfigurationAndConfigurationKeyMutation();
+  const [deleteResource] = useDeleteApiResourceWebApplicationResourceByIdMutation();
   const [openedDelete, { open:openDelete, close: closeDelete }] = useDisclosure(false);
   const handleDelete = async () => {
     if (!resourceId) return;
-    await deleteResource({ serverId: resourceId }).unwrap();
+    await deleteResource({ id: resourceId }).unwrap();
     closeDelete();
     navigate('/');
   }
@@ -108,7 +110,7 @@ export function ViewWebApplicationPage() {
             { name: 'Web application ID', value: { text: resourceBaseData?.id } },
             { name: 'Web application name', value: { text: resourceBaseData?.name } },
             { name: 'Networking', value: { text: 'Go to configuration', link: `${viewResourceOfType('WebApplicationResource', resourceBaseData?.id)}?rpi=4` } },
-            { name: 'Created at', value: { text: new Date(resourceBaseData?.createdAt).toLocaleString() } },
+            { name: 'Created at', value: { text: resourceBaseData?.createdAt && new Date(resourceBaseData?.createdAt).toLocaleString() } },
           ]} />
           <Divider />
           <Box>

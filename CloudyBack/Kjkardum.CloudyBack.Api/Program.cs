@@ -32,7 +32,15 @@ app.UseHttpsRedirection();
 app.UseProblemDetails();
 app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapControllers();
+app.MapWhen(
+    context => !context.Request.Path.StartsWithSegments("/api"),
+    appBuilder => {
+        appBuilder.UseStaticFiles();
+        appBuilder.UseRouting();
+        appBuilder.UseEndpoints(endpoints => endpoints.MapFallbackToFile("index.html"));
+    });
 
 app.UseCors(corsBuilder => corsBuilder
     .WithOrigins(

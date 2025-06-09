@@ -61,7 +61,7 @@ public class BaseResourceController(IMediator mediator): ControllerBase
     }
 
     [HttpGet("{resourceId:guid}/audit-log")]
-    public async Task<ActionResult<PaginatedResponse<AuditLogEntry>>> GetAuditLog(
+    public async Task<ActionResult<PaginatedResponse<AuditLogDto>>> GetAuditLog(
         Guid resourceId,
         [FromQuery] PaginatedRequest request,
         CancellationToken cancellationToken = default)

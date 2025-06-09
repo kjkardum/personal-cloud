@@ -117,7 +117,7 @@ export const ViewPostgresServerPage = () => {
             { name: 'Server name', value: { text: resourceBaseData?.name } },
             { name: 'Networking', value: { text: 'Go to configuration', link: `${viewResourceOfType('PostgresServerResource', resourceBaseData?.id)}?rpi=4` } },
             { name: 'Databases', value: { text: `${resourceBaseData?.postgresDatabaseResources?.length ?? 0} databases created`, link: `${viewResourceOfType('PostgresServerResource', resourceBaseData?.id)}?rpi=1` } },
-            { name: 'Created at', value: { text: new Date(resourceBaseData?.createdAt).toLocaleString() } },
+            { name: 'Created at', value: { text: resourceBaseData?.createdAt && new Date(resourceBaseData?.createdAt).toLocaleString() } },
           ]} />
           <Divider />
           <Box>
@@ -152,20 +152,21 @@ export const ViewPostgresServerPage = () => {
           <ResourceViewToolbarItem
             label="Create new database"
             leftSection={<CloudyIconDatabase color={theme.colors[theme.primaryColor][4]} height={16} />}
-            onClick={() => navigate(`/postgres/new/database?serverId=${resourceBaseData.id}`)}
+            onClick={() => navigate(`/postgres/new/database?serverId=${resourceBaseData?.id}`)}
           />
         </ResourceViewToolbar>
         <DataTable
           borderRadius="sm"
           withColumnBorders
+          withTableBorder={false}
           striped
           highlightOnHover
           records={resourceBaseData?.postgresDatabaseResources || []}
           columns={[
             { accessor: 'databaseName', title: 'Database name' },
             { accessor: 'adminUsername', title: 'Admin username' },
-            { accessor: 'createdAt', title: 'Created at', render: ({createdAt: date}) => new Date(date.endsWith('Z') ? date : date + 'Z').toLocaleString() },
-            { accessor: 'updatedAt', title: 'Updated at', render: ({updatedAt: date}) => new Date(date.endsWith('Z') ? date : date + 'Z').toLocaleString() },
+            { accessor: 'createdAt', title: 'Created at', render: ({createdAt: date}) => date && new Date(date.endsWith('Z') ? date : `${date}Z`).toLocaleString() },
+            { accessor: 'updatedAt', title: 'Updated at', render: ({updatedAt: date}) => date && new Date(date.endsWith('Z') ? date : `${date}Z`).toLocaleString() },
           ]}
           onRowClick={({ record }) => navigate(viewResourceOfType('PostgresDatabaseResource', record.id))}
         />

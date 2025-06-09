@@ -15,7 +15,7 @@ export const MetricChart = (props: {
 }) => {
   const [getMetrics] = usePostApiResourceBaseResourceByResourceIdPrometheusMutation();
   const customPrometheusReq = useCallback(
-    async (start, end, step) => {
+    async (start: string, end: string, step: any) => {
       const metrics = await getMetrics({
         resourceId: props.resourceId,
         queryPrometheusQuery: {
@@ -50,7 +50,7 @@ export const MetricChart = (props: {
   const memoedDummyDataPrometheusChart = useMemo(()=>({labels: [], datasets: []}), []);
   return (
     <>
-      <Line data={memoedDummyDataPrometheusChart} options={memoedOptionsPrometheusChart} />
+      <Line data={memoedDummyDataPrometheusChart} options={memoedOptionsPrometheusChart as any} />
     </>
   )
 }

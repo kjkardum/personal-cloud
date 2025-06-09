@@ -58,6 +58,7 @@ export const KafkaNetworkSubpage = ({
             flex={1}
             borderRadius="sm"
             withColumnBorders
+            withTableBorder={false}
             striped
             highlightOnHover
             records={resourceBaseData?.virtualNetworks || []}

@@ -167,6 +167,7 @@ export const ViewCloudyDockerPage = () => {
       <ResourceViewPage title="Containers">
         <DataTable
           borderRadius="sm"
+          withTableBorder={false}
           withColumnBorders
           striped
           highlightOnHover
@@ -211,6 +212,7 @@ export const ViewCloudyDockerPage = () => {
         <DataTable
           borderRadius="sm"
           withColumnBorders
+          withTableBorder={false}
           striped
           highlightOnHover
           records={dockerEnvironment?.volumes ?? []}
@@ -228,6 +230,7 @@ export const ViewCloudyDockerPage = () => {
         <DataTable
           borderRadius="sm"
           withColumnBorders
+          withTableBorder={false}
           striped
           highlightOnHover
           records={dockerEnvironment?.networks ?? []}
@@ -246,6 +249,7 @@ export const ViewCloudyDockerPage = () => {
         <DataTable
           borderRadius="sm"
           withColumnBorders
+          withTableBorder={false}
           striped
           highlightOnHover
           records={dockerEnvironment?.images ?? []}

@@ -21,4 +21,10 @@
       <ProjectReference Include="..\Kjkardum.CloudyBack.Infrastructure\Kjkardum.CloudyBack.Infrastructure.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Content Update="wwwroot\.gitkeep">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+
 </Project>

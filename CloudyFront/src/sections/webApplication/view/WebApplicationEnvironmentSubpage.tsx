@@ -85,7 +85,7 @@ export const WebApplicationEnvironmentSubpage = ({
       for (const item of remove) {
         await deleteConfiguration({
           id: resourceBaseData.id,
-          configurationKey: item.key,
+          configurationKey: item.key ?? '',
         }).unwrap();
       }
       for (const item of upsert) {

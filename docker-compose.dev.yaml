@@ -16,10 +16,10 @@ services:
       dockerfile: Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - CLOUDYBACK_OUTER_PERSIST_FOLDER=${PWD}/config_storage
+      - CLOUDYBACK_OUTER_PERSIST_FOLDER=${PWD}/CloudyBack/config_storage
       - ConnectionStrings__DefaultConnection=Server=cloudyadmindb;Database=CloudyDb;User Id=sa;Password=Passw0rd_;Encrypt=False;TrustServerCertificate=True;
     volumes:
-      - ./config_storage:/app/bin/Debug/net8.0/persist
+      - ./CloudyBack/config_storage:/app/bin/Debug/net8.0/persist
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - "8080:8080"

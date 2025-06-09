@@ -177,13 +177,13 @@ paths:
           content:
             text/plain:
               schema:
-                $ref: '#/components/schemas/AuditLogEntryPaginatedResponse'
+                $ref: '#/components/schemas/AuditLogDtoPaginatedResponse'
             application/json:
               schema:
-                $ref: '#/components/schemas/AuditLogEntryPaginatedResponse'
+                $ref: '#/components/schemas/AuditLogDtoPaginatedResponse'
             text/json:
               schema:
-                $ref: '#/components/schemas/AuditLogEntryPaginatedResponse'
+                $ref: '#/components/schemas/AuditLogDtoPaginatedResponse'
   '/api/resource/BaseResource/{resourceId}/prometheus':
     post:
       tags:
@@ -1212,7 +1212,7 @@ paths:
           description: OK
 components:
   schemas:
-    AuditLogEntry:
+    AuditLogDto:
       required:
         - actionDisplayText
         - actionName
@@ -1234,10 +1234,8 @@ components:
         resourceId:
           type: string
           format: uuid
-        resource:
-          $ref: '#/components/schemas/BaseResource'
       additionalProperties: false
-    AuditLogEntryPaginatedResponse:
+    AuditLogDtoPaginatedResponse:
       required:
         - data
       type: object
@@ -1254,28 +1252,7 @@ components:
         data:
           type: array
           items:
-            $ref: '#/components/schemas/AuditLogEntry'
-      additionalProperties: false
-    BaseResource:
-      required:
-        - name
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        name:
-          type: string
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
-        auditLogEntries:
-          type: array
-          items:
-            $ref: '#/components/schemas/AuditLogEntry'
+            $ref: '#/components/schemas/AuditLogDto'
       additionalProperties: false
     BaseResourceDto:
       required:

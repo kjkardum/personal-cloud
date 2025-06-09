@@ -43,13 +43,14 @@ export function ViewResourceGroupPage() {
             { name: 'Resource group', value: { text: resourceBaseData?.name } },
             { name: 'Server ID', value: { text: resourceBaseData?.id } },
             { name: 'Resources', value: { text: `${resourceBaseData?.resources?.length ?? 0} resources created` } },
-            { name: 'Created at', value: { text: new Date(resourceBaseData?.createdAt).toLocaleString() } },
+            { name: 'Created at', value: { text: resourceBaseData?.createdAt && new Date(resourceBaseData?.createdAt).toLocaleString() } },
           ]} />
           <Divider />
             <Title order={3}>Resource list</Title>
             <DataTable
               borderRadius="sm"
               withColumnBorders
+              withTableBorder={false}
               highlightOnHover
               records={resourceBaseData?.resources || []}
               columns={[

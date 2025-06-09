@@ -122,7 +122,7 @@ export const ViewKafkaClusterPage = () => {
             { name: 'Server ID', value: { text: resourceBaseData?.id } },
             { name: 'Server name', value: { text: resourceBaseData?.name } },
             { name: 'Networking', value: { text: 'Go to configuration', link: `${viewResourceOfType('KafkaClusterResource', resourceBaseData?.id)}?rpi=3` } },
-            { name: 'Created at', value: { text: new Date(resourceBaseData?.createdAt).toLocaleString() } },
+            { name: 'Created at', value: { text: resourceBaseData?.createdAt && new Date(resourceBaseData?.createdAt).toLocaleString() } },
           ]} />
           <Divider />
           <Box>

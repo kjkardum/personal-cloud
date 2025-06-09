@@ -44,13 +44,14 @@ export function ViewVirtualNetworkPage() {
             { name: 'Resource group', value: { text: resourceBaseData?.resourceGroupName } },
             { name: 'Virtual network ID', value: { text: resourceBaseData?.id } },
             { name: 'Virtual network name', value: { text: resourceBaseData?.name } },
-            { name: 'Created at', value: { text: new Date(resourceBaseData?.createdAt).toLocaleString() } },
+            { name: 'Created at', value: { text: resourceBaseData?.createdAt && new Date(resourceBaseData?.createdAt).toLocaleString() } },
           ]} />
           <Divider />
           <Title order={3}>Resource list</Title>
           <DataTable
             borderRadius="sm"
             withColumnBorders
+            withTableBorder={false}
             highlightOnHover
             records={resourceBaseData?.resources || []}
             columns={[

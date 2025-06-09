@@ -2,7 +2,7 @@ import { useDebouncedValue } from '@mantine/hooks';
 import { useMemo } from 'react';
 import { useGetApiResourceReverseProxyPreCheckDnsQuery } from '@/services/rtk/cloudyApi';
 
-export const useDomainInput = (domainInput) => {
+export const useDomainInput = (domainInput: string) => {
   const [debouncedDomainInput] = useDebouncedValue(domainInput, 300);
 
   const myLocationHref = useMemo(() => window.location.href, []);

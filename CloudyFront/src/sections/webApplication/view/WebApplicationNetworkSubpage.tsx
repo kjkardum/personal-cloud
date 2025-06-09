@@ -105,7 +105,7 @@ export const WebApplicationNetworkSubpage = ({
           </ResourceViewToolbar>
           <DataTable
             minHeight={400}
-            noRecordsText={'No public connections yet'}
+            noRecordsText="No public connections yet"
             flex={1}
             borderRadius="sm"
             withTableBorder={false}
@@ -123,7 +123,7 @@ export const WebApplicationNetworkSubpage = ({
                 render: ({ id }) => (
                   <Anchor
                     component="button"
-                    onClick={() => handleOpenDeletePublicConnection(id)}
+                    onClick={() => handleOpenDeletePublicConnection(id!)}
                   >
                     <IconTrash size={16} />
                   </Anchor>
@@ -150,7 +150,7 @@ export const WebApplicationNetworkSubpage = ({
           </ResourceViewToolbar>
           <DataTable
             minHeight={400}
-            noRecordsText={'No virtual networks joined yet'}
+            noRecordsText="No virtual networks joined yet"
             flex={1}
             borderRadius="sm"
             withTableBorder={false}

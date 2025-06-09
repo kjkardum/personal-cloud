@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { DataTable } from 'mantine-datatable';
-import { useGetApiResourceBaseResourceByResourceIdAuditLogQuery } from '@/services/rtk/cloudyApi';
+import { DataTable, DataTableColumn } from 'mantine-datatable';
+import { AuditLogDto, useGetApiResourceBaseResourceByResourceIdAuditLogQuery } from '@/services/rtk/cloudyApi';
 import { EmptyGuid } from '@/util/guid';
 import { Stack, TextInput } from '@mantine/core';
 import { useDebouncedValue } from '@mantine/hooks';
@@ -20,13 +20,13 @@ export const ResourceViewAuditLog = ({
       filterBy: debouncedSearchQuery,
     });
   const columns = useMemo(() => {
-    const base = [
+    const base: DataTableColumn<AuditLogDto>[] = [
       { accessor: 'actionDisplayText', title: 'Action' },
       {
         accessor: 'timestamp',
         title: 'Timestamp',
         render: ({ timestamp: date }) =>
-          new Date(date.endsWith('Z') ? date : date + 'Z').toLocaleString(),
+          date && new Date(date.endsWith('Z') ? date : `${date}Z`).toLocaleString(),
       },
     ];
     if (resourceBaseData?.id === EmptyGuid) {
@@ -45,6 +45,7 @@ export const ResourceViewAuditLog = ({
     <DataTable
       borderRadius="sm"
       withColumnBorders
+      withTableBorder={false}
       striped
       highlightOnHover
       records={resourceAuditLogPaginated?.data || []}

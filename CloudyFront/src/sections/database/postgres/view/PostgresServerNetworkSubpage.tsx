@@ -22,7 +22,7 @@ export const PostgresServerNetworkSubpage = ({
 }) => {
   const theme = useMantineTheme();
   const navigate = useNavigate();
-  const {refetch} = useGetApiResourcePostgresServerResourceByServerIdQuery({id: resourceBaseData.id});
+  const {refetch} = useGetApiResourcePostgresServerResourceByServerIdQuery({serverId: resourceBaseData?.id || ''});
   const [
     openedNtworkDrawer, { open: openNetworkDrawer, close: closeNetworkDrawer }] = useDisclosure(false);
   const handleCloseNetworkDrawer = useCallback(()=> {
@@ -58,6 +58,7 @@ export const PostgresServerNetworkSubpage = ({
             flex={1}
             borderRadius="sm"
             withColumnBorders
+            withTableBorder={false}
             striped
             highlightOnHover
             records={resourceBaseData?.virtualNetworks || []}

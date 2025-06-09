@@ -53,12 +53,12 @@ export const ResourceViewLogs = ({
 
       const flattenedLogs: LogEntry[] = [];
 
-      response.data.result.forEach((resultItem) => {
+      response?.data?.result?.forEach((resultItem) => {
         const stream = resultItem.stream;
-        const level = stream.detected_level || 'unknown';
-        const containerName = stream.container_name || 'N/A';
+        const level = stream?.detected_level || 'unknown';
+        const containerName = stream?.container_name || 'N/A';
 
-        resultItem.values.forEach(([ts, msg]) => {
+        resultItem?.values?.forEach(([ts, msg]) => {
           const timestamp = new Date(Number(ts.slice(0, -6))).toISOString(); // Convert ns to ms
           flattenedLogs.push({
             id: ts,

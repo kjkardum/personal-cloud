@@ -36,10 +36,11 @@ export const VirtualNetworkConnectDrawer = ({resourceId, ...props}: DrawerProps 
         </Box>
         <DataTable
           minHeight={400}
-          noRecordsText={'No results for your search'}
+          noRecordsText="No results for your search"
           flex={1}
           borderRadius="sm"
           withColumnBorders
+          withTableBorder={false}
           striped
           highlightOnHover
           records={data?.data || []}
