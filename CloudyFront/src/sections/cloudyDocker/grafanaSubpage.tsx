@@ -27,7 +27,6 @@ export const GrafanaSubpage = () => {
   const updateGrafanaConfigurationSubmit = useCallback(async () => {
     setLoading(true);
     try {
-      console.log('Attempting to attach network with domain:', domainInput, 'and https:', httpsInput);
       await updateGrafanaConfiguration({
         configureGrafanaCommand: { useHttps: httpsInput, host: domainInput },
       }).unwrap();

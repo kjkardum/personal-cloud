@@ -27,8 +27,8 @@ import {
   useGetApiResourceResourceGroupQuery,
 } from '@/services/rtk/cloudyApi';
 import { EmptyGuid } from '@/util/guid';
-import { IconExternalLink } from '@tabler/icons-react';
-import { GrafanaSubpage } from '@/sections/grafana/grafanaSubpage';
+import { GrafanaSubpage } from '@/sections/cloudyDocker/grafanaSubpage';
+import { PublicAccessSubpage } from '@/sections/cloudyDocker/publicAccessSubpage';
 
 export const ViewCloudyDockerPage = () => {
   const navigate = useNavigate();
@@ -156,7 +156,9 @@ export const ViewCloudyDockerPage = () => {
       <ResourceViewPage title="Grafana - Logs and metrics">
         <GrafanaSubpage />
       </ResourceViewPage>
-      <ResourceViewPage title="Public network access">TODO https and stuff</ResourceViewPage>
+      <ResourceViewPage title="Public network access">
+        <PublicAccessSubpage />
+      </ResourceViewPage>
       <ResourceViewPage title="Network visualiser">
         <Stack h='100%'>
           <Box w='100%' flex={1} pos='relative'>

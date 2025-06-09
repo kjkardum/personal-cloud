@@ -118,6 +118,40 @@ paths:
       responses:
         '200':
           description: OK
+  /api/resource/BaseResource/publicAccess:
+    get:
+      tags:
+        - BaseResource
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/PublicAccessConfigurationDto'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicAccessConfigurationDto'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/PublicAccessConfigurationDto'
+    post:
+      tags:
+        - BaseResource
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfigurePublicAccessCommand'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/ConfigurePublicAccessCommand'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/ConfigurePublicAccessCommand'
+      responses:
+        '200':
+          description: OK
   '/api/resource/BaseResource/{resourceId}/container':
     get:
       tags:
@@ -1302,6 +1336,12 @@ components:
         useHttps:
           type: boolean
       additionalProperties: false
+    ConfigurePublicAccessCommand:
+      type: object
+      properties:
+        host:
+          type: string
+      additionalProperties: false
     ConnectReverseProxyCommand:
       type: object
       properties:
@@ -1839,6 +1879,14 @@ components:
           items:
             type: array
             items: { }
+      additionalProperties: false
+    PublicAccessConfigurationDto:
+      type: object
+      properties:
+        created:
+          type: boolean
+        host:
+          type: string
       additionalProperties: false
     PublicProxyConfigurationDto:
       type: object

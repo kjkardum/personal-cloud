@@ -22,19 +22,19 @@ public class ConfigureGrafanaCommandHandler(
             KeyValueTableEntry.GrafanaPublicConnection);
         if (grafanaConnectionKeyValue != null)
         {
-            var existinUri = new Uri(grafanaConnectionKeyValue);
-            if (existinUri.Host == actualHostnameToUse
-                && existinUri.Port == portToUse &&
-                existinUri.Scheme == (actualHttpsValueToUse ? "https" : "http"))
+            var existingUri = new Uri(grafanaConnectionKeyValue);
+            if (existingUri.Host == actualHostnameToUse
+                && existingUri.Port == portToUse &&
+                existingUri.Scheme == (actualHttpsValueToUse ? "https" : "http"))
             {
                 // No changes needed, already configured
                 return;
             }
             await reverseProxyClient.RemoveProxyConfigurationByContainerName(
                 "cloudygrafanacontainer",
-                existinUri.Port,
-                existinUri.Host,
-                existinUri.Scheme == "https");
+                existingUri.Port,
+                existingUri.Host,
+                existingUri.Scheme == "https");
         }
 
         await observabilityClient.CreateOrRunGrafana();

@@ -1,12 +1,14 @@
 using Kjkardum.CloudyBack.Application.Request;
 using Kjkardum.CloudyBack.Application.Response;
 using Kjkardum.CloudyBack.Application.UseCases.BaseResource.Commands.ConfigureGrafana;
+using Kjkardum.CloudyBack.Application.UseCases.BaseResource.Commands.ConfigurePublicAccess;
 using Kjkardum.CloudyBack.Application.UseCases.BaseResource.Dtos;
 using Kjkardum.CloudyBack.Application.UseCases.BaseResource.Queries.GetAuditLog;
 using Kjkardum.CloudyBack.Application.UseCases.BaseResource.Queries.GetContainer;
 using Kjkardum.CloudyBack.Application.UseCases.BaseResource.Queries.GetDockerEnvironment;
 using Kjkardum.CloudyBack.Application.UseCases.BaseResource.Queries.GetGrafanaConfiguration;
 using Kjkardum.CloudyBack.Application.UseCases.BaseResource.Queries.GetPaginated;
+using Kjkardum.CloudyBack.Application.UseCases.BaseResource.Queries.GetPublicAccessConfiguration;
 using Kjkardum.CloudyBack.Application.UseCases.BaseResource.Queries.QueryLoki;
 using Kjkardum.CloudyBack.Application.UseCases.BaseResource.Queries.QueryPrometheus;
 using Kjkardum.CloudyBack.Domain.Entities;
@@ -47,6 +49,23 @@ public class BaseResourceController(IMediator mediator): ControllerBase
     [HttpPost("grafana")]
     public async Task<IActionResult> UpdateGrafanaConfiguration(
         ConfigureGrafanaCommand command,
+        CancellationToken cancellationToken = default)
+    {
+        await mediator.Send(command, cancellationToken);
+        return NoContent();
+    }
+
+    [HttpGet("publicAccess")]
+    public async Task<ActionResult<PublicAccessConfigurationDto>> GetPublicAccessConfiguration(
+        CancellationToken cancellationToken = default)
+    {
+        var result = await mediator.Send(new GetPublicAccessConfigurationQuery(), cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpPost("publicAccess")]
+    public async Task<IActionResult> UpdatePublicAccessConfiguration(
+        ConfigurePublicAccessCommand command,
         CancellationToken cancellationToken = default)
     {
         await mediator.Send(command, cancellationToken);

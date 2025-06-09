@@ -70,6 +70,24 @@ const injectedRtkApi = api
         }),
         invalidatesTags: ['BaseResource'],
       }),
+      getApiResourceBaseResourcePublicAccess: build.query<
+        GetApiResourceBaseResourcePublicAccessApiResponse,
+        GetApiResourceBaseResourcePublicAccessApiArg
+      >({
+        query: () => ({ url: `/api/resource/BaseResource/publicAccess` }),
+        providesTags: ['BaseResource'],
+      }),
+      postApiResourceBaseResourcePublicAccess: build.mutation<
+        PostApiResourceBaseResourcePublicAccessApiResponse,
+        PostApiResourceBaseResourcePublicAccessApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/resource/BaseResource/publicAccess`,
+          method: 'POST',
+          body: queryArg.configurePublicAccessCommand,
+        }),
+        invalidatesTags: ['BaseResource'],
+      }),
       getApiResourceBaseResourceByResourceIdContainer: build.query<
         GetApiResourceBaseResourceByResourceIdContainerApiResponse,
         GetApiResourceBaseResourceByResourceIdContainerApiArg
@@ -544,6 +562,13 @@ export type PostApiResourceBaseResourceGrafanaApiResponse = unknown;
 export type PostApiResourceBaseResourceGrafanaApiArg = {
   configureGrafanaCommand: ConfigureGrafanaCommand;
 };
+export type GetApiResourceBaseResourcePublicAccessApiResponse =
+  /** status 200 OK */ PublicAccessConfigurationDto;
+export type GetApiResourceBaseResourcePublicAccessApiArg = void;
+export type PostApiResourceBaseResourcePublicAccessApiResponse = unknown;
+export type PostApiResourceBaseResourcePublicAccessApiArg = {
+  configurePublicAccessCommand: ConfigurePublicAccessCommand;
+};
 export type GetApiResourceBaseResourceByResourceIdContainerApiResponse =
   /** status 200 OK */ ContainerDto;
 export type GetApiResourceBaseResourceByResourceIdContainerApiArg = {
@@ -842,6 +867,13 @@ export type GrafanaConfigurationDto = {
 export type ConfigureGrafanaCommand = {
   host?: string;
   useHttps?: boolean;
+};
+export type PublicAccessConfigurationDto = {
+  created?: boolean;
+  host?: string;
+};
+export type ConfigurePublicAccessCommand = {
+  host?: string;
 };
 export type ContainerDto = {
   stateRunning?: boolean;
@@ -1153,6 +1185,9 @@ export const {
   useGetApiResourceBaseResourceGrafanaQuery,
   useLazyGetApiResourceBaseResourceGrafanaQuery,
   usePostApiResourceBaseResourceGrafanaMutation,
+  useGetApiResourceBaseResourcePublicAccessQuery,
+  useLazyGetApiResourceBaseResourcePublicAccessQuery,
+  usePostApiResourceBaseResourcePublicAccessMutation,
   useGetApiResourceBaseResourceByResourceIdContainerQuery,
   useLazyGetApiResourceBaseResourceByResourceIdContainerQuery,
   useGetApiResourceBaseResourceByResourceIdAuditLogQuery,
