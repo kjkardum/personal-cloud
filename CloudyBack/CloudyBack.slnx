@@ -5,6 +5,7 @@
     <File Path="..\docker-compose.dev.yaml" />
     <File Path="..\Dockerfile" />
     <File Path="..\.gitignore" />
+    <File Path="..\.dockerignore" />
   </Folder>
   <Folder Name="/Solution Items/.config/">
     <File Path=".config\dotnet-tools.json" />

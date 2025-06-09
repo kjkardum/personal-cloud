@@ -21,16 +21,19 @@ RUN dotnet publish -c Release -o out
 
 FROM node:22 AS node-env
 WORKDIR /app
-COPY CloudyFront/package.json ./
-COPY CloudyFront/yarn.lock ./
-RUN yarn install --frozen-lockfile
+ENV YARN_VERSION=4.5.0
+ENV NODE_ENV=development
+RUN corepack enable && corepack prepare yarn@${YARN_VERSION}
 COPY CloudyFront/ ./
+RUN rm -rf node_modules
+RUN yarn install
 RUN yarn build
 
 # Build runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine
 WORKDIR /app
 COPY --from=dotnet-build-env /app/out .
+COPY --from=node-env /app/dist ./wwwroot
 
 RUN apk add --no-cache icu-libs
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false

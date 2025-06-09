@@ -29,7 +29,7 @@ public class CreatePostgresDatabaseCommandHandler(
             Name = request.DatabaseName,
             ResourceGroupId = serverResource.ResourceGroupId,
             DatabaseName = request.DatabaseName,
-            AdminUsername = request.AdminUsername,
+            AdminUsername = request.AdminUsername.ToLowerInvariant(),
             AdminPassword = request.AdminPassword,
             PostgresDatabaseServerResourceId = serverResource.Id,
         };
@@ -40,9 +40,9 @@ public class CreatePostgresDatabaseCommandHandler(
             serverResource.Id,
             serverResource.SaUsername,
             serverResource.SaPassword,
-            request.DatabaseName,
-            request.AdminUsername,
-            request.AdminPassword);
+            databaseResource.Name,
+            databaseResource.AdminUsername,
+            databaseResource.AdminPassword);
 
         await baseResourceRepository.LogResourceAction(new AuditLogEntry
             {
