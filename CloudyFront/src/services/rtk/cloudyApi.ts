@@ -52,6 +52,24 @@ const injectedRtkApi = api
         query: () => ({ url: `/api/resource/BaseResource/dockerEnvironment` }),
         providesTags: ['BaseResource'],
       }),
+      getApiResourceBaseResourceGrafana: build.query<
+        GetApiResourceBaseResourceGrafanaApiResponse,
+        GetApiResourceBaseResourceGrafanaApiArg
+      >({
+        query: () => ({ url: `/api/resource/BaseResource/grafana` }),
+        providesTags: ['BaseResource'],
+      }),
+      postApiResourceBaseResourceGrafana: build.mutation<
+        PostApiResourceBaseResourceGrafanaApiResponse,
+        PostApiResourceBaseResourceGrafanaApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/resource/BaseResource/grafana`,
+          method: 'POST',
+          body: queryArg.configureGrafanaCommand,
+        }),
+        invalidatesTags: ['BaseResource'],
+      }),
       getApiResourceBaseResourceByResourceIdContainer: build.query<
         GetApiResourceBaseResourceByResourceIdContainerApiResponse,
         GetApiResourceBaseResourceByResourceIdContainerApiArg
@@ -519,6 +537,13 @@ export type GetApiResourceBaseResourceApiArg = {
 export type GetApiResourceBaseResourceDockerEnvironmentApiResponse =
   /** status 200 OK */ DockerEnvironment;
 export type GetApiResourceBaseResourceDockerEnvironmentApiArg = void;
+export type GetApiResourceBaseResourceGrafanaApiResponse =
+  /** status 200 OK */ GrafanaConfigurationDto;
+export type GetApiResourceBaseResourceGrafanaApiArg = void;
+export type PostApiResourceBaseResourceGrafanaApiResponse = unknown;
+export type PostApiResourceBaseResourceGrafanaApiArg = {
+  configureGrafanaCommand: ConfigureGrafanaCommand;
+};
 export type GetApiResourceBaseResourceByResourceIdContainerApiResponse =
   /** status 200 OK */ ContainerDto;
 export type GetApiResourceBaseResourceByResourceIdContainerApiArg = {
@@ -800,9 +825,7 @@ export type DockerNetwork = {
   containerIds?: string[];
 };
 export type DockerVolume = {
-  volumeId?: string;
   name?: string;
-  size?: number;
   createdAt?: string;
 };
 export type DockerEnvironment = {
@@ -810,6 +833,15 @@ export type DockerEnvironment = {
   images?: DockerImage[];
   networks?: DockerNetwork[];
   volumes?: DockerVolume[];
+};
+export type GrafanaConfigurationDto = {
+  created?: boolean;
+  host?: string;
+  useHttps?: boolean;
+};
+export type ConfigureGrafanaCommand = {
+  host?: string;
+  useHttps?: boolean;
 };
 export type ContainerDto = {
   stateRunning?: boolean;
@@ -1126,6 +1158,9 @@ export const {
   useLazyGetApiResourceBaseResourceQuery,
   useGetApiResourceBaseResourceDockerEnvironmentQuery,
   useLazyGetApiResourceBaseResourceDockerEnvironmentQuery,
+  useGetApiResourceBaseResourceGrafanaQuery,
+  useLazyGetApiResourceBaseResourceGrafanaQuery,
+  usePostApiResourceBaseResourceGrafanaMutation,
   useGetApiResourceBaseResourceByResourceIdContainerQuery,
   useLazyGetApiResourceBaseResourceByResourceIdContainerQuery,
   useGetApiResourceBaseResourceByResourceIdAuditLogQuery,

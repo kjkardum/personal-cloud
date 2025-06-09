@@ -21,14 +21,25 @@ public class CaddyReverseProxyClient(
     private string SuffixCaddyJson => InDocker ? ".json" : "Local.json";
 
     public async Task EnsureCreated() => await CreateCaddyContainerIfNotExistsAsync();
-
-    public async Task AddProxyConfiguration(Guid proxiedContainerId, int proxiedPort, string hostName, bool useHttps)
+    public async Task AddProxyConfiguration(Guid proxiedContainerId, int proxiedPort, string hostName, bool useHttps) =>
+        await AddProxyConfigurationByContainerName(
+            DockerNamingHelper.GetContainerName(proxiedContainerId),
+            DockerNamingHelper.GetNetworkName(proxiedContainerId),
+            proxiedPort,
+            hostName,
+            useHttps);
+    public async Task AddProxyConfigurationByContainerName(
+        string containerName,
+        string networkName,
+        int proxiedPort,
+        string hostName,
+        bool useHttps)
     {
         //has layer4 plugin added, prepared in CurrentDirectory + Containerization/Clients/ReverseProxy/Dockerfiles/Caddy.Dockerfile
         //todo proxy database and other tcp connections using layer4 plugin
         await CreateCaddyContainerIfNotExistsAsync();
-        await AttachCaddyToContainerNetwork(proxiedContainerId);
-        await ConfigureCaddyProxyAsync(proxiedContainerId, proxiedPort, hostName, useHttps);
+        await AttachCaddyToContainerNetworkByName(networkName);
+        await ConfigureCaddyProxyByNameAsync(containerName, proxiedPort, hostName, useHttps);
         await RestartCaddyContainerAsync();
     }
 
@@ -53,8 +64,8 @@ public class CaddyReverseProxyClient(
         }
     }
 
-    private async Task ConfigureCaddyProxyAsync(
-        Guid proxiedContainerId,
+    private async Task ConfigureCaddyProxyByNameAsync(
+        string containerName,
         int proxiedPort,
         string hostName,
         bool useHttps)
@@ -73,7 +84,7 @@ public class CaddyReverseProxyClient(
             throw new InvalidOperationException("Failed to deserialize Caddy configuration.");
         }
 
-        var serverName = $"{DockerNamingHelper.GetContainerName(proxiedContainerId)}:{proxiedPort}";
+        var serverName = $"{containerName}:{proxiedPort}";
         var hostPort = useHttps ? ":443" : ":80";
         var existingServer = caddyConfigDto.apps.http.servers.Select(t => t.Value)
             .FirstOrDefault(t => t.listen.Contains(hostPort));
@@ -166,6 +177,17 @@ public class CaddyReverseProxyClient(
         int proxiedPort,
         string hostName,
         bool useHttps)
+    => await RemoveProxyConfigurationByContainerName(
+        DockerNamingHelper.GetContainerName(proxiedContainerId),
+        proxiedPort,
+        hostName,
+        useHttps);
+
+    public async Task RemoveProxyConfigurationByContainerName(
+        string containerName,
+        int proxiedPort,
+        string hostName,
+        bool useHttps)
     {
         var fileToEdit = GetCaddyConfigFile(justReturn: true);
         var content = string.Empty;
@@ -181,15 +203,15 @@ public class CaddyReverseProxyClient(
             throw new InvalidOperationException("Failed to deserialize Caddy configuration.");
         }
 
-        var serverName = $"{DockerNamingHelper.GetContainerName(proxiedContainerId)}:{proxiedPort}";
+        var serverName = $"{containerName}:{proxiedPort}";
         var hostPort = useHttps ? ":443" : ":80";
         var server = caddyConfigDto.apps.http.servers
             .FirstOrDefault(srv => srv.Value.listen.Contains(hostPort)
-                                   && srv.Value.routes.Any(r =>
-                                       r.match.Any(m => m.host.Contains(hostName)) &&
-                                       r.handle.Any(h => h.routes.Any(u =>
-                                           u.handle.Any(up =>
-                                               up.upstreams.Any(upstream => upstream.dial == serverName))))));
+                && srv.Value.routes.Any(r =>
+                    r.match.Any(m => m.host.Contains(hostName)) &&
+                        r.handle.Any(h => h.routes.Any(u =>
+                            u.handle.Any(up =>
+                                up.upstreams.Any(upstream => upstream.dial == serverName))))));
         if (server.Value == null)
         {
             logger.LogWarning("No matching server found for host {HostName} and port {Port}.", hostName, proxiedPort);

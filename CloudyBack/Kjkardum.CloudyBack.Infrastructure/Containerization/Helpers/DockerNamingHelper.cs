@@ -22,4 +22,6 @@ public class DockerNamingHelper
     public const string CaddyContainerName = "cloudycaddycontainer";
     public const string LokiNetworkName = "cloudylokinetwork";
     public const string PrometheusNetworkName = "cloudyprometheusnetwork";
+    public const string GrafanaContainerName = "cloudygrafanacontainer";
+    public const string GrafanaVolumeName = "cloudygrafanavolume";
 }

@@ -15,26 +15,33 @@ public class ObservabilityClient(
     DockerClient client,
     ILogger<ObservabilityClient> logger,
     IHttpClientFactory httpClientFactory,
-    IConfiguration configuration): IObservabilityClient
+    IConfiguration configuration) : IObservabilityClient
 {
     private readonly string _prometheusPassword = configuration["Keys:Prometheus"] ??
-        throw new ArgumentNullException("Prometheus password is not set in the configuration");
+                                                  throw new ArgumentNullException(
+                                                      "Prometheus password is not set in the configuration");
+
     private const string PrometheusImageName = "quay.io/prometheus/prometheus";
     private const string LokiImageName = "grafana/loki";
+    private const string GrafanaImageName = "grafana/grafana";
     private const string CadvisorImageName = "gcr.io/cadvisor/cadvisor";
+
     internal class PrometheusGlobalConfig
     {
         public string scrape_interval { get; set; }
     }
+
     internal class StaticConfig
     {
         public string[] targets { get; set; }
     }
+
     internal class ScrapeConfig
     {
         public string job_name { get; set; }
         public StaticConfig[] static_configs { get; set; }
     }
+
     internal class PrometheusConfig
     {
         public PrometheusGlobalConfig global { get; set; }
@@ -47,6 +54,108 @@ public class ObservabilityClient(
         await RestartOrCreatePrometheus();
         await RestartOrCreateLoki();
     }
+
+    public async Task CreateOrRunGrafana()
+    {
+        var network = await client.Networks.InspectNetworkAsync(DockerNamingHelper.ObservabilityNetworkName);
+        if (network == null)
+        {
+            logger.LogInformation("Observability network does not exist. Creating...");
+            throw new Exception("Observability network does not exist. Creating...");
+        }
+
+        await client.Images.CreateImageAsync(
+            new ImagesCreateParameters { FromImage = GrafanaImageName, Tag = "latest" },
+            null,
+            new Progress<JSONMessage>());
+        try
+        {
+            var container = await client.Containers.InspectContainerAsync(DockerNamingHelper.GrafanaContainerName);
+            if (container.State.Running)
+            {
+                await client.Containers.RestartContainerAsync(DockerNamingHelper.GrafanaContainerName,
+                    new ContainerRestartParameters());
+                logger.LogInformation("Grafana container is running, Restarting.");
+                return;
+            }
+
+            await client.Containers.StartContainerAsync(DockerNamingHelper.GrafanaContainerName,
+                new ContainerStartParameters());
+            logger.LogInformation("Grafana container is not running. Starting...");
+            return;
+        }
+        catch (Exception ex)
+        {
+            logger.LogInformation(ex, "Grafana container does not exist. Creating...");
+        }
+
+        try
+        {
+            await client.Volumes.CreateAsync(
+                new VolumesCreateParameters { Name = DockerNamingHelper.GrafanaVolumeName });
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Failed to create Grafana volume. It may already exist.");
+        }
+
+        var createContainerParameters = new CreateContainerParameters
+        {
+            Name = DockerNamingHelper.GrafanaContainerName,
+            Image = $"{GrafanaImageName}:latest",
+            Env = new List<string>
+            {
+                "GF_PATHS_PROVISIONING=/etc/grafana/provisioning",
+                "GF_FEATURE_TOGGLES_ENABLE=alertingSimplifiedRouting,alertingQueryAndExpressionsStepMode",
+                "PROMETHEUS_DATASOURCE_PASSWORD=" + _prometheusPassword,
+            },
+            HostConfig = new HostConfig
+            {
+                RestartPolicy = new RestartPolicy { Name = RestartPolicyKind.Always, MaximumRetryCount = 0 },
+                Binds = new List<string>
+                {
+                    $"{DockerNamingHelper.GrafanaVolumeName}:/var/lib/grafana",
+                    $"{DockerLocalStorageHelper.CopyAndResolvePersistedPath(GetGrafanaPrometheusConfigYml())}:/etc/grafana/provisioning/datasources/prometheus.yml",
+                    $"{DockerLocalStorageHelper.CopyAndResolvePersistedPath(GetGrafanaLokiConfigYml())}:/etc/grafana/provisioning/datasources/loki.yml",
+                },
+                //temporary to remove once reverse proxy is fully set
+                PortBindings =
+                    new Dictionary<string, IList<PortBinding>>
+                    {
+                        { "3000/tcp", new List<PortBinding> { new() { HostPort = "3000" } } }
+                    }
+            },
+            ExposedPorts = new Dictionary<string, EmptyStruct> { { "3000/tcp", default } },
+            NetworkingConfig = new NetworkingConfig
+            {
+                EndpointsConfig = new Dictionary<string, EndpointSettings>
+                {
+                    { DockerNamingHelper.ObservabilityNetworkName, new EndpointSettings() }
+                }
+            },
+        };
+        var containerCreated = await client.Containers.CreateContainerAsync(createContainerParameters);
+        await client.Containers.StartContainerAsync(containerCreated.ID, new ContainerStartParameters());
+        logger.LogInformation("Grafana container created and started");
+    }
+
+    private string GetGrafanaLokiConfigYml()
+    {
+        var currentDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        var yamlToEdit = Path.Combine(
+            currentDirectory,
+            "Containerization/Clients/Orchestration/FileTemplates/grafana_provision_loki.yml");
+        return yamlToEdit;
+    }
+    private string GetGrafanaPrometheusConfigYml()
+    {
+        var currentDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        var yamlToEdit = Path.Combine(
+            currentDirectory,
+            "Containerization/Clients/Orchestration/FileTemplates/grafana_provision_prometheus.yml");
+        return yamlToEdit;
+    }
+
     public async Task AttachCollector(Guid id, string jobName)
     {
         await EnsureCreated();
@@ -60,6 +169,7 @@ public class ObservabilityClient(
         {
             yaml = await reader.ReadToEndAsync();
         }
+
         var deserializedYaml = deserializer.Deserialize<PrometheusConfig>(yaml);
         var scrapeConfig = new ScrapeConfig
         {
@@ -79,14 +189,14 @@ public class ObservabilityClient(
         string? requestStep,
         string? requestTimeout,
         int? requestLimit)
-            => await QueryRange(
-                query,
-                requestStart,
-                requestEnd,
-                requestStep,
-                requestTimeout,
-                requestLimit,
-                "Prometheus");
+        => await QueryRange(
+            query,
+            requestStart,
+            requestEnd,
+            requestStep,
+            requestTimeout,
+            requestLimit,
+            "Prometheus");
 
     public async Task<PrometheusResultDto?> QueryLokiRange(
         string query,
@@ -95,14 +205,14 @@ public class ObservabilityClient(
         string? requestStep,
         string? requestTimeout,
         int? requestLimit)
-            => await QueryRange(
-                query,
-                requestStart,
-                requestEnd,
-                requestStep,
-                requestTimeout,
-                requestLimit,
-                "Loki");
+        => await QueryRange(
+            query,
+            requestStart,
+            requestEnd,
+            requestStep,
+            requestTimeout,
+            requestLimit,
+            "Loki");
 
     public async Task<PrometheusResultDto?> QueryRange(
         string query,
@@ -123,14 +233,17 @@ public class ObservabilityClient(
         {
             url += $"&step={requestStep}";
         }
+
         if (requestTimeout != null)
         {
             url += $"&timeout={requestTimeout}";
         }
+
         if (requestLimit != null)
         {
             url += $"&limit={requestLimit}";
         }
+
         logger.LogInformation("Querying {HttpClientBaseAddress}{Url}", httpClient.BaseAddress, url);
         var response = await httpClient.GetAsync(url);
         response.EnsureSuccessStatusCode();
@@ -157,11 +270,13 @@ public class ObservabilityClient(
         {
             File.Delete(yamlToEdit);
         }
+
         var yamlToEditOriginal = Path.Combine(yamlToEditFolder, "prometheus.yml");
         if (!File.Exists(yamlToEditOriginal))
         {
             throw new FileNotFoundException("Prometheus config template not found.", yamlToEditOriginal);
         }
+
         File.Copy(yamlToEditOriginal, yamlToEdit, true);
         return yamlToEdit;
     }
@@ -200,21 +315,20 @@ public class ObservabilityClient(
         {
             logger.LogInformation("Observability network does not exist. Creating...");
             await client.Networks.CreateNetworkAsync(new NetworksCreateParameters
-                {
-                    Name = DockerNamingHelper.ObservabilityNetworkName,
-                    Driver = "bridge"
-                });
+            {
+                Name = DockerNamingHelper.ObservabilityNetworkName, Driver = "bridge"
+            });
         }
 
         if (networks.All(n => n.Name != DockerNamingHelper.LokiNetworkName))
         {
             logger.LogInformation("Loki network does not exist. Creating...");
             await client.Networks.CreateNetworkAsync(new NetworksCreateParameters
-                {
-                    Name = DockerNamingHelper.LokiNetworkName,
-                    Driver = "bridge"
-                });
+            {
+                Name = DockerNamingHelper.LokiNetworkName, Driver = "bridge"
+            });
         }
+
         await client.Volumes
             .CreateAsync(new VolumesCreateParameters { Name = DockerNamingHelper.LokiVolumeName });
 
@@ -244,27 +358,29 @@ public class ObservabilityClient(
         {
             logger.LogInformation(ex, "Loki container does not exist. Creating...");
         }
+
         var createContainerParameters = new CreateContainerParameters
         {
             Name = DockerNamingHelper.LokiContainerName,
             Image = LokiImageName,
-            HostConfig = new HostConfig
-            {
-                RestartPolicy = new RestartPolicy { Name = RestartPolicyKind.Always, MaximumRetryCount = 0 },
-                Binds = new List<string>
+            HostConfig =
+                new HostConfig
                 {
-                    $"{DockerNamingHelper.LokiVolumeName}:/loki",
-                    $"{DockerLocalStorageHelper.CopyAndResolvePersistedPath(GetLokiConfigYaml())}:/etc/loki/loki-config.yaml"
+                    RestartPolicy =
+                        new RestartPolicy { Name = RestartPolicyKind.Always, MaximumRetryCount = 0 },
+                    Binds =
+                        new List<string>
+                        {
+                            $"{DockerNamingHelper.LokiVolumeName}:/loki",
+                            $"{DockerLocalStorageHelper.CopyAndResolvePersistedPath(GetLokiConfigYaml())}:/etc/loki/loki-config.yaml"
+                        },
+                    PortBindings =
+                        new Dictionary<string, IList<PortBinding>>
+                        {
+                            { "3100/tcp", new List<PortBinding> { new PortBinding { HostPort = "3100" } } }
+                        }
                 },
-                PortBindings = new Dictionary<string, IList<PortBinding>>
-                {
-                    { "3100/tcp", new List<PortBinding> { new PortBinding { HostPort = "3100" } } }
-                }
-            },
-            ExposedPorts = new Dictionary<string, EmptyStruct>
-            {
-                { "3100/tcp", default }
-            },
+            ExposedPorts = new Dictionary<string, EmptyStruct> { { "3100/tcp", default } },
             NetworkingConfig = new NetworkingConfig
             {
                 EndpointsConfig = new Dictionary<string, EndpointSettings>
@@ -273,10 +389,7 @@ public class ObservabilityClient(
                     { DockerNamingHelper.LokiNetworkName, new EndpointSettings() }
                 }
             },
-            Cmd = new List<string>
-            {
-                "--config.file=/etc/loki/loki-config.yaml"
-            }
+            Cmd = new List<string> { "--config.file=/etc/loki/loki-config.yaml" }
         };
         var containerCreated = await client.Containers.CreateContainerAsync(createContainerParameters);
         await client.Containers
@@ -291,20 +404,20 @@ public class ObservabilityClient(
         {
             logger.LogInformation("Observability network does not exist. Creating...");
             await client.Networks.CreateNetworkAsync(new NetworksCreateParameters
-                {
-                    Name = DockerNamingHelper.ObservabilityNetworkName,
-                    Driver = "bridge"
-                });
+            {
+                Name = DockerNamingHelper.ObservabilityNetworkName, Driver = "bridge"
+            });
         }
+
         if (networks.All(n => n.Name != DockerNamingHelper.PrometheusNetworkName))
         {
             logger.LogInformation("Prometheus network does not exist. Creating...");
             await client.Networks.CreateNetworkAsync(new NetworksCreateParameters
-                {
-                    Name = DockerNamingHelper.PrometheusNetworkName,
-                    Driver = "bridge"
-                });
+            {
+                Name = DockerNamingHelper.PrometheusNetworkName, Driver = "bridge"
+            });
         }
+
         await client.Volumes
             .CreateAsync(new VolumesCreateParameters { Name = DockerNamingHelper.PrometheusVolumeName });
 
@@ -353,10 +466,7 @@ public class ObservabilityClient(
                     { "9090/tcp", new List<PortBinding> { new PortBinding { HostPort = "9090" } } }
                 }
             },
-            ExposedPorts = new Dictionary<string, EmptyStruct>
-            {
-                { "9090/tcp", default }
-            },
+            ExposedPorts = new Dictionary<string, EmptyStruct> { { "9090/tcp", default } },
             /*END REMOVE PORT BINDING TODO*/
             NetworkingConfig = new NetworkingConfig
             {
@@ -368,8 +478,7 @@ public class ObservabilityClient(
             },
             Cmd = new List<string>
             {
-                "--web.config.file=/etc/prometheus/web.yml",
-                "--config.file=/etc/prometheus/prometheus.yml"
+                "--web.config.file=/etc/prometheus/web.yml", "--config.file=/etc/prometheus/prometheus.yml"
             }
         };
         var containerCreated = await client.Containers.CreateContainerAsync(createContainerParameters);
@@ -385,10 +494,9 @@ public class ObservabilityClient(
         {
             logger.LogInformation("Observability network does not exist. Creating...");
             await client.Networks.CreateNetworkAsync(new NetworksCreateParameters
-                {
-                    Name = DockerNamingHelper.ObservabilityNetworkName,
-                    Driver = "bridge"
-                });
+            {
+                Name = DockerNamingHelper.ObservabilityNetworkName, Driver = "bridge"
+            });
         }
 
         await client.Images.CreateImageAsync(
@@ -400,12 +508,14 @@ public class ObservabilityClient(
             var container = await client.Containers.InspectContainerAsync(DockerNamingHelper.CadvisorContainerName);
             if (container.State.Running)
             {
-                await client.Containers.RestartContainerAsync(DockerNamingHelper.CadvisorContainerName, new ContainerRestartParameters());
+                await client.Containers.RestartContainerAsync(DockerNamingHelper.CadvisorContainerName,
+                    new ContainerRestartParameters());
                 logger.LogInformation("Cadvisor container is running, Restarting.");
                 return;
             }
 
-            await client.Containers.StartContainerAsync(DockerNamingHelper.CadvisorContainerName, new ContainerStartParameters());
+            await client.Containers.StartContainerAsync(DockerNamingHelper.CadvisorContainerName,
+                new ContainerStartParameters());
             logger.LogInformation("Cadvisor container is not running. Starting...");
             return;
         }
@@ -413,6 +523,7 @@ public class ObservabilityClient(
         {
             logger.LogInformation(ex, "Cadvisor container does not exist. Creating...");
         }
+
         var createContainerParameters = new CreateContainerParameters
         {
             Name = DockerNamingHelper.CadvisorContainerName,
@@ -422,20 +533,13 @@ public class ObservabilityClient(
                 RestartPolicy = new RestartPolicy { Name = RestartPolicyKind.Always, MaximumRetryCount = 0 },
                 Binds = new List<string>
                 {
-                    "/:/rootfs:ro",
-                    "/var/run:/var/run:rw",
-                    "/sys:/sys:ro",
+                    "/:/rootfs:ro", "/var/run:/var/run:rw", "/sys:/sys:ro",
                     // "/var/lib/docker/:/var/lib/docker:ro" maybe on linux
                 },
                 Privileged = true,
                 Devices = new List<DeviceMapping>
                 {
-                    new()
-                    {
-                        PathOnHost = "/dev/kmsg",
-                        PathInContainer = "/dev/kmsg",
-                        CgroupPermissions = "rwm"
-                    }
+                    new() { PathOnHost = "/dev/kmsg", PathInContainer = "/dev/kmsg", CgroupPermissions = "rwm" }
                 }
             },
             NetworkingConfig = new NetworkingConfig

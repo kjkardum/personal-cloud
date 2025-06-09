@@ -6,7 +6,7 @@ import {
   Anchor,
   Box,
   Button,
-  Divider,
+  Divider, Group,
   Modal,
   SimpleGrid,
   Stack,
@@ -27,6 +27,8 @@ import {
   useGetApiResourceResourceGroupQuery,
 } from '@/services/rtk/cloudyApi';
 import { EmptyGuid } from '@/util/guid';
+import { IconExternalLink } from '@tabler/icons-react';
+import { GrafanaSubpage } from '@/sections/grafana/grafanaSubpage';
 
 export const ViewCloudyDockerPage = () => {
   const navigate = useNavigate();
@@ -151,7 +153,9 @@ export const ViewCloudyDockerPage = () => {
       <ResourceViewPage title="Audit log">
         <ResourceViewAuditLog resourceBaseData={{ id: EmptyGuid }} />
       </ResourceViewPage>
-      <ResourceViewPage title="Logs and metrics">TODO grafana deploy and open</ResourceViewPage>
+      <ResourceViewPage title="Grafana - Logs and metrics">
+        <GrafanaSubpage />
+      </ResourceViewPage>
       <ResourceViewPage title="Public network access">TODO https and stuff</ResourceViewPage>
       <ResourceViewPage title="Network visualiser">
         <Stack h='100%'>

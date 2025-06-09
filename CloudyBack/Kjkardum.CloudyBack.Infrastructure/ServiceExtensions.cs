@@ -44,8 +44,18 @@ public static class ServiceExtensions
         services.AddSingleton<DockerClient>(_ => new DockerClientConfiguration().CreateClient());
         services.AddTransient<IGeneralContainerStatusClient, GeneralContainerStatusClient>();
         services.AddTransient<IObservabilityClient, ObservabilityClient>();
-        services.AddHttpClient("Prometheus", c => c.BaseAddress = new Uri(inDocker ? $"http://{DockerNamingHelper.PrometheusContainerName}:9090" : "http://localhost:9090"));
-        services.AddHttpClient("Loki", c => c.BaseAddress = new Uri(inDocker ? $"http://{DockerNamingHelper.LokiContainerName}:3100/loki/" : "http://localhost:3100/loki/"));
+        services.AddHttpClient(
+            "Prometheus",
+            c => c.BaseAddress = new Uri(
+                inDocker
+                    ? $"http://{DockerNamingHelper.PrometheusContainerName}:9090"
+                    : "http://localhost:9090"));
+        services.AddHttpClient(
+            "Loki",
+            c => c.BaseAddress = new Uri(
+                inDocker
+                    ? $"http://{DockerNamingHelper.LokiContainerName}:3100/loki/"
+                    : "http://localhost:3100/loki/"));
         services.AddTransient<IPostgresServerClient, PostgresServerClient>();
         services.AddTransient<IKafkaClient, KafkaClient>();
         services.AddTransient<IWebApplicationClient, WebApplicationClient>();
@@ -55,6 +65,7 @@ public static class ServiceExtensions
         services.AddTransient<ISignInService, SignInService>();
 
         services.AddTransient<IUserRepository, UserRepository>();
+        services.AddTransient<IKeyValueRepository, KeyValueRepository>();
         services.AddTransient<IBaseResourceRepository, BaseResourceRepository>();
         services.AddTransient<IResourceGroupedBaseResourceRepository, ResourceGroupedBaseResourceRepository>();
         services.AddTransient<IResourceGroupRepository, ResourceGroupRepository>();

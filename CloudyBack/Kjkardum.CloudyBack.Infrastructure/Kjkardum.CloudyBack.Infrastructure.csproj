@@ -70,6 +70,12 @@
       <None Update="Containerization\Clients\WebApplication\FileTemplates\collector.yml">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+      <None Update="Containerization\Clients\Orchestration\FileTemplates\grafana_provision_loki.yml">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="Containerization\Clients\Orchestration\FileTemplates\grafana_provision_prometheus.yml">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>
