@@ -1,10 +1,12 @@
 using Docker.DotNet;
 using Docker.DotNet.Models;
 using Kjkardum.CloudyBack.Application.Clients;
+using Kjkardum.CloudyBack.Application.Configuration;
 using Kjkardum.CloudyBack.Application.UseCases.BaseResource.Dtos;
 using Kjkardum.CloudyBack.Infrastructure.Containerization.Helpers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System.Reflection;
 using System.Text.Json;
 using YamlDotNet.Serialization;
@@ -15,11 +17,14 @@ public class ObservabilityClient(
     DockerClient client,
     ILogger<ObservabilityClient> logger,
     IHttpClientFactory httpClientFactory,
-    IConfiguration configuration) : IObservabilityClient
+    IConfiguration configuration,
+    IOptions<AppConfiguration> appConfiguration) : IObservabilityClient
 {
     private readonly string _prometheusPassword = configuration["Keys:Prometheus"] ??
                                                   throw new ArgumentNullException(
                                                       "Prometheus password is not set in the configuration");
+
+    private readonly bool InDocker = appConfiguration.Value.InDocker;
 
     private const string PrometheusImageName = "quay.io/prometheus/prometheus";
     private const string LokiImageName = "grafana/loki";
@@ -118,9 +123,9 @@ public class ObservabilityClient(
                     $"{DockerLocalStorageHelper.CopyAndResolvePersistedPath(GetGrafanaPrometheusConfigYml())}:/etc/grafana/provisioning/datasources/prometheus.yml",
                     $"{DockerLocalStorageHelper.CopyAndResolvePersistedPath(GetGrafanaLokiConfigYml())}:/etc/grafana/provisioning/datasources/loki.yml",
                 },
-                //temporary to remove once reverse proxy is fully set
-                PortBindings =
-                    new Dictionary<string, IList<PortBinding>>
+                PortBindings = InDocker
+                    ? new Dictionary<string, IList<PortBinding>>()
+                    : new Dictionary<string, IList<PortBinding>>
                     {
                         { "3000/tcp", new List<PortBinding> { new() { HostPort = "3000" } } }
                     }
@@ -147,6 +152,7 @@ public class ObservabilityClient(
             "Containerization/Clients/Orchestration/FileTemplates/grafana_provision_loki.yml");
         return yamlToEdit;
     }
+
     private string GetGrafanaPrometheusConfigYml()
     {
         var currentDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -277,6 +283,7 @@ public class ObservabilityClient(
             throw new FileNotFoundException("Prometheus config template not found.", yamlToEditOriginal);
         }
 
+        Console.WriteLine($"Copying file {yamlToEditOriginal} to {yamlToEdit}");
         File.Copy(yamlToEditOriginal, yamlToEdit, true);
         return yamlToEdit;
     }
@@ -374,8 +381,9 @@ public class ObservabilityClient(
                             $"{DockerNamingHelper.LokiVolumeName}:/loki",
                             $"{DockerLocalStorageHelper.CopyAndResolvePersistedPath(GetLokiConfigYaml())}:/etc/loki/loki-config.yaml"
                         },
-                    PortBindings =
-                        new Dictionary<string, IList<PortBinding>>
+                    PortBindings = InDocker
+                        ? new Dictionary<string, IList<PortBinding>>()
+                        : new Dictionary<string, IList<PortBinding>>
                         {
                             { "3100/tcp", new List<PortBinding> { new PortBinding { HostPort = "3100" } } }
                         }
@@ -461,13 +469,14 @@ public class ObservabilityClient(
                     $"{DockerNamingHelper.PrometheusVolumeName}:/prometheus",
                     $"{DockerLocalStorageHelper.CopyAndResolvePersistedPath(await CreateWebConfigForPasswordAndReturnFilename(_prometheusPassword))}:/etc/prometheus/web.yml",
                 },
-                PortBindings = new Dictionary<string, IList<PortBinding>>
-                {
-                    { "9090/tcp", new List<PortBinding> { new PortBinding { HostPort = "9090" } } }
-                }
+                PortBindings = InDocker
+                    ? new Dictionary<string, IList<PortBinding>>()
+                    : new Dictionary<string, IList<PortBinding>>
+                    {
+                        { "9090/tcp", new List<PortBinding> { new PortBinding { HostPort = "9090" } } }
+                    }
             },
             ExposedPorts = new Dictionary<string, EmptyStruct> { { "9090/tcp", default } },
-            /*END REMOVE PORT BINDING TODO*/
             NetworkingConfig = new NetworkingConfig
             {
                 EndpointsConfig = new Dictionary<string, EndpointSettings>

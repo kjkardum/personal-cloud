@@ -27,13 +27,14 @@ RUN corepack enable && corepack prepare yarn@${YARN_VERSION}
 COPY CloudyFront/ ./
 RUN rm -rf node_modules
 RUN yarn install
+ENV NODE_ENV=production
 RUN yarn build
 
 # Build runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine
 WORKDIR /app
 COPY --from=dotnet-build-env /app/out .
-COPY --from=node-env /app/dist ./wwwroot
+COPY --from=node-env /app/dist/ ./wwwroot
 
 RUN apk add --no-cache icu-libs
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false

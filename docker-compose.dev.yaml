@@ -19,10 +19,8 @@ services:
       - CLOUDYBACK_OUTER_PERSIST_FOLDER=${PWD}/CloudyBack/config_storage
       - ConnectionStrings__DefaultConnection=Server=cloudyadmindb;Database=CloudyDb;User Id=sa;Password=Passw0rd_;Encrypt=False;TrustServerCertificate=True;
     volumes:
-      - ./CloudyBack/config_storage:/app/bin/Debug/net8.0/persist
+      - ./CloudyBack/config_storage:/app/persist
       - /var/run/docker.sock:/var/run/docker.sock
-    ports:
-      - "8080:8080"
     depends_on:
       - cloudyadmindb
     container_name: cloudyadminapp

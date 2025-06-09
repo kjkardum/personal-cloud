@@ -267,7 +267,7 @@ public class CaddyReverseProxyClient(
         await CreateCaddyContainer();
         if (InDocker)
         {
-            await AttachCaddyToContainerNetworkByName("cloudyback_cloudyadminnetwork");
+            await AttachCaddyToContainerNetworkByName("personal-cloud_cloudyadminnetwork");
         }
     }
 
@@ -328,8 +328,8 @@ public class CaddyReverseProxyClient(
             currentDirectory,
             "Containerization/Clients/ReverseProxy/FileTemplates");
         var fileToEdit = DockerLocalStorageHelper.FileCopyLocation(
-            Path.Combine(collectorCopiableTemplateFolder, "caddy_edit.json"));
-        var fileToEditOriginal = Path.Combine(collectorCopiableTemplateFolder, "caddy" + SuffixCaddyJson);
+            Path.Combine(collectorCopiableTemplateFolder, "Caddy_edit.json"));
+        var fileToEditOriginal = Path.Combine(collectorCopiableTemplateFolder, "Caddy" + SuffixCaddyJson);
         if (justReturn)
         {
             return fileToEdit;

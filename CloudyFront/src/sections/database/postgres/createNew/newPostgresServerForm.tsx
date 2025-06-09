@@ -10,7 +10,7 @@ import {
 import {useNavigate} from "react-router-dom";
 
 export const NewPostgresServerForm = () => {
-  const [createPostgresServerResource] = usePostApiResourcePostgresServerResourceMutation();
+  const [createPostgresServerResource, { isLoading }] = usePostApiResourcePostgresServerResourceMutation();
     const navigate = useNavigate();
   const form = useForm<CreatePostgresServerCommand>({
     mode: 'uncontrolled',
@@ -43,15 +43,8 @@ export const NewPostgresServerForm = () => {
         key={form.key('serverName')}
         {...form.getInputProps('serverName')}
       />
-      <TextInput
-        type="number"
-        label="Server port"
-        placeholder="Server port (leave empty for default)"
-        key={form.key('serverPort')}
-        {...form.getInputProps('serverPort')}
-      />
       <Divider my="sm" />
-      <Button type="submit">Create database server</Button>
+      <Button type="submit" loading={isLoading}>Create database server</Button>
     </form>
   );
 };

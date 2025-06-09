@@ -11,7 +11,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { viewResourceOfType } from '@/util/navigation';
 
 export const NewPostgresDatabaseForm = () => {
-    const [createPostgresDatabaseResource] = usePostApiResourcePostgresServerResourceByServerIdDatabaseMutation();
+    const [createPostgresDatabaseResource, {isLoading}] = usePostApiResourcePostgresServerResourceByServerIdDatabaseMutation();
     const [getServerById] = useLazyGetApiResourcePostgresServerResourceByServerIdQuery();
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
@@ -93,7 +93,7 @@ export const NewPostgresDatabaseForm = () => {
                 {...form.getInputProps('adminPassword')}
             />
             <Divider my="sm" />
-            <Button type="submit">Create database</Button>
+            <Button type="submit" loading={isLoading}>Create database</Button>
         </form>
     );
 }
