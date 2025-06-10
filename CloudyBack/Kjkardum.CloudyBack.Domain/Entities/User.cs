@@ -8,5 +8,6 @@ public class User: IAuditableEntity
 
     public required string Email { get; set; }
     public required string PasswordHash { get; set; }
+    public bool SuperAdmin { get; set; }
     public DateTime LastLogin { get; set; }
 }

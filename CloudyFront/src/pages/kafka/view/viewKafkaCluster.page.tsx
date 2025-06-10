@@ -34,6 +34,8 @@ import { ResourceViewAuditLog } from '@/components/ResourceView/ResourceViewAudi
 import { TypeToIcon, TypeToText } from '@/util/typeToDisplay';
 import { DataTable } from 'mantine-datatable';
 import { KafkaTopicsSubpage } from '@/sections/messageBroker/kafka/view/KafkaTopicsSubpage';
+import { KafkaNetworkSubpage } from '@/sections/messageBroker/kafka/view/KafkaNetworkSubpage';
+import { ResourceViewLogs } from '@/components/ResourceView/ResourceViewLogs';
 
 export const ViewKafkaClusterPage = () => {
   const navigate = useNavigate();
@@ -150,8 +152,12 @@ export const ViewKafkaClusterPage = () => {
       <ResourceViewPage title="Topics">
         <KafkaTopicsSubpage resourceId={resourceId || ''} />
       </ResourceViewPage>
-      <ResourceViewPage title="Networking">Soon</ResourceViewPage>
-      <ResourceViewPage title="Logs">Soon</ResourceViewPage>
+      <ResourceViewPage title="Networking">
+        {resourceBaseData ? <KafkaNetworkSubpage resourceBaseData={resourceBaseData} /> : 'Loading...'}
+      </ResourceViewPage>
+      <ResourceViewPage title="Logs">
+        { resourceBaseData ? <ResourceViewLogs resourceBaseData={resourceBaseData} /> : 'Loading...' }
+      </ResourceViewPage>
     </ResourceViewLayout>
   );
 };

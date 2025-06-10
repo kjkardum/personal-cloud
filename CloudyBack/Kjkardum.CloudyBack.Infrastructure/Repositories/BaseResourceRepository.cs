@@ -22,27 +22,33 @@ public class BaseResourceRepository(ApplicationDbContext dbContext) : IBaseResou
         }
         if (!string.IsNullOrEmpty(resourceType))
         {
-            if (resourceType == typeof(WebApplicationResource).ToString())
+            if (typeof(WebApplicationResource).ToString()
+                .EndsWith(resourceType, StringComparison.InvariantCultureIgnoreCase))
             {
                 query = query.OfType<WebApplicationResource>();
             }
-            else if (resourceType == typeof(PostgresDatabaseResource).ToString())
+            else if (typeof(PostgresDatabaseResource).ToString()
+                .EndsWith(resourceType, StringComparison.InvariantCultureIgnoreCase))
             {
                 query = query.OfType<PostgresDatabaseResource>();
             }
-            else if (resourceType == typeof(PostgresServerResource).ToString())
+            else if (typeof(PostgresServerResource).ToString()
+                .EndsWith(resourceType, StringComparison.InvariantCultureIgnoreCase))
             {
                 query = query.OfType<PostgresServerResource>();
             }
-            else if (resourceType == typeof(VirtualNetworkResource).ToString())
+            else if (typeof(VirtualNetworkResource).ToString()
+                .EndsWith(resourceType, StringComparison.InvariantCultureIgnoreCase))
             {
                 query = query.OfType<VirtualNetworkResource>();
             }
-            else if (resourceType == typeof(KafkaClusterResource).ToString())
+            else if (typeof(KafkaClusterResource).ToString()
+                .EndsWith(resourceType, StringComparison.InvariantCultureIgnoreCase))
             {
                 query = query.OfType<KafkaClusterResource>();
             }
-            else if (resourceType == typeof(ResourceGroup).ToString())
+            else if (typeof(ResourceGroup).ToString()
+                .EndsWith(resourceType, StringComparison.InvariantCultureIgnoreCase))
             {
                 query = query.OfType<ResourceGroup>();
             }

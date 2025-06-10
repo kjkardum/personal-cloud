@@ -9,7 +9,7 @@ import { UpdateWebApplicationDeploymentConfigurationCommand, usePutApiResourceWe
 
 type runtimeTypeEnum = { [enumValue in WebApplicationRuntimeType]: string };
 const runtimeTypeEnumOptions: runtimeTypeEnum = {
-  [WebApplicationRuntimeType.DotNet]: 'ASP.NET 8',
+  [WebApplicationRuntimeType.DotNet]: '.NET 9',
   [WebApplicationRuntimeType.NodeJs]: 'Node.js 20',
   [WebApplicationRuntimeType.Python]: 'Python 3.11',
 };

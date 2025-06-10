@@ -4,7 +4,8 @@ import {
   usePostApiResourceBaseResourceByResourceIdLokiMutation,
 } from '@/services/rtk/cloudyApi';
 import { DataTable } from 'mantine-datatable';
-import { Text, Loader, Paper, Group, Badge, Center, Title, Stack } from '@mantine/core';
+import { Text, Loader, Paper, Group, Badge, Center, Title, Stack, Button, ActionIcon } from '@mantine/core';
+import { IconRefresh } from '@tabler/icons-react';
 
 type LogEntry = {
   id: string;
@@ -26,6 +27,7 @@ export const ResourceViewLogs = ({
   const [logEntries, setLogEntries] = useState<LogEntry[]>([]);
   const [loadingInitial, setLoadingInitial] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [refresh, setRefresh] = useState<{} | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const entriesDatesRange = useMemo(() => {
     if (logEntries.length === 0) { return; }
@@ -106,12 +108,19 @@ export const ResourceViewLogs = ({
       setHasMore(false);
     }
   };
+  const doRefresh = () => {
+    setRefresh({});
+    setLoadingInitial(true);
+    setLogEntries([]);
+    setHasMore(true);
+    endTimestampRef.current = new Date();
+  }
 
   useEffect(() => {
     const end = new Date();
     const start = new Date(end.getTime() - 24 * 60 * 60 * 1000); // 24 hours ago
     loadLogs(start, end).finally(() => setLoadingInitial(false));
-  }, [resourceId]);
+  }, [resourceId, refresh]);
 
   const loadMoreRecords = async () => {
     if (!hasMore || loadingMore) return;
@@ -127,7 +136,7 @@ export const ResourceViewLogs = ({
     <Stack h='100%'>
       <Group justify="space-between" mb="md">
         <Title order={3}>Logs Viewer</Title>
-        {loadingInitial && <Loader size="sm" />}
+        {loadingInitial ? <Loader size="sm" /> : <ActionIcon variant="subtle" size="md" mt='md' mr='md' onClick={doRefresh}><IconRefresh /></ActionIcon>}
       </Group>
       <Text c="darkgray">Logs loaded from {entriesDatesRange?.start.toISOString()} to {entriesDatesRange?.end.toISOString()}</Text>
       <DataTable
