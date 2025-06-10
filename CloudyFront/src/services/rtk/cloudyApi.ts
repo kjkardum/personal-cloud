@@ -41,6 +41,7 @@ const injectedRtkApi = api
             PageSize: queryArg.pageSize,
             FilterBy: queryArg.filterBy,
             OrderBy: queryArg.orderBy,
+            resourceType: queryArg.resourceType,
           },
         }),
         providesTags: ['BaseResource'],
@@ -240,6 +241,21 @@ const injectedRtkApi = api
           body: queryArg.createPostgresServerCommand,
         }),
         invalidatesTags: ['PostgresServerResource'],
+      }),
+      getApiResourcePostgresServerResourceDatabase: build.query<
+        GetApiResourcePostgresServerResourceDatabaseApiResponse,
+        GetApiResourcePostgresServerResourceDatabaseApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/resource/PostgresServerResource/database`,
+          params: {
+            Page: queryArg.page,
+            PageSize: queryArg.pageSize,
+            FilterBy: queryArg.filterBy,
+            OrderBy: queryArg.orderBy,
+          },
+        }),
+        providesTags: ['PostgresServerResource'],
       }),
       getApiResourcePostgresServerResourceByServerId: build.query<
         GetApiResourcePostgresServerResourceByServerIdApiResponse,
@@ -463,6 +479,21 @@ const injectedRtkApi = api
         }),
         invalidatesTags: ['VirtualNetworkResource'],
       }),
+      getApiResourceWebApplicationResource: build.query<
+        GetApiResourceWebApplicationResourceApiResponse,
+        GetApiResourceWebApplicationResourceApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/resource/WebApplicationResource`,
+          params: {
+            Page: queryArg.page,
+            PageSize: queryArg.pageSize,
+            FilterBy: queryArg.filterBy,
+            OrderBy: queryArg.orderBy,
+          },
+        }),
+        providesTags: ['WebApplicationResource'],
+      }),
       postApiResourceWebApplicationResource: build.mutation<
         PostApiResourceWebApplicationResourceApiResponse,
         PostApiResourceWebApplicationResourceApiArg
@@ -551,6 +582,7 @@ export type GetApiResourceBaseResourceApiArg = {
   pageSize?: number;
   filterBy?: string;
   orderBy?: string;
+  resourceType?: string;
 };
 export type GetApiResourceBaseResourceDockerEnvironmentApiResponse =
   /** status 200 OK */ DockerEnvironment;
@@ -648,6 +680,14 @@ export type PostApiResourcePostgresServerResourceApiResponse =
   /** status 200 OK */ PostgresServerResourceDto;
 export type PostApiResourcePostgresServerResourceApiArg = {
   createPostgresServerCommand: CreatePostgresServerCommand;
+};
+export type GetApiResourcePostgresServerResourceDatabaseApiResponse =
+  /** status 200 OK */ PostgresDatabaseResourceDtoPaginatedResponse;
+export type GetApiResourcePostgresServerResourceDatabaseApiArg = {
+  page?: number;
+  pageSize?: number;
+  filterBy?: string;
+  orderBy?: string;
 };
 export type GetApiResourcePostgresServerResourceByServerIdApiResponse =
   /** status 200 OK */ PostgresServerResourceDto;
@@ -755,6 +795,14 @@ export type PostApiResourceVirtualNetworkResourceByIdConnectApiResponse = unknow
 export type PostApiResourceVirtualNetworkResourceByIdConnectApiArg = {
   id: string;
   connectVirtualNetworkCommand: ConnectVirtualNetworkCommand;
+};
+export type GetApiResourceWebApplicationResourceApiResponse =
+  /** status 200 OK */ WebApplicationResourceDtoPaginatedResponse;
+export type GetApiResourceWebApplicationResourceApiArg = {
+  page?: number;
+  pageSize?: number;
+  filterBy?: string;
+  orderBy?: string;
 };
 export type PostApiResourceWebApplicationResourceApiResponse =
   /** status 200 OK */ WebApplicationResourceDto;
@@ -1027,6 +1075,12 @@ export type PostgresDatabaseResourceDto = {
   serverName?: string;
   serverId?: string;
 };
+export type PostgresDatabaseResourceDtoPaginatedResponse = {
+  page?: number;
+  pageSize?: number;
+  totalCount?: number;
+  data: PostgresDatabaseResourceDto[];
+};
 export type PostgresQueryResultDto = {
   csvResponse?: string[][];
 };
@@ -1141,6 +1195,12 @@ export type WebApplicationResourceDto = {
   port?: number;
   configuration?: WebApplicationConfigurationEntryDto[] | null;
 };
+export type WebApplicationResourceDtoPaginatedResponse = {
+  page?: number;
+  pageSize?: number;
+  totalCount?: number;
+  data: WebApplicationResourceDto[];
+};
 export type CreateWebApplicationResourceCommand = {
   webApplicationName?: string;
   resourceGroupId?: string;
@@ -1208,6 +1268,8 @@ export const {
   useGetApiResourcePostgresServerResourceQuery,
   useLazyGetApiResourcePostgresServerResourceQuery,
   usePostApiResourcePostgresServerResourceMutation,
+  useGetApiResourcePostgresServerResourceDatabaseQuery,
+  useLazyGetApiResourcePostgresServerResourceDatabaseQuery,
   useGetApiResourcePostgresServerResourceByServerIdQuery,
   useLazyGetApiResourcePostgresServerResourceByServerIdQuery,
   useDeleteApiResourcePostgresServerResourceByServerIdMutation,
@@ -1240,6 +1302,8 @@ export const {
   useGetApiResourceVirtualNetworkResourceByIdQuery,
   useLazyGetApiResourceVirtualNetworkResourceByIdQuery,
   usePostApiResourceVirtualNetworkResourceByIdConnectMutation,
+  useGetApiResourceWebApplicationResourceQuery,
+  useLazyGetApiResourceWebApplicationResourceQuery,
   usePostApiResourceWebApplicationResourceMutation,
   useGetApiResourceWebApplicationResourceByIdQuery,
   useLazyGetApiResourceWebApplicationResourceByIdQuery,

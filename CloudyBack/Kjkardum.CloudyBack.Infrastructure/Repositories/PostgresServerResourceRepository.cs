@@ -30,7 +30,6 @@ public class PostgresServerResourceRepository(ApplicationDbContext dbContext): I
 
     public async Task<(IEnumerable<PostgresServerResource>, int)> GetPaginated(PaginatedRequest pagination)
     {
-        //page (from 1), pageSize, filterBy (looks at name), orderBy, where orderBys are allowed to be: Name, CreatedAt, UpdatedAt in a format Name,Asc or Name,Desc
         var query = dbContext.PostgresServerResources.AsQueryable();
         if (!string.IsNullOrEmpty(pagination.FilterBy))
         {

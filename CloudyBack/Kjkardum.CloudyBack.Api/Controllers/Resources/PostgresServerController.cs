@@ -9,6 +9,7 @@ using Kjkardum.CloudyBack.Application.UseCases.Postgres.Commands.ServerContainer
 using Kjkardum.CloudyBack.Application.UseCases.Postgres.Dtos;
 using Kjkardum.CloudyBack.Application.UseCases.Postgres.Queries.GetById;
 using Kjkardum.CloudyBack.Application.UseCases.Postgres.Queries.GetDatabaseById;
+using Kjkardum.CloudyBack.Application.UseCases.Postgres.Queries.GetPaginatedDatabases;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,6 +25,14 @@ public class PostgresServerResourceController(IMediator mediator): ControllerBas
         CancellationToken cancellationToken = default)
     {
         var result = await mediator.Send(new GetPaginatedPostgresServerResourceQuery(request), cancellationToken);
+        return Ok(result);
+    }
+    [HttpGet("database")]
+    public async Task<ActionResult<PaginatedResponse<PostgresDatabaseResourceDto>>> GetAllDatabases(
+        [FromQuery] PaginatedRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await mediator.Send(new GetPaginatedPostgresDatabaseResourceQuery(request), cancellationToken);
         return Ok(result);
     }
 

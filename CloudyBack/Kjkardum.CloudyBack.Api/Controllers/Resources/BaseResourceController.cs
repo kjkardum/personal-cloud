@@ -24,9 +24,10 @@ public class BaseResourceController(IMediator mediator): ControllerBase
     [HttpGet]
     public async Task<ActionResult<PaginatedResponse<BaseResourceDto>>> GetAll(
         [FromQuery] PaginatedRequest request,
+        [FromQuery] string? resourceType = null,
         CancellationToken cancellationToken = default)
     {
-        var result = await mediator.Send(new GetPaginatedBaseResourceQuery(request), cancellationToken);
+        var result = await mediator.Send(new GetPaginatedBaseResourceQuery(request, resourceType), cancellationToken);
         return Ok(result);
     }
 

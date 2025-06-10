@@ -54,6 +54,10 @@ paths:
           in: query
           schema:
             type: string
+        - name: resourceType
+          in: query
+          schema:
+            type: string
       responses:
         '200':
           description: OK
@@ -553,6 +557,42 @@ paths:
             text/json:
               schema:
                 $ref: '#/components/schemas/PostgresServerResourceDto'
+  /api/resource/PostgresServerResource/database:
+    get:
+      tags:
+        - PostgresServerResource
+      parameters:
+        - name: Page
+          in: query
+          schema:
+            type: integer
+            format: int32
+        - name: PageSize
+          in: query
+          schema:
+            type: integer
+            format: int32
+        - name: FilterBy
+          in: query
+          schema:
+            type: string
+        - name: OrderBy
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/PostgresDatabaseResourceDtoPaginatedResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostgresDatabaseResourceDtoPaginatedResponse'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/PostgresDatabaseResourceDtoPaginatedResponse'
   '/api/resource/PostgresServerResource/{serverId}':
     get:
       tags:
@@ -1093,6 +1133,41 @@ paths:
         '200':
           description: OK
   /api/resource/WebApplicationResource:
+    get:
+      tags:
+        - WebApplicationResource
+      parameters:
+        - name: Page
+          in: query
+          schema:
+            type: integer
+            format: int32
+        - name: PageSize
+          in: query
+          schema:
+            type: integer
+            format: int32
+        - name: FilterBy
+          in: query
+          schema:
+            type: string
+        - name: OrderBy
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/WebApplicationResourceDtoPaginatedResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebApplicationResourceDtoPaginatedResponse'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/WebApplicationResourceDtoPaginatedResponse'
     post:
       tags:
         - WebApplicationResource
@@ -1712,6 +1787,25 @@ components:
         serverId:
           type: string
       additionalProperties: false
+    PostgresDatabaseResourceDtoPaginatedResponse:
+      required:
+        - data
+      type: object
+      properties:
+        page:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        totalCount:
+          type: integer
+          format: int32
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/PostgresDatabaseResourceDto'
+      additionalProperties: false
     PostgresDatabaseSimpleResourceDto:
       required:
         - id
@@ -2210,6 +2304,25 @@ components:
           items:
             $ref: '#/components/schemas/WebApplicationConfigurationEntryDto'
           nullable: true
+      additionalProperties: false
+    WebApplicationResourceDtoPaginatedResponse:
+      required:
+        - data
+      type: object
+      properties:
+        page:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        totalCount:
+          type: integer
+          format: int32
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/WebApplicationResourceDto'
       additionalProperties: false
     WebApplicationRuntimeType:
       enum:

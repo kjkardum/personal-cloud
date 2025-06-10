@@ -1,3 +1,4 @@
+using Kjkardum.CloudyBack.Application.Request;
 using Kjkardum.CloudyBack.Domain.Entities;
 
 namespace Kjkardum.CloudyBack.Application.Repositories;
@@ -10,4 +11,5 @@ public interface IWebApplicationResourceRepository
     Task Delete(WebApplicationResource resource);
     Task UpsertConfigurationEntry(WebApplicationConfigurationEntry configurationEntry);
     Task DeleteConfigurationEntry(WebApplicationConfigurationEntry configurationEntry);
+    Task<(IEnumerable<WebApplicationResource>, int)> GetPaginated(PaginatedRequest pagination);
 }

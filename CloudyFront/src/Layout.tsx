@@ -83,11 +83,6 @@ export default function Layout() {
                 </Button>
               )
             )}
-            {Array(10)
-              .fill(0)
-              .map((_, index) => (
-                <Skeleton key={index} h={28} animate={false} />
-              ))}
           </Stack>
           <ActionIcon onClick={toggleIconsOnly} variant="filled" size="md" mt="md">
             {iconsOnly ? <IconLayoutSidebarLeftExpand /> : <IconLayoutSidebarLeftCollapse />}

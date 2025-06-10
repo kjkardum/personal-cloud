@@ -16,7 +16,7 @@ public class GetPaginatedBaseResourceQueryHandler(
         GetPaginatedBaseResourceQuery request,
         CancellationToken cancellationToken)
     {
-        var (baseResources, totalCount) = await baseResourceRepository.GetPaginated(request.Pagination);
+        var (baseResources, totalCount) = await baseResourceRepository.GetPaginated(request.Pagination, request.ResourceType);
 
         var mappedBaseResource = baseResources.Select(mapper.Map<BaseResourceDto>).ToList();
 

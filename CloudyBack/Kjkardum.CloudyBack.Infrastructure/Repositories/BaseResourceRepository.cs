@@ -13,12 +13,39 @@ public class BaseResourceRepository(ApplicationDbContext dbContext) : IBaseResou
         await dbContext.Resources
             .FirstOrDefaultAsync(x => x.Id == id);
 
-    public async Task<(IEnumerable<BaseResource>, int)> GetPaginated(PaginatedRequest pagination)
+    public async Task<(IEnumerable<BaseResource>, int)> GetPaginated(PaginatedRequest pagination, string resourceType)
     {
         var query = dbContext.Resources.AsQueryable();
         if (!string.IsNullOrEmpty(pagination.FilterBy))
         {
             query = query.Where(x => x.Name.Contains(pagination.FilterBy));
+        }
+        if (!string.IsNullOrEmpty(resourceType))
+        {
+            if (resourceType == typeof(WebApplicationResource).ToString())
+            {
+                query = query.OfType<WebApplicationResource>();
+            }
+            else if (resourceType == typeof(PostgresDatabaseResource).ToString())
+            {
+                query = query.OfType<PostgresDatabaseResource>();
+            }
+            else if (resourceType == typeof(PostgresServerResource).ToString())
+            {
+                query = query.OfType<PostgresServerResource>();
+            }
+            else if (resourceType == typeof(VirtualNetworkResource).ToString())
+            {
+                query = query.OfType<VirtualNetworkResource>();
+            }
+            else if (resourceType == typeof(KafkaClusterResource).ToString())
+            {
+                query = query.OfType<KafkaClusterResource>();
+            }
+            else if (resourceType == typeof(ResourceGroup).ToString())
+            {
+                query = query.OfType<ResourceGroup>();
+            }
         }
 
         var orderBy = (pagination.OrderBy ?? string.Empty).Split(',');

@@ -18,7 +18,6 @@ import { MetricChart } from '@/components/Observability/MetricChart';
 import { ResourceViewAuditLog } from '@/components/ResourceView/ResourceViewAuditLog';
 import { ResourceViewLayout, ResourceViewPage } from '@/components/ResourceView/ResourceViewLayout';
 import { ResourceViewSummary } from '@/components/ResourceView/ResourceViewSummary';
-import { ResourceViewToolbar } from '@/components/ResourceView/ResourceViewToolbar';
 import { CloudyIconDocker, defaultIconStyle } from '@/icons/Resources';
 import {
   PredefinedPrometheusQuery,

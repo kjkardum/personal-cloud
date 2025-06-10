@@ -1,3 +1,5 @@
+using Kjkardum.CloudyBack.Application.Request;
+using Kjkardum.CloudyBack.Application.Response;
 using Kjkardum.CloudyBack.Application.UseCases.WebApplication.Commands.Create;
 using Kjkardum.CloudyBack.Application.UseCases.WebApplication.Commands.Delete;
 using Kjkardum.CloudyBack.Application.UseCases.WebApplication.Commands.DeleteConfigItem;
@@ -6,6 +8,7 @@ using Kjkardum.CloudyBack.Application.UseCases.WebApplication.Commands.ServerCon
 using Kjkardum.CloudyBack.Application.UseCases.WebApplication.Commands.UpdateDeploymentConfiguration;
 using Kjkardum.CloudyBack.Application.UseCases.WebApplication.Dto;
 using Kjkardum.CloudyBack.Application.UseCases.WebApplication.Queries.GetById;
+using Kjkardum.CloudyBack.Application.UseCases.WebApplication.Queries.GetPaginated;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,6 +18,14 @@ namespace Kjkardum.CloudyBack.Api.Controllers.Resources;
 [Route("api/resource/[controller]")]
 public class WebApplicationResourceController(IMediator mediator): ControllerBase
 {
+    [HttpGet]
+    public async Task<ActionResult<PaginatedResponse<WebApplicationResourceDto>>> GetAll(
+        [FromQuery] PaginatedRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await mediator.Send(new GetPaginatedWebApplicationResourceQuery(request), cancellationToken);
+        return Ok(result);
+    }
     [HttpPost]
     public async Task<ActionResult<WebApplicationResourceDto>> CreateWebApplicationResource(
         CreateWebApplicationResourceCommand command,
