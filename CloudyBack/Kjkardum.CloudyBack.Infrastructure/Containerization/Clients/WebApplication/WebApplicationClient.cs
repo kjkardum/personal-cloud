@@ -154,11 +154,11 @@ public class WebApplicationClient(DockerClient client, ILogger<WebApplicationCli
         List<string> environmentVariables,
         List<Guid> virtualNetworks)
     {
-        var runnerImage = runtimeType switch
+        var (runnerImage, runnerImageTag) = runtimeType switch
         {
-            WebApplicationRuntimeType.DotNet => "mcr.microsoft.com/dotnet/aspnet:9.0-alpine",
-            WebApplicationRuntimeType.NodeJs => "node:20",
-            WebApplicationRuntimeType.Python => "python:bookworm",
+            WebApplicationRuntimeType.DotNet => ("mcr.microsoft.com/dotnet/aspnet", "9.0-alpine"),
+            WebApplicationRuntimeType.NodeJs => ("node", "20"),
+            WebApplicationRuntimeType.Python => ("python", "3.11-bookworm"),
             _ => throw new NotSupportedException($"Runtime type {runtimeType} is not supported.")
         };
         var volumeName = DockerNamingHelper.GetVolumeName(id);
@@ -166,7 +166,7 @@ public class WebApplicationClient(DockerClient client, ILogger<WebApplicationCli
         logger.LogInformation("Running web application with ID: {Id} using command: {RunCommand}", id, runCommand);
         await RemoveExistingContainer(id);
         await client.Images.CreateImageAsync(
-            new ImagesCreateParameters { FromImage = runnerImage, Tag = "latest" },
+            new ImagesCreateParameters { FromImage = runnerImage, Tag = runnerImageTag },
             null,
             new Progress<JSONMessage>());
         logger.LogInformation("Web application {Id} image pulled: {RunnerImage}", id, runnerImage);
@@ -178,7 +178,7 @@ public class WebApplicationClient(DockerClient client, ILogger<WebApplicationCli
         logger.LogInformation("Creating container for web application {Id} with image {RunnerImage}", id, runnerImage);
         var containerParameters = new CreateContainerParameters
         {
-            Image = runnerImage,
+            Image = $"{runnerImage}:{runnerImageTag}",
             Name = appContainer,
             HostConfig =
                 new HostConfig
