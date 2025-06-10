@@ -169,11 +169,13 @@ public class WebApplicationClient(DockerClient client, ILogger<WebApplicationCli
             new ImagesCreateParameters { FromImage = runnerImage, Tag = "latest" },
             null,
             new Progress<JSONMessage>());
+        logger.LogInformation("Web application {Id} image pulled: {RunnerImage}", id, runnerImage);
         await CreateNetworkForApplicationIfNotExists(id);
         var networksDictionary = virtualNetworks.ToDictionary(
             DockerNamingHelper.GetVirtualNetworkResourceName,
             _ => new EndpointSettings());
         networksDictionary[DockerNamingHelper.GetNetworkName(id)] = new EndpointSettings();
+        logger.LogInformation("Creating container for web application {Id} with image {RunnerImage}", id, runnerImage);
         var containerParameters = new CreateContainerParameters
         {
             Image = runnerImage,
@@ -190,8 +192,11 @@ public class WebApplicationClient(DockerClient client, ILogger<WebApplicationCli
             ExposedPorts = new Dictionary<string, EmptyStruct> { { $"{port}/tcp", default } },
             Cmd = new List<string> { "bash", "-c", $"cd /appsrc && {runCommand}" }
         };
+        logger.LogInformation("Create container parameters are prepared");
         var containerReference = await client.Containers.CreateContainerAsync(containerParameters);
+        logger.LogInformation("Container created with ID: {ContainerId}", containerReference.ID);
         await client.Containers.StartContainerAsync(containerReference.ID, new ContainerStartParameters());
+        logger.LogInformation("Container started with ID: {ContainerId}", containerReference.ID);
     }
 
     private async Task CreateNetworkForApplicationIfNotExists(Guid id)
