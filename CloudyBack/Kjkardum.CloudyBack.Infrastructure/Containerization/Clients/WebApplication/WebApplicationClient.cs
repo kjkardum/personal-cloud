@@ -27,6 +27,7 @@ public class WebApplicationClient(DockerClient client, ILogger<WebApplicationCli
         List<Guid> virtualNetworks)
     {
         logger.LogInformation("Building and running web application from repository: {RepoUrl}", repoUrl);
+        await CreateNetworkForApplicationIfNotExists(id);
         await CreateSidecarTelemetryCollector(id, name);
         await BuildWebApplicationUsingGitRepo(id, repoUrl, buildCommand, environmentVariables, virtualNetworks);
         await RunWebApplicationUsingGitRepo(id, runtimeType, runCommand, port, environmentVariables, virtualNetworks);
