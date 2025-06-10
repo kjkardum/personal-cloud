@@ -190,7 +190,7 @@ public class WebApplicationClient(DockerClient client, ILogger<WebApplicationCli
             NetworkingConfig = new NetworkingConfig { EndpointsConfig = networksDictionary },
             Env = [..environmentVariables, DockerLoggingHelper.LogEnvironmentVariable(id)],
             ExposedPorts = new Dictionary<string, EmptyStruct> { { $"{port}/tcp", default } },
-            Cmd = new List<string> { "bash", "-c", $"cd /appsrc && {runCommand}" }
+            Cmd = new List<string> { "sh", "-c", $"cd /appsrc && {runCommand}" }
         };
         logger.LogInformation("Create container parameters are prepared");
         var containerReference = await client.Containers.CreateContainerAsync(containerParameters);
