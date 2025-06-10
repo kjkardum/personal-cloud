@@ -14,8 +14,9 @@ public static class TenantAndUserSeed
                 new()
                 {
                     Id = Guid.Empty,
-                    Email = "user@cloudy.com",
-                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("Pa$$w0rd"),
+                    Email = "admin@cloudy.diy",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("Pa$$w0rdDiy"),
+                    SuperAdmin = true
                 }
             };
 
