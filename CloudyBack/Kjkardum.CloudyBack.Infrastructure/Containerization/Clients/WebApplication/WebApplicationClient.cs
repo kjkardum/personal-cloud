@@ -83,10 +83,17 @@ public class WebApplicationClient(DockerClient client, ILogger<WebApplicationCli
         {
             var existingTelemetryContainer = await client.Containers.InspectContainerAsync(
                 DockerNamingHelper.GetSidecarTelemetryName(id));
-            if (existingTelemetryContainer.State.Running)
+            if (!existingTelemetryContainer.State.Running)
             {
+                logger.LogInformation("Telemetry container for ID: {Id} is not running. Starting it.", id);
+                await client.Containers.StartContainerAsync(
+                    DockerNamingHelper.GetSidecarTelemetryName(id), new ContainerStartParameters());
+                logger.LogInformation("Telemetry container started for ID: {Id}.", id);
                 return;
             }
+
+            logger.LogInformation("Telemetry container for ID: {Id} is already running.", id);
+            return;
         }
         catch (Exception ex)
         {
