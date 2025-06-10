@@ -89,7 +89,6 @@ public class WebApplicationClient(DockerClient client, ILogger<WebApplicationCli
                 await client.Containers.StartContainerAsync(
                     DockerNamingHelper.GetSidecarTelemetryName(id), new ContainerStartParameters());
                 logger.LogInformation("Telemetry container started for ID: {Id}.", id);
-                return;
             }
 
             logger.LogInformation("Telemetry container for ID: {Id} is already running.", id);
@@ -97,6 +96,7 @@ public class WebApplicationClient(DockerClient client, ILogger<WebApplicationCli
         }
         catch (Exception ex)
         {
+            logger.LogError(ex, "Error creating telemetry container");
             logger.LogInformation("No existing telemetry container found for ID: {Id}. Creating a new one.", id);
         }
 
