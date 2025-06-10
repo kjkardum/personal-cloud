@@ -5,10 +5,12 @@ using Kjkardum.CloudyBack.Application.UseCases.BaseResource.Queries.GetContainer
 using Kjkardum.CloudyBack.Application.UseCases.BaseResource.Queries.GetPaginated;
 using Kjkardum.CloudyBack.Application.UseCases.BaseResource.Queries.GetResourceGrouped;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kjkardum.CloudyBack.Api.Controllers.Resources;
 
+[Authorize]
 [ApiController]
 [Route("api/resource/[controller]")]
 public class ResourceGroupedResourceController(IMediator mediator): ControllerBase

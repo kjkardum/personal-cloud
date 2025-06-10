@@ -28,7 +28,6 @@ await CreateRequiredContainer(app.Services, builder.Configuration);
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.UseHttpsRedirection();
 app.UseProblemDetails();
 app.UseAuthentication();
 app.UseAuthorization();
@@ -101,7 +100,7 @@ public partial class Program
 
     public static async Task CreateRequiredContainer(IServiceProvider serviceProvider, IConfiguration configuration)
     {
-        var inDocker = configuration.GetValue<bool>("ApplicationConfiguration__InDocker");
+        var inDocker = configuration.GetValue<bool>("ApplicationConfiguration:InDocker");
         using var scope = serviceProvider.CreateScope();
         var services = scope.ServiceProvider;
         var logger = services.GetRequiredService<ILogger<Program>>();

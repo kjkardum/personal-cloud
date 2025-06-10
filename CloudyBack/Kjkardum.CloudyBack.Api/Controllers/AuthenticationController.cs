@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Net.Mime;
 using Kjkardum.CloudyBack.Application.UseCases.User.Commands.Login;
 using Kjkardum.CloudyBack.Application.UseCases.User.Dto;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Kjkardum.CloudyBack.Api.Controllers;
 
@@ -10,7 +11,7 @@ namespace Kjkardum.CloudyBack.Api.Controllers;
 [Route("api/[controller]")]
 public class AuthenticationController(IMediator mediator, IConfiguration configuration) : ControllerBase
 {
-    private readonly int _jwtDurationInMinutes = configuration.GetValue<int>("Jwt__DurationInMinutes");
+    private readonly int _jwtDurationInMinutes = configuration.GetValue<int>("Jwt:DurationInMinutes");
     /// <summary>
     /// Logs in existing user.
     /// </summary>
@@ -53,6 +54,10 @@ public class AuthenticationController(IMediator mediator, IConfiguration configu
         SetCookies(string.Empty, true);
         return NoContent();
     }
+
+    [Authorize]
+    [HttpGet("authenticated")]
+    public ActionResult<string> AuthCheck() => Ok("""{"result": "Authenticated"}""");
 
     private void SetCookies(string jwt, bool expired = false)
     {

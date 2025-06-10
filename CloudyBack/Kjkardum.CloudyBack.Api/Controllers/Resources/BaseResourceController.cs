@@ -13,10 +13,12 @@ using Kjkardum.CloudyBack.Application.UseCases.BaseResource.Queries.QueryLoki;
 using Kjkardum.CloudyBack.Application.UseCases.BaseResource.Queries.QueryPrometheus;
 using Kjkardum.CloudyBack.Domain.Entities;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kjkardum.CloudyBack.Api.Controllers.Resources;
 
+[Authorize]
 [ApiController]
 [Route("api/resource/[controller]")]
 public class BaseResourceController(IMediator mediator): ControllerBase

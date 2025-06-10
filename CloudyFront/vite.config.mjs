@@ -13,11 +13,9 @@ export default defineConfig({
     proxy: {
       '/api': {
         target: 'http://localhost:5118',
-        changeOrigin: true,
       },
       '/swagger': {
         target: 'http://localhost:5118',
-        changeOrigin: true,
       }
     }
   },

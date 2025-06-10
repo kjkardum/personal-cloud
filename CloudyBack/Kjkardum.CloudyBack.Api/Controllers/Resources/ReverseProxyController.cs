@@ -3,10 +3,12 @@ using Kjkardum.CloudyBack.Application.UseCases.ReverseProxy.Commands.Disconnect;
 using Kjkardum.CloudyBack.Application.UseCases.ReverseProxy.Dto;
 using Kjkardum.CloudyBack.Application.UseCases.ReverseProxy.Queries.PreCheckDns;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kjkardum.CloudyBack.Api.Controllers.Resources;
 
+[Authorize]
 [ApiController]
 [Route("api/resource/[controller]")]
 public class ReverseProxyController(IMediator mediator) : ControllerBase

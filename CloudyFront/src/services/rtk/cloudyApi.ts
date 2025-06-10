@@ -30,6 +30,20 @@ const injectedRtkApi = api
         }),
         invalidatesTags: ['Authentication'],
       }),
+      postApiAuthenticationLogout: build.mutation<
+        PostApiAuthenticationLogoutApiResponse,
+        PostApiAuthenticationLogoutApiArg
+      >({
+        query: () => ({ url: `/api/Authentication/Logout`, method: 'POST' }),
+        invalidatesTags: ['Authentication'],
+      }),
+      getApiAuthenticationAuthenticated: build.query<
+        GetApiAuthenticationAuthenticatedApiResponse,
+        GetApiAuthenticationAuthenticatedApiArg
+      >({
+        query: () => ({ url: `/api/Authentication/authenticated` }),
+        providesTags: ['Authentication'],
+      }),
       getApiResourceBaseResource: build.query<
         GetApiResourceBaseResourceApiResponse,
         GetApiResourceBaseResourceApiArg
@@ -399,10 +413,6 @@ const injectedRtkApi = api
         query: () => ({ url: `/health` }),
         providesTags: ['Status'],
       }),
-      getAuthenticated: build.query<GetAuthenticatedApiResponse, GetAuthenticatedApiArg>({
-        query: () => ({ url: `/authenticated` }),
-        providesTags: ['Status'],
-      }),
       postApiTenantManagementCreateUser: build.mutation<
         PostApiTenantManagementCreateUserApiResponse,
         PostApiTenantManagementCreateUserApiArg
@@ -575,6 +585,10 @@ export type PostApiAuthenticationLoginApiResponse = /** status 200 OK */ LoggedI
 export type PostApiAuthenticationLoginApiArg = {
   userLoginCommand: UserLoginCommand;
 };
+export type PostApiAuthenticationLogoutApiResponse = unknown;
+export type PostApiAuthenticationLogoutApiArg = void;
+export type GetApiAuthenticationAuthenticatedApiResponse = /** status 200 OK */ string;
+export type GetApiAuthenticationAuthenticatedApiArg = void;
 export type GetApiResourceBaseResourceApiResponse =
   /** status 200 OK */ BaseResourceDtoPaginatedResponse;
 export type GetApiResourceBaseResourceApiArg = {
@@ -758,8 +772,6 @@ export type GetApiResourceReverseProxyPreCheckDnsApiArg = {
 };
 export type GetHealthApiResponse = /** status 200 OK */ string;
 export type GetHealthApiArg = void;
-export type GetAuthenticatedApiResponse = /** status 200 OK */ string;
-export type GetAuthenticatedApiArg = void;
 export type PostApiTenantManagementCreateUserApiResponse = unknown;
 export type PostApiTenantManagementCreateUserApiArg = {
   userRegistrationCommand: UserRegistrationCommand;
@@ -1238,6 +1250,9 @@ export enum WebApplicationRuntimeType {
 }
 export const {
   usePostApiAuthenticationLoginMutation,
+  usePostApiAuthenticationLogoutMutation,
+  useGetApiAuthenticationAuthenticatedQuery,
+  useLazyGetApiAuthenticationAuthenticatedQuery,
   useGetApiResourceBaseResourceQuery,
   useLazyGetApiResourceBaseResourceQuery,
   useGetApiResourceBaseResourceDockerEnvironmentQuery,
@@ -1291,8 +1306,6 @@ export const {
   useLazyGetApiResourceReverseProxyPreCheckDnsQuery,
   useGetHealthQuery,
   useLazyGetHealthQuery,
-  useGetAuthenticatedQuery,
-  useLazyGetAuthenticatedQuery,
   usePostApiTenantManagementCreateUserMutation,
   usePutApiTenantManagementUpdateUserByIdMutation,
   useDeleteApiTenantManagementDeleteUserByIdMutation,

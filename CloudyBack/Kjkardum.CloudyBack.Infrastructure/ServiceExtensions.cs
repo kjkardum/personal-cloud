@@ -39,7 +39,7 @@ public static class ServiceExtensions
             }
         });
 
-        var inDocker = configuration.GetValue<bool>("ApplicationConfiguration__InDocker");
+        var inDocker = configuration.GetValue<bool>("ApplicationConfiguration:InDocker");
 
         services.AddSingleton<DockerClient>(_ => new DockerClientConfiguration().CreateClient());
         services.AddTransient<IGeneralContainerStatusClient, GeneralContainerStatusClient>();

@@ -16,9 +16,14 @@ import { ViewPostgresDatabasePage } from './pages/postgres/view/viewPostgresData
 import { ViewWebApplicationPage } from './pages/webApplication/view/viewWebApplication.page';
 import { BrowseWebApplicationResourcePage } from '@/pages/browse/browseWebApplicationResource.page';
 import { BrowsePostgresDatabaseResourcePage } from '@/pages/browse/browsePostgresDatabaseResource.page';
+import { LoginPage } from '@/pages/login/login.page';
 
 
 export const routes = createBrowserRouter([
+  {
+    path: '/login',
+    element: <LoginPage />
+  },
   {
     path: '/',
     element: <Layout />,

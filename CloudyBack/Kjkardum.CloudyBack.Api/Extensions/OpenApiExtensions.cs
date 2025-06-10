@@ -13,18 +13,13 @@ public static class OpenApiExtensions
             setup.EnableAnnotations();
 
             setup.AddSecurityDefinition(
-                "Bearer",
+                "Jwt Token",
                 new OpenApiSecurityScheme
                 {
-                    Description = """
-                                  JWT Authorization token using the Bearer scheme. <br>
-                                  Enter 'Bearer' [space] and then your token in the text input below. <br>
-                                  Example: 'Bearer 12345abcdef'
-                                  """,
-                    Name = "Authorization",
-                    In = ParameterLocation.Header,
+                    Description = "JWT Authorization token. Enter your token in the text input below.",
+                    Name = "x-cloudy-token",
+                    In = ParameterLocation.Cookie,
                     Type = SecuritySchemeType.ApiKey,
-                    Scheme = "Bearer"
                 });
 
             setup.AddSecurityRequirement(new OpenApiSecurityRequirement()

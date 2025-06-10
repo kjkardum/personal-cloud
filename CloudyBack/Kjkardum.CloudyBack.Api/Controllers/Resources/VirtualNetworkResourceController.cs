@@ -7,10 +7,12 @@ using Kjkardum.CloudyBack.Application.UseCases.VirtualNetwork.Dto;
 using Kjkardum.CloudyBack.Application.UseCases.VirtualNetwork.Queries.GetById;
 using Kjkardum.CloudyBack.Application.UseCases.VirtualNetwork.Queries.GetPaginated;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kjkardum.CloudyBack.Api.Controllers.Resources;
 
+[Authorize]
 [ApiController]
 [Route("api/resource/[controller]")]
 public class VirtualNetworkResourceController(IMediator mediator): ControllerBase

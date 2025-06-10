@@ -11,10 +11,12 @@ using Kjkardum.CloudyBack.Application.UseCases.Postgres.Queries.GetById;
 using Kjkardum.CloudyBack.Application.UseCases.Postgres.Queries.GetDatabaseById;
 using Kjkardum.CloudyBack.Application.UseCases.Postgres.Queries.GetPaginatedDatabases;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kjkardum.CloudyBack.Api.Controllers.Resources;
 
+[Authorize]
 [ApiController]
 [Route("api/resource/[controller]")]
 public class PostgresServerResourceController(IMediator mediator): ControllerBase

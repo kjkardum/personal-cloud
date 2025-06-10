@@ -9,11 +9,13 @@ using Kjkardum.CloudyBack.Application.UseCases.Kafka.Queries.GetById;
 using Kjkardum.CloudyBack.Application.UseCases.Kafka.Queries.GetTopics;
 using Kjkardum.CloudyBack.Infrastructure.Containerization.Clients.Kafka;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Runtime.CompilerServices;
 
 namespace Kjkardum.CloudyBack.Api.Controllers.Resources;
 
+[Authorize]
 [ApiController]
 [Route("api/resource/[controller]")]
 public class KafkaClusterResourceController(IMediator mediator): ControllerBase

@@ -6,11 +6,13 @@ using Kjkardum.CloudyBack.Application.UseCases.ResourceGroup.Queries;
 using Kjkardum.CloudyBack.Application.UseCases.ResourceGroup.Queries.GetAll;
 using Kjkardum.CloudyBack.Application.UseCases.ResourceGroup.Queries.GetById;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Mime;
 
 namespace Kjkardum.CloudyBack.Api.Controllers.Resources;
 
+[Authorize]
 [ApiController]
 [Route("api/resource/[controller]")]
 public class ResourceGroupController(IMediator mediator): ControllerBase

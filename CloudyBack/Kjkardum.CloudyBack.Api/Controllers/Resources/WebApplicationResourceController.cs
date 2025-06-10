@@ -10,10 +10,12 @@ using Kjkardum.CloudyBack.Application.UseCases.WebApplication.Dto;
 using Kjkardum.CloudyBack.Application.UseCases.WebApplication.Queries.GetById;
 using Kjkardum.CloudyBack.Application.UseCases.WebApplication.Queries.GetPaginated;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kjkardum.CloudyBack.Api.Controllers.Resources;
 
+[Authorize]
 [ApiController]
 [Route("api/resource/[controller]")]
 public class WebApplicationResourceController(IMediator mediator): ControllerBase

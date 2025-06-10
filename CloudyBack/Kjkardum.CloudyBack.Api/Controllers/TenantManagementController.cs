@@ -11,9 +11,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Kjkardum.CloudyBack.Api.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
 public class TenantManagementController(
     IMediator mediator,
     IAuthenticationService authenticationService) : ControllerBase
