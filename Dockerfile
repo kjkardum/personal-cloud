@@ -23,8 +23,10 @@ FROM node:22 AS node-env
 WORKDIR /app
 ENV YARN_VERSION=4.5.0
 ENV NODE_ENV=development
-RUN corepack enable && corepack prepare yarn@${YARN_VERSION}
+RUN corepack enable
+RUN corepack prepare yarn@${YARN_VERSION} --activate
 COPY CloudyFront/ ./
+RUN cp -f .yarnrc_docker.yml .yarnrc.yml
 RUN rm -rf node_modules
 RUN yarn install
 ENV NODE_ENV=production

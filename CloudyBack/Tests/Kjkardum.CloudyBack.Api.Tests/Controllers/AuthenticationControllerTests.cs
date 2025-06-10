@@ -9,6 +9,7 @@ using Kjkardum.CloudyBack.Api.Services;
 using Kjkardum.CloudyBack.Application.UseCases.User.Commands.Create;
 using Kjkardum.CloudyBack.Application.UseCases.User.Commands.Login;
 using Kjkardum.CloudyBack.Application.UseCases.User.Dto;
+using Microsoft.Extensions.Configuration;
 using Xunit;
 
 namespace Kjkardum.CloudyBack.Api.Tests.Controllers;
@@ -17,11 +18,18 @@ public class AuthenticationControllerTests
 {
     private readonly AuthenticationController _controller;
     private readonly IMediator _mediator;
+    private readonly IConfiguration _configuration;
 
     public AuthenticationControllerTests()
     {
         _mediator = Substitute.For<IMediator>();
-        _controller = new AuthenticationController(_mediator);
+        _configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    { "Jwt:DurationInMinutes", "60" }
+                })
+            .Build();
+        _controller = new AuthenticationController(_mediator, _configuration);
     }
 
     [Fact]
