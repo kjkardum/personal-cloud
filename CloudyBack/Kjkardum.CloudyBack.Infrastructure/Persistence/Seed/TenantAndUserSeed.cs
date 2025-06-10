@@ -23,7 +23,5 @@ public static class TenantAndUserSeed
             await context.Users.AddRangeAsync(users);
             await context.SaveChangesAsync();
         }
-
-        _ = await context.ResourceGroupedBaseResources.Take(5).ToListAsync();
     }
 }

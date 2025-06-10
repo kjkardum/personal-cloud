@@ -9,4 +9,16 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './vitest.setup.mjs',
   },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:5118',
+        changeOrigin: true,
+      },
+      '/swagger': {
+        target: 'http://localhost:5118',
+        changeOrigin: true,
+      }
+    }
+  },
 });
