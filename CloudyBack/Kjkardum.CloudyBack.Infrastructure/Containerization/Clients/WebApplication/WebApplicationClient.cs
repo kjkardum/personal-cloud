@@ -156,7 +156,7 @@ public class WebApplicationClient(DockerClient client, ILogger<WebApplicationCli
     {
         var (runnerImage, runnerImageTag) = runtimeType switch
         {
-            WebApplicationRuntimeType.DotNet => ("mcr.microsoft.com/dotnet/aspnet", "9.0-alpine"),
+            WebApplicationRuntimeType.DotNet => ("mcr.microsoft.com/dotnet/sdk", "9.0-alpine"),
             WebApplicationRuntimeType.NodeJs => ("node", "20"),
             WebApplicationRuntimeType.Python => ("python", "3.11-bookworm"),
             _ => throw new NotSupportedException($"Runtime type {runtimeType} is not supported.")
