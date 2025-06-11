@@ -177,6 +177,11 @@
           "System.Diagnostics.EventLog": "6.0.0"
         }
       },
+      "CsvHelper": {
+        "type": "Transitive",
+        "resolved": "33.1.0",
+        "contentHash": "kqfTOZGrn7NarNeXgjh86JcpTHUoeQDMB8t9NVa/ZtlSYiV1rxfRnQ49WaJsob4AiGrbK0XDzpyKkBwai4F8eg=="
+      },
       "Docker.DotNet": {
         "type": "Transitive",
         "resolved": "3.125.15",
@@ -910,6 +915,7 @@
         "dependencies": {
           "ApiExceptions": "[1.2.3, )",
           "AutoMapper": "[13.0.1, )",
+          "CsvHelper": "[33.1.0, )",
           "FluentValidation": "[11.9.1, )",
           "FluentValidation.DependencyInjectionExtensions": "[11.9.1, )",
           "Kjkardum.CloudyBack.Domain": "[1.0.0, )",

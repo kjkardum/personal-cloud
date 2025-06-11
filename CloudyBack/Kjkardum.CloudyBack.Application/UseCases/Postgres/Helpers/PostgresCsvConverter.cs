@@ -1,4 +1,6 @@
+using CsvHelper;
 using Kjkardum.CloudyBack.Application.UseCases.Postgres.Dtos;
+using System.Globalization;
 
 namespace Kjkardum.CloudyBack.Application.UseCases.Postgres.Helpers;
 
@@ -12,15 +14,30 @@ public static class PostgresCsvConverter
             return result;
         }
 
-        var entries = csvString
-            .Split(["\r\n", "\n"], StringSplitOptions.RemoveEmptyEntries)
-            .Select(line => line.Trim().Split(',').ToList())
-            .ToList();
-        if (entries.Count == 0)
+        using (var reader = new StringReader(csvString))
+        using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
         {
-            return result;
+            var allRows = new List<List<string>>();
+            while (csv.Read())
+            {
+                var row = new List<string>();
+                for (int i = 0; csv.TryGetField(i, out string? field); i++)
+                {
+                    row.Add(field ?? string.Empty);
+                }
+                allRows.Add(row);
+            }
+
+            if (allRows.Count > 0)
+            {
+                var startRow = asSa ? 0 : 1;
+                for (int i = startRow; i < allRows.Count; i++)
+                {
+                    result.CsvResponse.Add(allRows[i]);
+                }
+            }
         }
-        result.CsvResponse.AddRange(entries.Slice(asSa ? 0 : 1, entries.Count - 1));
+
         return result;
     }
 }

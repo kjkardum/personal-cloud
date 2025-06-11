@@ -23,6 +23,9 @@ import {
 import { viewResourceOfType } from '@/util/navigation';
 import { PostgresConnectionStringsSubpage } from '@/sections/database/postgres/view/PostgresConnectionStringsSubpage';
 import { QueryRunnerSubpage } from '@/sections/database/postgres/view/QueryRunnerSubpage';
+import {
+  CustomPerformanceQueryRunnerSubpage
+} from '@/sections/database/postgres/view/CustomPerformanceQueryRunnerSubpage';
 
 export function ViewPostgresDatabasePage() {
   const { id: resourceId } = useParams<{ id: string }>();
@@ -119,6 +122,9 @@ export function ViewPostgresDatabasePage() {
       </ResourceViewPage>
       <ResourceViewPage title="Query runner">
         <QueryRunnerSubpage resourceBaseData={resourceBaseData} />
+      </ResourceViewPage>
+      <ResourceViewPage title="Inspect performace">
+        {resourceBaseData ? <CustomPerformanceQueryRunnerSubpage resourceBaseData={resourceBaseData} /> : 'Loading...'}
       </ResourceViewPage>
     </ResourceViewLayout>
   );
