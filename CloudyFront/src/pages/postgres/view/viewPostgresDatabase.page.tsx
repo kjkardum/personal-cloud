@@ -1,31 +1,25 @@
 import React from 'react';
 import {
+  IconBrandSpeedtest, IconCpu,
   IconLock,
+  IconNetworkOff, IconOutlet,
   IconPlayerPlayFilled,
   IconPlayerStopFilled,
-  IconRestore,
+  IconRestore, IconSettingsPlus, IconTerminal, IconTerminal2,
   IconTrash,
 } from '@tabler/icons-react';
 import { Link, useParams } from 'react-router-dom';
-import { Anchor, Divider, Stack, TextInput, useMantineTheme } from '@mantine/core';
+import { Anchor, Blockquote, Box, Divider, SimpleGrid, Stack, TextInput, Title, useMantineTheme } from '@mantine/core';
 import { ResourceViewLayout, ResourceViewPage } from '@/components/ResourceView/ResourceViewLayout';
 import { ResourceViewSummary } from '@/components/ResourceView/ResourceViewSummary';
-import {
-  ResourceViewToolbar,
-  ResourceViewToolbarItem,
-} from '@/components/ResourceView/ResourceViewToolbar';
+import { ResourceViewToolbar, ResourceViewToolbarItem } from '@/components/ResourceView/ResourceViewToolbar';
 import { CloudyIconDatabase, defaultIconStyle } from '@/icons/Resources';
-import {
-  useGetApiResourceBaseResourceByResourceIdContainerQuery,
-  useGetApiResourcePostgresServerResourceByServerIdQuery,
-  useGetApiResourcePostgresServerResourceDatabaseByDatabaseIdQuery,
-} from '@/services/rtk/cloudyApi';
-import { viewResourceOfType } from '@/util/navigation';
+import { CustomPerformanceQueryRunnerSubpage } from '@/sections/database/postgres/view/CustomPerformanceQueryRunnerSubpage';
 import { PostgresConnectionStringsSubpage } from '@/sections/database/postgres/view/PostgresConnectionStringsSubpage';
 import { QueryRunnerSubpage } from '@/sections/database/postgres/view/QueryRunnerSubpage';
-import {
-  CustomPerformanceQueryRunnerSubpage
-} from '@/sections/database/postgres/view/CustomPerformanceQueryRunnerSubpage';
+import { useGetApiResourceBaseResourceByResourceIdContainerQuery, useGetApiResourcePostgresServerResourceByServerIdQuery, useGetApiResourcePostgresServerResourceDatabaseByDatabaseIdQuery } from '@/services/rtk/cloudyApi';
+import { viewResourceOfType } from '@/util/navigation';
+
 
 export function ViewPostgresDatabasePage() {
   const { id: resourceId } = useParams<{ id: string }>();
@@ -34,6 +28,9 @@ export function ViewPostgresDatabasePage() {
     useGetApiResourcePostgresServerResourceDatabaseByDatabaseIdQuery({
       databaseId: resourceId || '',
     });
+  const {data: serverIfAccessibleData } = useGetApiResourcePostgresServerResourceByServerIdQuery({
+    serverId: resourceBaseData?.serverId || ''
+  })
   const { data: containerStatus } = useGetApiResourceBaseResourceByResourceIdContainerQuery({
     resourceId: resourceBaseData?.serverId || '',
   });
@@ -115,6 +112,36 @@ export function ViewPostgresDatabasePage() {
             ]}
           />
           <Divider />
+          <Box>
+            <Title order={3}>Next steps</Title>
+            <SimpleGrid
+              cols={{ base: 1, lg: 3 }}
+              spacing={{ base: 10, xl: 'xl' }}
+              verticalSpacing={{ base: 'md', xl: 'xl' }}
+            >
+              {!serverIfAccessibleData?.virtualNetworks?.length && (
+                <Blockquote color="blue" icon={<IconNetworkOff/>} mt="xl">
+                  To connect to this server, you need to add it into some network. Create a virtual network with your server and other resources that need access to it from <Anchor component={Link} to={`${viewResourceOfType('PostgresServerResource', serverIfAccessibleData?.id)}?rpi=5`}>Server networking</Anchor>.
+                </Blockquote>
+              )}
+              <Blockquote color="blue" icon={<IconOutlet />} mt="xl">
+                To connect to this database, you can use the connection strings available in the <Anchor component={Link} to={`${viewResourceOfType('PostgresDatabaseResource', resourceBaseData?.id)}?rpi=1`}>Connection strings</Anchor> section.
+              </Blockquote>
+              <Blockquote color="yellow" icon={<IconCpu />} mt="xl">
+                Inspect which queries are taking the most time and resources in the <Anchor component={Link} to={`${viewResourceOfType('PostgresDatabaseResource', resourceBaseData?.id)}?rpi=3`}>Inspect performance</Anchor> section.
+              </Blockquote>
+              <Blockquote color="blue" icon={<IconTerminal2 />} mt="xl">
+                Run queries against this database without exposing it to the public internet in the <Anchor component={Link} to={`${viewResourceOfType('PostgresDatabaseResource', resourceBaseData?.id)}?rpi=2`}>Query runner</Anchor> section.
+              </Blockquote>
+              {serverIfAccessibleData?.id && (
+                <Blockquote color="blue" icon={<IconSettingsPlus />} mt="xl">
+                  To extend your postgres server with extensions, such as postgis or vector, go to <Anchor component={Link} to={`${viewResourceOfType('PostgresServerResource', serverIfAccessibleData?.id)}?rpi=3`}>Extensions</Anchor>.
+                </Blockquote>
+              )}
+            </SimpleGrid>
+          </Box>
+          <Divider />
+
         </Stack>
       </ResourceViewPage>
       <ResourceViewPage title="Connection strings">

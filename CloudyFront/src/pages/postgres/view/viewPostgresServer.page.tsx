@@ -1,10 +1,17 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { IconPlayerPlayFilled, IconPlayerStopFilled, IconRestore, IconTrash } from '@tabler/icons-react';
+import {
+  IconNetworkOff,
+  IconPlayerPlayFilled,
+  IconPlayerStopFilled,
+  IconRestore, IconSettingsPlus,
+  IconTrash,
+} from '@tabler/icons-react';
 import { DataTable } from 'mantine-datatable';
 import { Line } from 'react-chartjs-2';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   Anchor,
+  Blockquote,
   Box,
   Button,
   Divider,
@@ -19,16 +26,17 @@ import {
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { MetricChart } from '@/components/Observability/MetricChart';
+import { ResourceViewAuditLog } from '@/components/ResourceView/ResourceViewAuditLog';
 import { ResourceViewLayout, ResourceViewPage } from '@/components/ResourceView/ResourceViewLayout';
+import { ResourceViewLogs } from '@/components/ResourceView/ResourceViewLogs';
+import { ResourceViewSummary } from '@/components/ResourceView/ResourceViewSummary';
 import { ResourceViewToolbar, ResourceViewToolbarItem } from '@/components/ResourceView/ResourceViewToolbar';
 import { CloudyIconDatabase, CloudyIconDatabaseServer, defaultIconStyle } from '@/icons/Resources';
+import { PostgresExtensionsSubpage } from '@/sections/database/postgres/view/PostgresExtensionsSubpage';
+import { PostgresServerNetworkSubpage } from '@/sections/database/postgres/view/PostgresServerNetworkSubpage';
 import { PredefinedLokiQuery, PredefinedPrometheusQuery, PrometheusResultDto, useDeleteApiResourcePostgresServerResourceByServerIdMutation, useGetApiResourceBaseResourceByResourceIdAuditLogQuery, useGetApiResourceBaseResourceByResourceIdContainerQuery, useGetApiResourcePostgresServerResourceByServerIdQuery, usePostApiResourceBaseResourceByResourceIdLokiMutation, usePostApiResourceBaseResourceByResourceIdPrometheusMutation, usePostApiResourcePostgresServerResourceByServerIdContainerActionMutation } from '@/services/rtk/cloudyApi';
 import { viewResourceOfType } from '@/util/navigation';
-import { ResourceViewSummary } from '@/components/ResourceView/ResourceViewSummary';
-import { ResourceViewAuditLog } from '@/components/ResourceView/ResourceViewAuditLog';
-import { PostgresServerNetworkSubpage } from '@/sections/database/postgres/view/PostgresServerNetworkSubpage';
-import { ResourceViewLogs } from '@/components/ResourceView/ResourceViewLogs';
-import { PostgresExtensionsSubpage } from '@/sections/database/postgres/view/PostgresExtensionsSubpage';
+
 
 export const ViewPostgresServerPage = () => {
   const navigate = useNavigate();
@@ -120,6 +128,27 @@ export const ViewPostgresServerPage = () => {
             { name: 'Databases', value: { text: `${resourceBaseData?.postgresDatabaseResources?.length ?? 0} databases created`, link: `${viewResourceOfType('PostgresServerResource', resourceBaseData?.id)}?rpi=1` } },
             { name: 'Created at', value: { text: resourceBaseData?.createdAt && new Date(resourceBaseData?.createdAt).toLocaleString() } },
           ]} />
+          <Divider />
+          <Box>
+            <Title order={3}>Next steps</Title>
+            <SimpleGrid
+              cols={{ base: 1, lg: 3 }}
+              spacing={{ base: 10, xl: 'xl' }}
+              verticalSpacing={{ base: 'md', xl: 'xl' }}
+            >
+              {!resourceBaseData?.virtualNetworks?.length && (
+                <Blockquote color="blue" icon={<IconNetworkOff/>} mt="xl">
+                  To connect to this server, you need to add it into some network. Create a virtual network with your server and other resources that need access to it from <Anchor component={Link} to={`${viewResourceOfType('PostgresServerResource', resourceBaseData?.id)}?rpi=5`}>Networking</Anchor>.
+                </Blockquote>
+              )}
+              <Blockquote color="blue" icon={<CloudyIconDatabase />} mt="xl">
+                To create, connect to and monitor your server's databases, go to <Anchor component={Link} to={`${viewResourceOfType('PostgresServerResource', resourceBaseData?.id)}?rpi=1`}>Databases</Anchor>.
+              </Blockquote>
+              <Blockquote color="blue" icon={<IconSettingsPlus />} mt="xl">
+                To extend your postgres server with extensions, such as postgis or vector, go to <Anchor component={Link} to={`${viewResourceOfType('PostgresServerResource', resourceBaseData?.id)}?rpi=3`}>Extensions</Anchor>.
+              </Blockquote>
+            </SimpleGrid>
+          </Box>
           <Divider />
           <Box>
             <Title order={3}>System health</Title>

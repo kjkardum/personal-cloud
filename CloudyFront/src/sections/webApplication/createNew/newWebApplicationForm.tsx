@@ -3,12 +3,9 @@ import { z } from 'zod';
 import { Button, Divider, Select, TextInput } from '@mantine/core';
 import { useForm, zodResolver } from '@mantine/form';
 import { ResourceGroupAutocomplete } from '@/components/ResourceGroup/ResourceGroupAutocomplete';
-import {
-  CreateWebApplicationResourceCommand,
-  usePostApiResourceWebApplicationResourceMutation,
-  WebApplicationSourceType,
-} from '@/services/rtk/cloudyApi';
+import { CreateWebApplicationResourceCommand, usePostApiResourceWebApplicationResourceMutation, WebApplicationSourceType } from '@/services/rtk/cloudyApi';
 import { viewResourceOfType } from '@/util/navigation';
+
 
 type sourceTypeEnum = { [enumValue in WebApplicationSourceType]: string };
 const sourceTypeEnumOptions: sourceTypeEnum = {
@@ -37,7 +34,16 @@ export const NewWebApplicationForm = () => {
           .string()
           .nonempty('Resource group is required, select or type any name to create a new one'),
         webApplicationName: z.string().nonempty('Web application name is required'),
-        sourcePath: z.string().nonempty('Deployment URL is required'),
+        sourcePath: z
+          .string()
+          .nonempty('Deployment URL is required')
+          .url('Deployment URL must be a valid URL')
+          .refine((value) => value.startsWith('https://') || value.startsWith('http://'), {
+            message: 'Deployment URL must start with http:// or https://',
+          })
+          .refine((value) => value.endsWith('.git'), {
+            message: 'Deployment URL must end with .git',
+          }),
         sourceType: z.nativeEnum(WebApplicationSourceType, {
           message: 'Deployment method is required',
         }),
