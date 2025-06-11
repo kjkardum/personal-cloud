@@ -51,8 +51,8 @@ export const CustomPerformanceQueryRunnerSubpage =  ({resourceBaseData}: { resou
       setResult(undefined);
     }
   }
-  const handleSelectQuery = async (_, selectedOption: QueryMetricOption | null) => {
-    const option = QueryMetricOptions.find(option => option.label === selectedOption?.label) || null
+  const handleSelectQuery = async (value: string | null) => {
+    const option = QueryMetricOptions.find(option => option.value === value) || null
     setSelectedQuery(()=>option);
     if (option) {
       await runQuery(option.value);

@@ -7,17 +7,19 @@ import { ResourceViewToolbar, ResourceViewToolbarItem } from '@/components/Resou
 import { UpdateWebApplicationDeploymentConfigurationCommand, usePutApiResourceWebApplicationResourceByIdDeploymentConfigurationMutation, WebApplicationResourceDto, WebApplicationRuntimeType } from '@/services/rtk/cloudyApi';
 
 
-type runtimeTypeEnum = { [enumValue in WebApplicationRuntimeType]: string };
+type runtimeTypeEnum = { [enumValue in WebApplicationRuntimeType]: {label: string, placeholderBuild: string, placeholderRun: string} };
 const runtimeTypeEnumOptions: runtimeTypeEnum = {
-  [WebApplicationRuntimeType.DotNet]: '.NET 9',
-  [WebApplicationRuntimeType.NodeJs]: 'Node.js 20',
-  [WebApplicationRuntimeType.Python]: 'Python 3.11',
+  [WebApplicationRuntimeType.DotNet]: {label: '.NET 9', placeholderBuild: 'cd backend && dotnet public -c Release -o out', placeholderRun: 'cd backend/out dotnet YourApp.dll'},
+  [WebApplicationRuntimeType.NodeJs]: {label: 'Node.js 20', placeholderBuild: 'yarn install && yarn build', placeholderRun: 'node dist/server.js'},
+  [WebApplicationRuntimeType.Python]: {label: 'Python 3.11', placeholderBuild: 'pip install -r requirements.txt && alembic upgrade head', placeholderRun: 'pip install -r requirements.txt && python app.py'},
 };
 
-const runtimeTypeEnumValueAsList = Object.entries(runtimeTypeEnumOptions).map(([value, label]) => ({
-  value: value as WebApplicationRuntimeType,
-  label,
-}));
+const runtimeTypeEnumValueAsList = Object.entries(runtimeTypeEnumOptions).map(
+  ([value, { label }]) => ({
+    value: value as WebApplicationRuntimeType,
+    label,
+  })
+);
 
 export const WebApplicationDeploymentSubpage = ({
   resourceBaseData,
@@ -55,6 +57,7 @@ export const WebApplicationDeploymentSubpage = ({
     },
     [updateWebApplicationDeployment, resourceBaseData.id, form]
   );
+  const latestValues = form.getValues();
   const submitForm = form.onSubmit(handleSubmit);
   return (
     <form onSubmit={form.onSubmit(handleSubmit)}>
@@ -69,7 +72,7 @@ export const WebApplicationDeploymentSubpage = ({
       <Stack gap="md" p='sm'>
         <TextInput
           label="Build command"
-          placeholder="Build command"
+          placeholder={latestValues.runtimeType ? runtimeTypeEnumOptions[latestValues.runtimeType].placeholderBuild : 'Build command'}
           key={form.key('buildCommand')}
           {...form.getInputProps('buildCommand')}
         />
@@ -83,7 +86,7 @@ export const WebApplicationDeploymentSubpage = ({
         />
         <TextInput
           label="Startup command"
-          placeholder="Startup command"
+          placeholder={latestValues.runtimeType ? runtimeTypeEnumOptions[latestValues.runtimeType].placeholderRun : 'Startup command'}
           key={form.key('startupCommand')}
           {...form.getInputProps('startupCommand')}
         />
