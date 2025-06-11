@@ -201,6 +201,7 @@ export function ViewWebApplicationPage() {
                         {config.domain}
                       </Anchor>
                     ))
+                    // @ts-ignore cant render such things
                     .reduce((prev, curr) => [prev, ', ', curr])}
                   .
                 </Blockquote>
