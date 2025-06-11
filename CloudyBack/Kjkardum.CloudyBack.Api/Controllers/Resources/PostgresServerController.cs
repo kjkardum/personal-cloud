@@ -81,25 +81,25 @@ public class PostgresServerResourceController(IMediator mediator): ControllerBas
         return Ok(result);
     }
 
-    [HttpGet("{serverId:guid}/databaseExtensions")]
+    [HttpGet("{databaseId:guid}/databaseExtensions")]
     public async Task<ActionResult<PostgresQueryResultDto>> GetDatabaseExtensions(
-        Guid serverId,
+        Guid databaseId,
         CancellationToken cancellationToken = default)
     {
         var result = await mediator.Send(
-            new GetPostgresDatabaseExtensionsQuery { ServerId = serverId },
+            new GetPostgresDatabaseExtensionsQuery { DatabaseId = databaseId },
             cancellationToken);
         return Ok(result);
     }
 
-    [HttpPost("{serverId:guid}/databaseExtensions")]
+    [HttpPost("{databaseId:guid}/databaseExtensions")]
     public async Task<IActionResult> AddDatabaseExtension(
-        Guid serverId,
+        Guid databaseId,
         [FromQuery] string extensionName,
         CancellationToken cancellationToken = default)
     {
         await mediator.Send(
-            new AddPostgresDatabaseExtensionCommand { ServerId = serverId, ExtensionName = extensionName },
+            new AddPostgresDatabaseExtensionCommand { DatabaseId = databaseId, ExtensionName = extensionName },
             cancellationToken);
         return Ok();
     }

@@ -4,6 +4,6 @@ namespace Kjkardum.CloudyBack.Application.UseCases.Postgres.Commands.AddDatabase
 
 public class AddPostgresDatabaseExtensionCommand: IRequest
 {
-    public Guid ServerId { get; set; }
+    public Guid DatabaseId { get; set; }
     public string ExtensionName { get; set; }
 }

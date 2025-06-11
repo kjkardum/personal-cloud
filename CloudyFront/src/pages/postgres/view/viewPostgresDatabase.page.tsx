@@ -19,6 +19,7 @@ import { PostgresConnectionStringsSubpage } from '@/sections/database/postgres/v
 import { QueryRunnerSubpage } from '@/sections/database/postgres/view/QueryRunnerSubpage';
 import { useGetApiResourceBaseResourceByResourceIdContainerQuery, useGetApiResourcePostgresServerResourceByServerIdQuery, useGetApiResourcePostgresServerResourceDatabaseByDatabaseIdQuery } from '@/services/rtk/cloudyApi';
 import { viewResourceOfType } from '@/util/navigation';
+import { PostgresExtensionsSubpage } from '@/sections/database/postgres/view/PostgresExtensionsSubpage';
 
 
 export function ViewPostgresDatabasePage() {
@@ -133,11 +134,9 @@ export function ViewPostgresDatabasePage() {
               <Blockquote color="blue" icon={<IconTerminal2 />} mt="xl">
                 Run queries against this database without exposing it to the public internet in the <Anchor component={Link} to={`${viewResourceOfType('PostgresDatabaseResource', resourceBaseData?.id)}?rpi=2`}>Query runner</Anchor> section.
               </Blockquote>
-              {serverIfAccessibleData?.id && (
-                <Blockquote color="blue" icon={<IconSettingsPlus />} mt="xl">
-                  To extend your postgres server with extensions, such as postgis or vector, go to <Anchor component={Link} to={`${viewResourceOfType('PostgresServerResource', serverIfAccessibleData?.id)}?rpi=3`}>Extensions</Anchor>.
-                </Blockquote>
-              )}
+              <Blockquote color="blue" icon={<IconSettingsPlus />} mt="xl">
+                To extend your postgres database with extensions, such as postgis or vector, go to <Anchor component={Link} to={`${viewResourceOfType('PostgresDatabaseResource', resourceBaseData?.id)}?rpi=4`}>Extensions</Anchor>.
+              </Blockquote>
             </SimpleGrid>
           </Box>
           <Divider />
@@ -152,6 +151,9 @@ export function ViewPostgresDatabasePage() {
       </ResourceViewPage>
       <ResourceViewPage title="Inspect performace">
         {resourceBaseData ? <CustomPerformanceQueryRunnerSubpage resourceBaseData={resourceBaseData} /> : 'Loading...'}
+      </ResourceViewPage>
+      <ResourceViewPage title="Extensions">
+        {resourceBaseData ? <PostgresExtensionsSubpage resourceBaseData={resourceBaseData} /> : 'Loading...'}
       </ResourceViewPage>
     </ResourceViewLayout>
   );

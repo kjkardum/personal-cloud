@@ -713,12 +713,12 @@ paths:
             text/json:
               schema:
                 $ref: '#/components/schemas/PostgresQueryResultDto'
-  '/api/resource/PostgresServerResource/{serverId}/databaseExtensions':
+  '/api/resource/PostgresServerResource/{databaseId}/databaseExtensions':
     get:
       tags:
         - PostgresServerResource
       parameters:
-        - name: serverId
+        - name: databaseId
           in: path
           required: true
           schema:
@@ -741,7 +741,7 @@ paths:
       tags:
         - PostgresServerResource
       parameters:
-        - name: serverId
+        - name: databaseId
           in: path
           required: true
           schema:

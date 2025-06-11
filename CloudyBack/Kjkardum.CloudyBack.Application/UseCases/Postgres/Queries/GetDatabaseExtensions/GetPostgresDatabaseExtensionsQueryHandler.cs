@@ -8,24 +8,25 @@ using MediatR;
 namespace Kjkardum.CloudyBack.Application.UseCases.Postgres.Queries.GetDatabaseExtensions;
 
 public class GetPostgresDatabaseExtensionsQueryHandler(
-    IPostgresServerResourceRepository postgresServerRepository,
-    IPostgresServerClient postgresServerClient)
+    IPostgresDatabaseResourceRepository postgresDatabaseResourceRepository,
+    IPostgresServerClient postgresServerClient,
+    IBaseResourceRepository baseResourceRepository)
     : IRequestHandler<GetPostgresDatabaseExtensionsQuery, PostgresQueryResultDto>
 {
     public async Task<PostgresQueryResultDto> Handle(
         GetPostgresDatabaseExtensionsQuery request,
         CancellationToken cancellationToken)
     {
-        var resource = await postgresServerRepository.GetById(request.ServerId);
+        var resource = await postgresDatabaseResourceRepository.GetById(request.DatabaseId);
         if (resource == null)
         {
-            throw new EntityNotFoundException($"Postgres server with ID {request.ServerId} not found.");
+            throw new EntityNotFoundException($"Postgres database with ID {request.DatabaseId} not found.");
         }
         var extensionsCsv = await postgresServerClient.RunQueryAsync(
-            resource.Id,
-            resource.SaUsername,
-            resource.SaPassword,
-            "postgres",
+            resource.PostgresDatabaseServerResourceId,
+            resource.PostgresDatabaseServerResource!.SaUsername,
+            resource.PostgresDatabaseServerResource!.SaPassword,
+            resource.Name,
             null,
             "SELECT name, installed_version FROM pg_available_extensions;");
 

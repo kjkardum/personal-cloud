@@ -12,8 +12,8 @@ import {
 } from '@mantine/core';
 import {
   PostgresServerResourceDto,
-  useGetApiResourcePostgresServerResourceByServerIdDatabaseExtensionsQuery,
-  usePostApiResourcePostgresServerResourceByServerIdDatabaseExtensionsMutation,
+  useGetApiResourcePostgresServerResourceByDatabaseIdDatabaseExtensionsQuery,
+  usePostApiResourcePostgresServerResourceByDatabaseIdDatabaseExtensionsMutation,
 } from '@/services/rtk/cloudyApi';
 
 export const PostgresExtensionsSubpage = ({
@@ -22,14 +22,14 @@ export const PostgresExtensionsSubpage = ({
   resourceBaseData: PostgresServerResourceDto | undefined;
 }) => {
   const { data: extensionsData, refetch: refetchExtensions } =
-    useGetApiResourcePostgresServerResourceByServerIdDatabaseExtensionsQuery({
-      serverId: resourceBaseData?.id || '',
+    useGetApiResourcePostgresServerResourceByDatabaseIdDatabaseExtensionsQuery({
+      databaseId: resourceBaseData?.id || '',
     });
-  const [installExtension, {isLoading}] = usePostApiResourcePostgresServerResourceByServerIdDatabaseExtensionsMutation();
+  const [installExtension, {isLoading}] = usePostApiResourcePostgresServerResourceByDatabaseIdDatabaseExtensionsMutation();
   const handleInstallExtension = async (extensionName: string) => {
     if (!resourceBaseData) return;
     try {
-      await installExtension({ serverId: resourceBaseData.id, extensionName }).unwrap();
+      await installExtension({ databaseId: resourceBaseData.id, extensionName }).unwrap();
       refetchExtensions();
     } catch (error) {
       console.error('Failed to install extension:', error);

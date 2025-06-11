@@ -5,5 +5,5 @@ namespace Kjkardum.CloudyBack.Application.UseCases.Postgres.Queries.GetDatabaseE
 
 public class GetPostgresDatabaseExtensionsQuery: IRequest<PostgresQueryResultDto>
 {
-    public Guid ServerId { get; set; }
+    public Guid DatabaseId { get; set; }
 }

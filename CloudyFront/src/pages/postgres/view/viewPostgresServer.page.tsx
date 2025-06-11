@@ -144,9 +144,6 @@ export const ViewPostgresServerPage = () => {
               <Blockquote color="blue" icon={<CloudyIconDatabase />} mt="xl">
                 To create, connect to and monitor your server's databases, go to <Anchor component={Link} to={`${viewResourceOfType('PostgresServerResource', resourceBaseData?.id)}?rpi=1`}>Databases</Anchor>.
               </Blockquote>
-              <Blockquote color="blue" icon={<IconSettingsPlus />} mt="xl">
-                To extend your postgres server with extensions, such as postgis or vector, go to <Anchor component={Link} to={`${viewResourceOfType('PostgresServerResource', resourceBaseData?.id)}?rpi=3`}>Extensions</Anchor>.
-              </Blockquote>
             </SimpleGrid>
           </Box>
           <Divider />
@@ -203,9 +200,6 @@ export const ViewPostgresServerPage = () => {
       </ResourceViewPage>
       <ResourceViewPage title="Audit log">
         <ResourceViewAuditLog resourceBaseData={resourceBaseData} />
-      </ResourceViewPage>
-      <ResourceViewPage title="Extensions">
-        {resourceBaseData ? <PostgresExtensionsSubpage resourceBaseData={resourceBaseData} /> : 'Loading...'}
       </ResourceViewPage>
       <ResourceViewPage title="Backup">Soon</ResourceViewPage>
       <ResourceViewPage title="Networking">

@@ -308,21 +308,21 @@ const injectedRtkApi = api
         }),
         invalidatesTags: ['PostgresServerResource'],
       }),
-      getApiResourcePostgresServerResourceByServerIdDatabaseExtensions: build.query<
-        GetApiResourcePostgresServerResourceByServerIdDatabaseExtensionsApiResponse,
-        GetApiResourcePostgresServerResourceByServerIdDatabaseExtensionsApiArg
+      getApiResourcePostgresServerResourceByDatabaseIdDatabaseExtensions: build.query<
+        GetApiResourcePostgresServerResourceByDatabaseIdDatabaseExtensionsApiResponse,
+        GetApiResourcePostgresServerResourceByDatabaseIdDatabaseExtensionsApiArg
       >({
         query: (queryArg) => ({
-          url: `/api/resource/PostgresServerResource/${queryArg.serverId}/databaseExtensions`,
+          url: `/api/resource/PostgresServerResource/${queryArg.databaseId}/databaseExtensions`,
         }),
         providesTags: ['PostgresServerResource'],
       }),
-      postApiResourcePostgresServerResourceByServerIdDatabaseExtensions: build.mutation<
-        PostApiResourcePostgresServerResourceByServerIdDatabaseExtensionsApiResponse,
-        PostApiResourcePostgresServerResourceByServerIdDatabaseExtensionsApiArg
+      postApiResourcePostgresServerResourceByDatabaseIdDatabaseExtensions: build.mutation<
+        PostApiResourcePostgresServerResourceByDatabaseIdDatabaseExtensionsApiResponse,
+        PostApiResourcePostgresServerResourceByDatabaseIdDatabaseExtensionsApiArg
       >({
         query: (queryArg) => ({
-          url: `/api/resource/PostgresServerResource/${queryArg.serverId}/databaseExtensions`,
+          url: `/api/resource/PostgresServerResource/${queryArg.databaseId}/databaseExtensions`,
           method: 'POST',
           params: {
             extensionName: queryArg.extensionName,
@@ -745,14 +745,15 @@ export type PostApiResourcePostgresServerResourceDatabaseByDatabaseIdRunQueryApi
   databaseId: string;
   runPostgresDatabaseQueryCommand: RunPostgresDatabaseQueryCommand;
 };
-export type GetApiResourcePostgresServerResourceByServerIdDatabaseExtensionsApiResponse =
+export type GetApiResourcePostgresServerResourceByDatabaseIdDatabaseExtensionsApiResponse =
   /** status 200 OK */ PostgresQueryResultDto;
-export type GetApiResourcePostgresServerResourceByServerIdDatabaseExtensionsApiArg = {
-  serverId: string;
+export type GetApiResourcePostgresServerResourceByDatabaseIdDatabaseExtensionsApiArg = {
+  databaseId: string;
 };
-export type PostApiResourcePostgresServerResourceByServerIdDatabaseExtensionsApiResponse = unknown;
-export type PostApiResourcePostgresServerResourceByServerIdDatabaseExtensionsApiArg = {
-  serverId: string;
+export type PostApiResourcePostgresServerResourceByDatabaseIdDatabaseExtensionsApiResponse =
+  unknown;
+export type PostApiResourcePostgresServerResourceByDatabaseIdDatabaseExtensionsApiArg = {
+  databaseId: string;
   extensionName?: string;
 };
 export type PostApiResourcePostgresServerResourceByServerIdDatabaseApiResponse =
@@ -1323,9 +1324,9 @@ export const {
   useGetApiResourcePostgresServerResourceDatabaseByDatabaseIdQuery,
   useLazyGetApiResourcePostgresServerResourceDatabaseByDatabaseIdQuery,
   usePostApiResourcePostgresServerResourceDatabaseByDatabaseIdRunQueryMutation,
-  useGetApiResourcePostgresServerResourceByServerIdDatabaseExtensionsQuery,
-  useLazyGetApiResourcePostgresServerResourceByServerIdDatabaseExtensionsQuery,
-  usePostApiResourcePostgresServerResourceByServerIdDatabaseExtensionsMutation,
+  useGetApiResourcePostgresServerResourceByDatabaseIdDatabaseExtensionsQuery,
+  useLazyGetApiResourcePostgresServerResourceByDatabaseIdDatabaseExtensionsQuery,
+  usePostApiResourcePostgresServerResourceByDatabaseIdDatabaseExtensionsMutation,
   usePostApiResourcePostgresServerResourceByServerIdDatabaseMutation,
   usePostApiResourcePostgresServerResourceByServerIdContainerActionMutation,
   usePostApiResourceResourceGroupMutation,
