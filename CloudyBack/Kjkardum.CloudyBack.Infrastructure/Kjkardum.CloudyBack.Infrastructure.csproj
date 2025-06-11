@@ -82,6 +82,9 @@
       <None Update="Containerization\Clients\Orchestration\FileTemplates\grafana_provision_prometheus.yml">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+      <None Update="Containerization\Clients\Postgres\Dockerfiles\Postgres.Dockerfile">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>

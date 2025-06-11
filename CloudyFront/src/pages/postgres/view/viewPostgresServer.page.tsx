@@ -28,6 +28,7 @@ import { ResourceViewSummary } from '@/components/ResourceView/ResourceViewSumma
 import { ResourceViewAuditLog } from '@/components/ResourceView/ResourceViewAuditLog';
 import { PostgresServerNetworkSubpage } from '@/sections/database/postgres/view/PostgresServerNetworkSubpage';
 import { ResourceViewLogs } from '@/components/ResourceView/ResourceViewLogs';
+import { PostgresExtensionsSubpage } from '@/sections/database/postgres/view/PostgresExtensionsSubpage';
 
 export const ViewPostgresServerPage = () => {
   const navigate = useNavigate();
@@ -173,6 +174,9 @@ export const ViewPostgresServerPage = () => {
       </ResourceViewPage>
       <ResourceViewPage title="Audit log">
         <ResourceViewAuditLog resourceBaseData={resourceBaseData} />
+      </ResourceViewPage>
+      <ResourceViewPage title="Extensions">
+        {resourceBaseData ? <PostgresExtensionsSubpage resourceBaseData={resourceBaseData} /> : 'Loading...'}
       </ResourceViewPage>
       <ResourceViewPage title="Backup">Soon</ResourceViewPage>
       <ResourceViewPage title="Networking">

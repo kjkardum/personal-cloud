@@ -678,7 +678,7 @@ paths:
             text/json:
               schema:
                 $ref: '#/components/schemas/PostgresDatabaseResourceDto'
-  '/database/{databaseId}/runQuery':
+  '/api/resource/PostgresServerResource/database/{databaseId}/runQuery':
     post:
       tags:
         - PostgresServerResource
@@ -713,6 +713,47 @@ paths:
             text/json:
               schema:
                 $ref: '#/components/schemas/PostgresQueryResultDto'
+  '/api/resource/PostgresServerResource/{serverId}/databaseExtensions':
+    get:
+      tags:
+        - PostgresServerResource
+      parameters:
+        - name: serverId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/PostgresQueryResultDto'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostgresQueryResultDto'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/PostgresQueryResultDto'
+    post:
+      tags:
+        - PostgresServerResource
+      parameters:
+        - name: serverId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: extensionName
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
   '/api/resource/PostgresServerResource/{serverId}/database':
     post:
       tags:
@@ -2342,10 +2383,10 @@ components:
         - PublicGitClone
       type: string
   securitySchemes:
-    Bearer:
+    Jwt Token:
       type: apiKey
-      description: "JWT Authorization token using the Bearer scheme. <br>\nEnter 'Bearer' [space] and then your token in the text input below. <br>\nExample: 'Bearer 12345abcdef'"
-      name: Authorization
-      in: header
+      description: JWT Authorization token. Enter your token in the text input below.
+      name: x-cloudy-token
+      in: cookie
 security:
   - Bearer: [ ]

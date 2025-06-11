@@ -18,7 +18,11 @@ import {
   useMantineTheme,
 } from '@mantine/core';
 import { useOs } from '@mantine/hooks';
-import { PostgresDatabaseResourceDto, PostgresQueryResultDto, usePostDatabaseByDatabaseIdRunQueryMutation } from '@/services/rtk/cloudyApi';
+import {
+  PostgresDatabaseResourceDto,
+  PostgresQueryResultDto,
+  usePostApiResourcePostgresServerResourceDatabaseByDatabaseIdRunQueryMutation,
+} from '@/services/rtk/cloudyApi';
 
 
 import IStandaloneCodeEditor = editor.IStandaloneCodeEditor;
@@ -31,7 +35,7 @@ export const QueryRunnerSubpage =  ({resourceBaseData}: { resourceBaseData:  Pos
   const theme = useMantineTheme();
   const os = useOs();
   const { colorScheme } = useMantineColorScheme();
-  const [runQueryMutation, {isLoading}] = usePostDatabaseByDatabaseIdRunQueryMutation();
+  const [runQueryMutation, {isLoading}] = usePostApiResourcePostgresServerResourceDatabaseByDatabaseIdRunQueryMutation();
   const [result, setResult] = useState<PostgresQueryResultDto | undefined>(undefined);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const filteredDataset = useMemo(() => {

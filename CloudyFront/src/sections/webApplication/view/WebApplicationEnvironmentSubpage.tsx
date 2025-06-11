@@ -138,6 +138,7 @@ export const WebApplicationEnvironmentSubpage = ({
                 label="Value"
                 placeholder="(eg. production)"
                 type={rest.visible ? 'text' : 'password'}
+                autoComplete='off'
                 value={value}
                 onChange={updateConfigurationValue(index)}
               />

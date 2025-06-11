@@ -1,6 +1,7 @@
 using Kjkardum.CloudyBack.Application.Request;
 using Kjkardum.CloudyBack.Application.Response;
 using Kjkardum.CloudyBack.Application.UseCases.BaseResource.Queries.GetPaginated;
+using Kjkardum.CloudyBack.Application.UseCases.Postgres.Commands.AddDatabaseExtension;
 using Kjkardum.CloudyBack.Application.UseCases.Postgres.Commands.CreateDatabase;
 using Kjkardum.CloudyBack.Application.UseCases.Postgres.Commands.CreateServer;
 using Kjkardum.CloudyBack.Application.UseCases.Postgres.Commands.DeleteServer;
@@ -9,6 +10,7 @@ using Kjkardum.CloudyBack.Application.UseCases.Postgres.Commands.ServerContainer
 using Kjkardum.CloudyBack.Application.UseCases.Postgres.Dtos;
 using Kjkardum.CloudyBack.Application.UseCases.Postgres.Queries.GetById;
 using Kjkardum.CloudyBack.Application.UseCases.Postgres.Queries.GetDatabaseById;
+using Kjkardum.CloudyBack.Application.UseCases.Postgres.Queries.GetDatabaseExtensions;
 using Kjkardum.CloudyBack.Application.UseCases.Postgres.Queries.GetPaginatedDatabases;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -59,7 +61,7 @@ public class PostgresServerResourceController(IMediator mediator): ControllerBas
         return Ok(result);
     }
 
-    [HttpPost("/database/{databaseId:guid}/runQuery")]
+    [HttpPost("database/{databaseId:guid}/runQuery")]
     public async Task<ActionResult<PostgresQueryResultDto>> RunDatabaseQuery(
         Guid databaseId,
         RunPostgresDatabaseQueryCommand command,
@@ -78,6 +80,30 @@ public class PostgresServerResourceController(IMediator mediator): ControllerBas
         var result = await mediator.Send(request, cancellationToken);
         return Ok(result);
     }
+
+    [HttpGet("{serverId:guid}/databaseExtensions")]
+    public async Task<ActionResult<PostgresQueryResultDto>> GetDatabaseExtensions(
+        Guid serverId,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await mediator.Send(
+            new GetPostgresDatabaseExtensionsQuery { ServerId = serverId },
+            cancellationToken);
+        return Ok(result);
+    }
+
+    [HttpPost("{serverId:guid}/databaseExtensions")]
+    public async Task<IActionResult> AddDatabaseExtension(
+        Guid serverId,
+        [FromQuery] string extensionName,
+        CancellationToken cancellationToken = default)
+    {
+        await mediator.Send(
+            new AddPostgresDatabaseExtensionCommand { ServerId = serverId, ExtensionName = extensionName },
+            cancellationToken);
+        return Ok();
+    }
+
 
     [HttpPost("{serverId:guid}/database")]
     public async Task<ActionResult<PostgresDatabaseSimpleResourceDto>> CreateDatabase(

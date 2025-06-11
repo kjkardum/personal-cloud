@@ -47,7 +47,7 @@ export const KafkaNetworkSubpage = ({
         <Stack>
           <ResourceViewToolbar>
             <ResourceViewToolbarItem
-              label="Join virtual network TODO"
+              label="Join virtual network"
               leftSection={<IconPlus color={theme.colors[theme.primaryColor][4]} height={16} />}
               onClick={openNetworkDrawer}
             />

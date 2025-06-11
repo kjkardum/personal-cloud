@@ -9,7 +9,6 @@ namespace Kjkardum.CloudyBack.Infrastructure.Containerization.Clients.Postgres;
 
 public class PostgresServerClient(DockerClient client, ILogger<PostgresServerClient> logger) : IPostgresServerClient
 {
-    private const string ImageName = "postgres";
     private const string PostgresExporterImageName = "otel/opentelemetry-collector-contrib";
 
     public async Task CreateServerAsync(
@@ -100,54 +99,51 @@ public class PostgresServerClient(DockerClient client, ILogger<PostgresServerCli
 
     private async Task CreateServerContainer(Guid id, int serverPort, string saUsername, string saPassword)
     {
-        await client.Images.CreateImageAsync(
-            new ImagesCreateParameters { FromImage = ImageName, Tag = "latest" },
-            null,
-            new Progress<JSONMessage>());
+        var postgresImage = await GetBuilderDockerImage();
         logger.LogInformation("Image pulled");
         await client.Containers.CreateContainerAsync(new CreateContainerParameters
-            {
-                Name = DockerNamingHelper.GetContainerName(id),
-                Image = ImageName,
-                NetworkingConfig =
-                    new NetworkingConfig()
+        {
+            Name = DockerNamingHelper.GetContainerName(id),
+            Image = postgresImage,
+            NetworkingConfig =
+                new NetworkingConfig()
+                {
+                    EndpointsConfig = new Dictionary<string, EndpointSettings>()
                     {
-                        EndpointsConfig = new Dictionary<string, EndpointSettings>()
+                        { DockerNamingHelper.GetNetworkName(id), new EndpointSettings() }
+                    }
+                },
+            HostConfig =
+                new HostConfig
+                {
+                    Binds =
+                        new List<string> { $"{DockerNamingHelper.GetVolumeName(id)}:/var/lib/postgresql/data", },
+                    PortBindings =
+                        new Dictionary<string, IList<PortBinding>>
                         {
-                            { DockerNamingHelper.GetNetworkName(id), new EndpointSettings() }
-                        }
-                    },
-                HostConfig =
-                    new HostConfig
-                    {
-                        Binds =
-                            new List<string> { $"{DockerNamingHelper.GetVolumeName(id)}:/var/lib/postgresql/data", },
-                        PortBindings =
-                            new Dictionary<string, IList<PortBinding>>
-                            {
-                                { "5432/tcp", new List<PortBinding> { new() { HostPort = $"{serverPort}" } } }
-                            },
-                        RestartPolicy = new RestartPolicy { Name = RestartPolicyKind.Always, MaximumRetryCount = 0 },
-                        LogConfig = DockerLoggingHelper.DefaultLogConfig(id)
-                    },
-                ExposedPorts = new Dictionary<string, EmptyStruct> { { "5432/tcp", default } },
-                Env = new List<string>
-                {
-                    $"POSTGRES_PASSWORD={saPassword}",
-                    $"POSTGRES_USER={saUsername}",
-                    DockerLoggingHelper.LogEnvironmentVariable(id)
+                            { "5432/tcp", new List<PortBinding> { new() { HostPort = $"{serverPort}" } } }
+                        },
+                    RestartPolicy = new RestartPolicy { Name = RestartPolicyKind.Always, MaximumRetryCount = 0 },
+                    LogConfig = DockerLoggingHelper.DefaultLogConfig(id)
                 },
-                Cmd = new List<string>
-                {
-                    "postgres",
-                    "-c",
-                    "shared_preload_libraries=pg_stat_statements",
-                    "-c",
-                    "pg_stat_statements.track=all",
-                    "-c",
-                    "max_connections=200",
-                },
-            });
+            ExposedPorts = new Dictionary<string, EmptyStruct> { { "5432/tcp", default } },
+            Env = new List<string>
+            {
+                $"POSTGRES_PASSWORD={saPassword}",
+                $"POSTGRES_USER={saUsername}",
+                DockerLoggingHelper.LogEnvironmentVariable(id)
+            },
+            Cmd = new List<string>
+            {
+                "postgres",
+                "-c",
+                "shared_preload_libraries=pg_stat_statements",
+                "-c",
+                "pg_stat_statements.track=all",
+                "-c",
+                "max_connections=200",
+            },
+        });
         logger.LogInformation("Container created");
         await client.Containers
             .StartContainerAsync(DockerNamingHelper.GetContainerName(id), new ContainerStartParameters());
@@ -267,7 +263,7 @@ public class PostgresServerClient(DockerClient client, ILogger<PostgresServerCli
         string saUsername,
         string saPassword,
         string database,
-        string impersonateUser,
+        string? impersonateUser,
         string requestQuery)
     {
         var container = await client.Containers.InspectContainerAsync(DockerNamingHelper.GetContainerName(serverId));
@@ -277,6 +273,19 @@ public class PostgresServerClient(DockerClient client, ILogger<PostgresServerCli
             return string.Empty;
         }
 
+        List<string> impersonateUserCommandList = impersonateUser != null
+            ?
+            [
+                "-c",
+                "SET ROLE {impersonateUser}; {requestQuery}"
+                    .Replace("{impersonateUser}", impersonateUser)
+                    .Replace("{requestQuery}", requestQuery)
+            ]
+            :
+            [
+                "-c",
+                requestQuery
+            ];
         var exec = await client.Exec.ExecCreateContainerAsync(
             container.ID,
             new ContainerExecCreateParameters
@@ -285,22 +294,15 @@ public class PostgresServerClient(DockerClient client, ILogger<PostgresServerCli
                 AttachStdout = true,
                 AttachStderr = true,
                 Env = new List<string> { $"PGPASSWORD={saPassword}" },
-                Cmd = new List<string>
-                {
+                Cmd =
+                [
                     "psql",
-                    "-U",
-                    saUsername,
-                    "-d",
-                    database,
-                    "-P",
-                    "pager=off",
-                    "-P",
-                    "format=csv",
-                    "-c",
-                    "SET ROLE {impersonateUser}; {requestQuery}"
-                        .Replace("{impersonateUser}", impersonateUser)
-                        .Replace("{requestQuery}", requestQuery)
-                },
+                    "-U", saUsername,
+                    "-d", database,
+                    "-P", "pager=off",
+                    "-P", "format=csv",
+                    ..impersonateUserCommandList
+                ],
                 Tty = true,
                 Detach = false
             });
@@ -310,4 +312,24 @@ public class PostgresServerClient(DockerClient client, ILogger<PostgresServerCli
         logger.LogInformation("Query executed. StdErr: {StdErr}", stdErr);
         return stdOut;
     }
+
+    private async Task<string> GetBuilderDockerImage()
+    {
+        //previous this was not await using
+        await using var builderDockerfileContext = GetPostgresBuilderDockerfileContext();
+        await client.Images.BuildImageFromDockerfileAsync(
+            new ImageBuildParameters
+            {
+                Tags = [DockerNamingHelper.PostgresBuilderImageName], Dockerfile = "Postgres.Dockerfile",
+            },
+            builderDockerfileContext,
+            null,
+            new Dictionary<string, string>(),
+            new Progress<JSONMessage>());
+        //previously here was manual close of stream
+        return DockerNamingHelper.PostgresBuilderImageName;
+    }
+
+    private static Stream GetPostgresBuilderDockerfileContext()
+        => DockerBuilderHelper.GetDockerfileContext("Postgres/Dockerfiles/Postgres.Dockerfile");
 }

@@ -24,4 +24,5 @@ public class DockerNamingHelper
     public const string PrometheusNetworkName = "cloudyprometheusnetwork";
     public const string GrafanaContainerName = "cloudygrafanacontainer";
     public const string GrafanaVolumeName = "cloudygrafanavolume";
+    public const string PostgresBuilderImageName = "cloudypostgresbuilder";
 }

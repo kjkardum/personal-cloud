@@ -33,21 +33,8 @@ public class RunPostgresDatabaseQueryCommandHandler(
             resource.Name,
             resource.AdminUsername,
             request.Query);
-        var result = new PostgresQueryResultDto { CsvResponse = new List<List<string>>() };
-        if (string.IsNullOrEmpty(resultCsv))
-        {
-            return result;
-        }
 
-        var entries = resultCsv
-            .Split(["\r\n", "\n"], StringSplitOptions.RemoveEmptyEntries)
-            .Select(line => line.Trim().Split(',').ToList())
-            .ToList();
-        if (entries.Count == 0)
-        {
-            return result;
-        }
-        result.CsvResponse.AddRange(entries.Slice(1, entries.Count - 1));
+        var result = PostgresCsvConverter.ToQueryDto(resultCsv, asSa: false);
         return result;
     }
 }

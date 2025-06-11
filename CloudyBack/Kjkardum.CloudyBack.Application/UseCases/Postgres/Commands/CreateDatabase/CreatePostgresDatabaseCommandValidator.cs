@@ -17,6 +17,8 @@ public class CreatePostgresDatabaseCommandValidator: AbstractValidator<CreatePos
             .WithMessage("Name cannot contain apostrophes")
             .Must(x => !"123456789".Contains(x[0]))
             .WithMessage("Name cannot start with a number")
+            .Matches("[a-zA-Z0-9_]*$")
+            .WithMessage("Name can only contain alphanumeric characters and underscores")
             .MaximumLength(100);
         RuleFor(x => x.AdminUsername)
             .NotEmpty()
