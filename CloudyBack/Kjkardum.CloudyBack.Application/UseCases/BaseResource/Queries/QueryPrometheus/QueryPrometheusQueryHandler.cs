@@ -5,6 +5,7 @@ using Kjkardum.CloudyBack.Application.Repositories;
 using Kjkardum.CloudyBack.Application.UseCases.BaseResource.Dtos;
 using Kjkardum.CloudyBack.Domain.Entities;
 using MediatR;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Kjkardum.CloudyBack.Application.UseCases.BaseResource.Queries.QueryPrometheus;
@@ -14,7 +15,8 @@ public class QueryPrometheusQueryHandler(
     IWebApplicationResourceRepository webApplicationResourceRepository,
     IGeneralContainerStatusClient generalContainerStatusClient,
     IOptions<AppConfiguration> appConfiguration,
-    IObservabilityClient observabilityClient) : IRequestHandler<QueryPrometheusQuery, PrometheusResultDto>
+    IObservabilityClient observabilityClient,
+    ILogger<QueryPrometheusQueryHandler> logger) : IRequestHandler<QueryPrometheusQuery, PrometheusResultDto>
 {
     private readonly bool OnLinux = appConfiguration.Value.UnameO
         .Contains("linux", StringComparison.InvariantCultureIgnoreCase);
@@ -45,6 +47,13 @@ public class QueryPrometheusQueryHandler(
             _ =>
                 throw new ArgumentOutOfRangeException(nameof(request.Query))
         };
+
+        logger.LogInformation(
+            "Querying Prometheus with query: {Query} for resource {ResourceId} with container {ContainerId}",
+            query,
+            request.ResourceId,
+            container?.ContainerId);
+
         return await observabilityClient.QueryPrometheusRange(
             query,
             request.Start,
