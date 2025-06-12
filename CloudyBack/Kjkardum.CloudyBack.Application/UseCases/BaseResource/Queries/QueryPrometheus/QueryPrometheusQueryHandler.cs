@@ -70,7 +70,7 @@ public class QueryPrometheusQueryHandler(
     {
         if (OnLinux)
         {
-            return container == null ? "/" : container.ContainerName;
+            return container == null ? "/" : container.ContainerName.TrimStart('/');
         }
 
         return "/docker" + (container == null ? string.Empty : $"/{container.ContainerId}");
