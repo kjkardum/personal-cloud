@@ -25,6 +25,8 @@ public class ObservabilityClient(
                                                       "Prometheus password is not set in the configuration");
 
     private readonly bool InDocker = appConfiguration.Value.InDocker;
+    private readonly bool OnLinux = appConfiguration.Value.UnameO
+        .Contains("linux", StringComparison.InvariantCultureIgnoreCase);
 
     private const string PrometheusImageName = "quay.io/prometheus/prometheus";
     private const string LokiImageName = "grafana/loki";
@@ -533,6 +535,17 @@ public class ObservabilityClient(
             logger.LogInformation(ex, "Cadvisor container does not exist. Creating...");
         }
 
+        var bindsList = new List<string>
+        {
+            "/:/rootfs:ro", "/var/run:/var/run:rw", "/sys:/sys:ro",
+            // "/var/lib/docker/:/var/lib/docker:ro" maybe on linux
+        };
+        if (OnLinux)
+        {
+            bindsList.Add("/var/lib/docker/:/var/lib/docker:ro");
+            bindsList.Add("/dev/disk/:/dev/disk:ro");
+        }
+
         var createContainerParameters = new CreateContainerParameters
         {
             Name = DockerNamingHelper.CadvisorContainerName,
@@ -540,11 +553,7 @@ public class ObservabilityClient(
             HostConfig = new HostConfig
             {
                 RestartPolicy = new RestartPolicy { Name = RestartPolicyKind.Always, MaximumRetryCount = 0 },
-                Binds = new List<string>
-                {
-                    "/:/rootfs:ro", "/var/run:/var/run:rw", "/sys:/sys:ro",
-                    // "/var/lib/docker/:/var/lib/docker:ro" maybe on linux
-                },
+                Binds = bindsList,
                 Privileged = true,
                 Devices = new List<DeviceMapping>
                 {
