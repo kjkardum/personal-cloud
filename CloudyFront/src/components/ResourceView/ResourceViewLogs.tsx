@@ -4,8 +4,9 @@ import {
   usePostApiResourceBaseResourceByResourceIdLokiMutation,
 } from '@/services/rtk/cloudyApi';
 import { DataTable } from 'mantine-datatable';
-import { Text, Loader, Paper, Group, Badge, Center, Title, Stack, Button, ActionIcon } from '@mantine/core';
-import { IconRefresh } from '@tabler/icons-react';
+import { Text, Loader, Tooltip, Group, Badge, Center, Title, Stack, Button, ActionIcon } from '@mantine/core';
+import { IconPlayerPause, IconPlayerPlay, IconRefresh } from '@tabler/icons-react';
+import { useInterval } from '@mantine/hooks';
 
 type LogEntry = {
   id: string;
@@ -28,6 +29,7 @@ export const ResourceViewLogs = ({
   const [loadingInitial, setLoadingInitial] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [refresh, setRefresh] = useState<{} | null>(null);
+  const [autoRefresh, setAutoRefresh] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const entriesDatesRange = useMemo(() => {
     if (logEntries.length === 0) { return; }
@@ -115,6 +117,11 @@ export const ResourceViewLogs = ({
     setHasMore(true);
     endTimestampRef.current = new Date();
   }
+  useInterval(
+    () => autoRefresh && doRefresh(),
+    5000,
+    { autoInvoke: true }
+  );
 
   useEffect(() => {
     const end = new Date();
@@ -136,7 +143,13 @@ export const ResourceViewLogs = ({
     <Stack h='100%'>
       <Group justify="space-between" mb="md">
         <Title order={3}>Logs Viewer</Title>
-        {loadingInitial ? <Loader size="sm" /> : <ActionIcon variant="subtle" size="md" mt='md' mr='md' onClick={doRefresh}><IconRefresh /></ActionIcon>}
+        {loadingInitial ? <Loader size="sm" /> : <div>
+          <ActionIcon variant="subtle" size="md" mt='md' mr='md' onClick={doRefresh}><IconRefresh /></ActionIcon>
+          <Tooltip label="Auto refresh">
+            <ActionIcon variant="subtle" size="md" mt='md' mr='md' onClick={()=>setAutoRefresh(r => !r)}>
+              {autoRefresh ? <IconPlayerPause /> : <IconPlayerPlay />}</ActionIcon>
+          </Tooltip>
+        </div>}
       </Group>
       <Text c="darkgray">Logs loaded from {entriesDatesRange?.start.toISOString()} to {entriesDatesRange?.end.toISOString()}</Text>
       <DataTable

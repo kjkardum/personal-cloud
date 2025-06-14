@@ -5,6 +5,8 @@ import { NumberInput, Select, Stack, TextInput, useMantineTheme } from '@mantine
 import { useForm, zodResolver } from '@mantine/form';
 import { ResourceViewToolbar, ResourceViewToolbarItem } from '@/components/ResourceView/ResourceViewToolbar';
 import { UpdateWebApplicationDeploymentConfigurationCommand, usePutApiResourceWebApplicationResourceByIdDeploymentConfigurationMutation, WebApplicationResourceDto, WebApplicationRuntimeType } from '@/services/rtk/cloudyApi';
+import { useNavigate } from 'react-router-dom';
+import { viewResourceOfType } from '@/util/navigation';
 
 
 type runtimeTypeEnum = { [enumValue in WebApplicationRuntimeType]: {label: string, placeholderBuild: string, placeholderRun: string} };
@@ -27,6 +29,7 @@ export const WebApplicationDeploymentSubpage = ({
   resourceBaseData: WebApplicationResourceDto;
 }) => {
   const theme = useMantineTheme();
+  const navigate = useNavigate();
   const [updateWebApplicationDeployment, {isLoading: updatingWebApplication}] =
     usePutApiResourceWebApplicationResourceByIdDeploymentConfigurationMutation();
   const form = useForm<UpdateWebApplicationDeploymentConfigurationCommand>({
@@ -49,11 +52,15 @@ export const WebApplicationDeploymentSubpage = ({
   });
   const handleSubmit = useCallback(
     async (values: UpdateWebApplicationDeploymentConfigurationCommand) => {
-      const server = await updateWebApplicationDeployment({
+      const serverPromise = updateWebApplicationDeployment({
         updateWebApplicationDeploymentConfigurationCommand: values,
         id: resourceBaseData.id,
       }).unwrap();
+      const timeout5SecPromise = new Promise((resolve) => setTimeout(resolve, 5000));
+      const res = await Promise.race([serverPromise, timeout5SecPromise]);
+      console.log(res);
       form.reset();
+      navigate(`${viewResourceOfType('WebApplicationResource', resourceBaseData.id)}?rpi=5`);
     },
     [updateWebApplicationDeployment, resourceBaseData.id, form]
   );
