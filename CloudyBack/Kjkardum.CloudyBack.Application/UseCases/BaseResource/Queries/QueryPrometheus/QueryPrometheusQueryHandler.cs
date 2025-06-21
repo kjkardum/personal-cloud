@@ -97,7 +97,7 @@ public class QueryPrometheusQueryHandler(
             throw new EntityNotFoundException($"Web application with id {resourceId} not found.");
         }
 
-        var hostsOfApp = string.Join(',', webApplication.PublicProxyConfigurations!.Select(t => t.Domain));
+        var hostsOfApp = string.Join('|', webApplication.PublicProxyConfigurations!.Select(t => t.Domain));
         return $$"""delta(caddy_http_requests_total{host=~"{{hostsOfApp}}"}[1m])""";
     }
 }
