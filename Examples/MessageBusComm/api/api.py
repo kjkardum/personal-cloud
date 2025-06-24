@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime, ForeignKey
-from sqlalchemy.orm import declarative_base, relationship, Session
+from sqlalchemy.orm import declarative_base, relationship, Session, joinedload
 from pydantic import BaseModel
 from typing import List, Optional
 import datetime
@@ -68,8 +68,8 @@ class PostResponse(BaseModel):
 def get_posts():
     """Get all posts with their comments"""
     with Session(engine) as session:
-        # Query all posts with their comments
-        posts = session.query(Post).all()
+        # Query all posts with their comments using eager loading
+        posts = session.query(Post).options(joinedload(Post.comments)).all()
         return posts
 
 if __name__ == "__main__":
