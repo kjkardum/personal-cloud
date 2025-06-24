@@ -112,16 +112,16 @@ def check_and_process_changes():
             record_id = generate_id(record)
             
             # Check if record was processed before
-            processed = connection.execute(
+            processed_result = connection.execute(
                 select(processed_posts).where(processed_posts.c.id == record_id)
             ).fetchone()
             
             message_type = None
             
-            if not processed:
+            if not processed_result:
                 # New record
                 message_type = 'create'
-            elif processed['hash'] != current_hash:
+            elif processed_result[1] != current_hash:  # processed_result[1] corresponds to the 'hash' column
                 # Updated record
                 message_type = 'update'
             
@@ -142,7 +142,7 @@ def check_and_process_changes():
                 print(f"Sent message: {message_type} for record {record_id}")
                 
                 # Update processed_posts table
-                if not processed:
+                if not processed_result:
                     connection.execute(
                         insert(processed_posts).values(
                             id=record_id, 
@@ -161,7 +161,8 @@ def check_and_process_changes():
                     )
         
         # Check for deleted records
-        processed_ids = [row['id'] for row in connection.execute(select(processed_posts.c.id))]
+        processed_result = connection.execute(select(processed_posts.c.id)).fetchall()
+        processed_ids = [row[0] for row in processed_result]  # Access the first element of each row tuple
         current_ids = [generate_id(record) for record in current_records]
         
         deleted_ids = set(processed_ids) - set(current_ids)
