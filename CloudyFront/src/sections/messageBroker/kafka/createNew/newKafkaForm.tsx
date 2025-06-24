@@ -10,7 +10,7 @@ import {useNavigate} from "react-router-dom";
 import { viewResourceOfType } from '@/util/navigation';
 
 export const NewKafkaForm = () => {
-  const [createKafkaResource] = usePostApiResourceKafkaClusterResourceMutation();
+  const [createKafkaResource, {isLoading}] = usePostApiResourceKafkaClusterResourceMutation();
   const navigate = useNavigate();
   const form = useForm<CreateKafkaClusterCommand>({
     mode: 'uncontrolled',
@@ -51,7 +51,7 @@ export const NewKafkaForm = () => {
         {...form.getInputProps('serverPort')}
       />
       <Divider my="sm" />
-      <Button type="submit">Create kafka cluster</Button>
+      <Button loading={isLoading} type="submit">Create kafka cluster</Button>
     </form>
   );
 };

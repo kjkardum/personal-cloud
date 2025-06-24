@@ -36,6 +36,7 @@ import { DataTable } from 'mantine-datatable';
 import { KafkaTopicsSubpage } from '@/sections/messageBroker/kafka/view/KafkaTopicsSubpage';
 import { KafkaNetworkSubpage } from '@/sections/messageBroker/kafka/view/KafkaNetworkSubpage';
 import { ResourceViewLogs } from '@/components/ResourceView/ResourceViewLogs';
+import { DockerNamingHelper } from '@/util/dockerNamingHelper';
 
 export const ViewKafkaClusterPage = () => {
   const navigate = useNavigate();
@@ -122,6 +123,7 @@ export const ViewKafkaClusterPage = () => {
             { name: 'Resource group', value: { text: resourceBaseData?.resourceGroupName } },
             { name: 'Status', value: { text: containerStatus?.stateRunning ? 'Active' : 'Stopped' } },
             { name: 'Server ID', value: { text: resourceBaseData?.id } },
+            { name: 'Kafka host', value: { text: `${DockerNamingHelper.getContainerName(resourceBaseData?.id || '')}:${9092}` } },
             { name: 'Server name', value: { text: resourceBaseData?.name } },
             { name: 'Networking', value: { text: 'Go to configuration', link: `${viewResourceOfType('KafkaClusterResource', resourceBaseData?.id)}?rpi=3` } },
             { name: 'Created at', value: { text: resourceBaseData?.createdAt && new Date(resourceBaseData?.createdAt).toLocaleString() } },

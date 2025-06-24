@@ -104,7 +104,7 @@ def check_and_process_changes():
     with engine.connect() as connection:
         # Get all post comments
         result = connection.execute(select(post_comments))
-        current_records = [dict(row) for row in result]
+        current_records = [row._asdict() for row in result]
         
         # Process each record
         for record in current_records:

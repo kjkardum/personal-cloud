@@ -50,8 +50,9 @@ class CommentResponse(BaseModel):
     comment: str
     like_count: int
     
-    class Config:
-        orm_mode = True
+    model_config = {
+        "from_attributes": True
+    }
 
 class PostResponse(BaseModel):
     id: int
@@ -59,8 +60,9 @@ class PostResponse(BaseModel):
     post_content: str
     comments: List[CommentResponse]
     
-    class Config:
-        orm_mode = True
+    model_config = {
+        "from_attributes": True
+    }
 
 @app.get("/posts", response_model=List[PostResponse])
 def get_posts():

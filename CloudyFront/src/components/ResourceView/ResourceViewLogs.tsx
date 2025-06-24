@@ -119,7 +119,7 @@ export const ResourceViewLogs = ({
   }
   useInterval(
     () => autoRefresh && doRefresh(),
-    5000,
+    3500,
     { autoInvoke: true }
   );
 
