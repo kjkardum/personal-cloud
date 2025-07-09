@@ -1,4 +1,4 @@
-# personal-cloud
+# Cloudy - local infrastructure management system
 Cloud platform inspired self hosted service hosting panel. Offering managed resources such as databases and message brokers, and other resources like web-applications and virtual networks 
 
 ## Abstract
