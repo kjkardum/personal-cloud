@@ -6,6 +6,7 @@
     <File Path="..\Dockerfile" />
     <File Path="..\.gitignore" />
     <File Path="..\.dockerignore" />
+    <File Path="..\README.md" />
   </Folder>
   <Folder Name="/Solution Items/.config/">
     <File Path=".config\dotnet-tools.json" />
