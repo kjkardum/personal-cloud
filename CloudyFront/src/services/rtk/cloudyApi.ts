@@ -1017,6 +1017,7 @@ export type QueryPrometheusQuery = {
 };
 export type QueryLokiQuery = {
   query?: PredefinedLokiQuery;
+  queryString?: string | null;
   start?: string;
   end?: string;
   step?: string | null;

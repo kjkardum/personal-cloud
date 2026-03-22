@@ -372,7 +372,7 @@ public class CaddyReverseProxyClient(
         await client.Images.BuildImageFromDockerfileAsync(
             new ImageBuildParameters
             {
-                Tags = [DockerNamingHelper.CaddyBuilderImageName], Dockerfile = "Caddy.Dockerfile",
+                Tags = new List<string> { DockerNamingHelper.CaddyBuilderImageName }, Dockerfile = "Caddy.Dockerfile",
             },
             builderDockerfileContext,
             null,

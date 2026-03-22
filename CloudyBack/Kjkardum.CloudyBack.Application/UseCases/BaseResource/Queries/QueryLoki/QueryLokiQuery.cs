@@ -13,6 +13,7 @@ public class QueryLokiQuery: IRequest<PrometheusResultDto>
 {
     [JsonIgnore] public Guid ResourceId { get; set; }
     public PredefinedLokiQuery Query { get; set; }
+    public string? QueryString { get; set; }
     public DateTime Start { get; set; }
     public DateTime End { get; set; }
     public string? Step { get; set; }

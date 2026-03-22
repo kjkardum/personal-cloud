@@ -25,6 +25,11 @@ public class QueryLokiQueryHandler(
             _ =>
                 throw new ArgumentOutOfRangeException(nameof(request.Query))
         };
+        if (request.QueryString != null)
+        {
+            request.QueryString = request.QueryString.Replace("`", string.Empty);
+            query = $"{query} |= `{request.QueryString}`";
+        }
         return await observabilityClient.QueryLokiRange(
             query,
             request.Start,

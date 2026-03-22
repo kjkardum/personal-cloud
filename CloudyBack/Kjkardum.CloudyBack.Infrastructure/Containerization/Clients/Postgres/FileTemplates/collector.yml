@@ -10,9 +10,8 @@ receivers:
     tls:
       insecure: true
     query_sample_collection:
-      enabled: true
+      max_rows_per_query: 100
     top_query_collection:
-      enabled: true
       top_n_query: 10
       max_rows_per_query: 10
     metrics:

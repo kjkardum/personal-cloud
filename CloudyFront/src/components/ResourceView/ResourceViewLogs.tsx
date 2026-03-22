@@ -1,12 +1,22 @@
-import { useEffect, useState, useRef, useMemo } from 'react';
-import {
-  PredefinedLokiQuery,
-  usePostApiResourceBaseResourceByResourceIdLokiMutation,
-} from '@/services/rtk/cloudyApi';
-import { DataTable } from 'mantine-datatable';
-import { Text, Loader, Tooltip, Group, Badge, Center, Title, Stack, Button, ActionIcon } from '@mantine/core';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { IconPlayerPause, IconPlayerPlay, IconRefresh } from '@tabler/icons-react';
+import { DataTable } from 'mantine-datatable';
+import {
+  ActionIcon,
+  Badge,
+  Button,
+  Center,
+  Group,
+  Loader,
+  Stack,
+  Text,
+  TextInput,
+  Title,
+  Tooltip,
+} from '@mantine/core';
 import { useInterval } from '@mantine/hooks';
+import { PredefinedLokiQuery, usePostApiResourceBaseResourceByResourceIdLokiMutation } from '@/services/rtk/cloudyApi';
+
 
 type LogEntry = {
   id: string;
@@ -31,6 +41,7 @@ export const ResourceViewLogs = ({
   const [refresh, setRefresh] = useState<{} | null>(null);
   const [autoRefresh, setAutoRefresh] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
   const entriesDatesRange = useMemo(() => {
     if (logEntries.length === 0) { return; }
     const start = new Date(logEntries[logEntries.length - 1].timestamp);
@@ -48,6 +59,7 @@ export const ResourceViewLogs = ({
         resourceId,
         queryLokiQuery: {
           query: PredefinedLokiQuery.ContainerLog,
+          queryString: searchQuery || undefined,
           start: start.toISOString(),
           end: end.toISOString(),
           step: undefined,
@@ -152,6 +164,12 @@ export const ResourceViewLogs = ({
         </div>}
       </Group>
       <Text c="darkgray">Logs loaded from {entriesDatesRange?.start.toISOString()} to {entriesDatesRange?.end.toISOString()}</Text>
+      <TextInput
+        m='sm'
+        placeholder="Search log (case sensitive)"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.currentTarget.value)}
+      />
       <DataTable
         flex={1}
         highlightOnHover

@@ -2049,6 +2049,9 @@ components:
       properties:
         query:
           $ref: '#/components/schemas/PredefinedLokiQuery'
+        queryString:
+          type: string
+          nullable: true
         start:
           type: string
           format: date-time
